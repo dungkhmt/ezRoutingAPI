@@ -72,7 +72,7 @@
 		</xs:complexType>
 	</xs:element>
 	
-	<!-- ComputeRoutes -->
+	<!-- ComputeRoutes inprogress -->
 	<xs:element name="getComputeRouteRequest">
 		<xs:complexType>
 			<xs:sequence>
