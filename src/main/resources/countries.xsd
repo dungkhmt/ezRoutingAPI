@@ -1,0 +1,126 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://spring.io/guides/gs-producing-web-service"
+	targetNamespace="http://spring.io/guides/gs-producing-web-service"
+	elementFormDefault="qualified">
+
+	<xs:element name="getCountryRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="name" type="xs:string" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="getCountryResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="country" type="tns:country" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:complexType name="country">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" />
+			<xs:element name="population" type="xs:int" />
+			<xs:element name="capital" type="xs:string" />
+			<xs:element name="currency" type="tns:currency" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="currency">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="GBP" />
+			<xs:enumeration value="EUR" />
+			<xs:enumeration value="PLN" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<!-- New function -->
+	<xs:element name="getAddRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="var1" type="xs:int" />
+				<xs:element name="var2" type="xs:int" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="getAddResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="sum" type="xs:int" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	<!-- New function -->
+	<xs:element name="getSubRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="var1" type="xs:int" />
+				<xs:element name="var2" type="xs:int" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="getSubResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="subtraction" type="xs:int" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	<!-- ComputeRoutes -->
+	<xs:element name="getComputeRouteRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Points" type="xs:rPoint" />
+				<xs:element name="DiffConstraints" type="xs:DiffConstraint" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	<xs:complexType name="rPoint">
+		<xs:sequence>
+			<xs:element name="ID" type="xs:int" />
+			<xs:element name="Type" type="xs:int" />
+			<xs:element name="Lat" type="xs:double" />
+			<xs:element name="Lng" type="xs:double" />
+			<xs:element name="Info1" type="xs:int" />
+			<xs:element name="Info2" type="xs:int" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="DiffConstraint">
+		<xs:sequence>
+			<xs:element name="ID1" type="xs:int" />
+			<xs:element name="ID2" type="xs:int" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:element name="getComputeRouteResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Routes" type="xs:Route" />
+				<xs:element name="TotalDistance" type="xs:double" />
+				<xs:element name="Violations" type="xs:int" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	<xs:complexType name="Route">
+		<xs:sequence>
+			<xs:element name="ID" type="xs:int" />
+			<xs:element name="ClientIDs" type="xs:ClientID" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="ClientID">
+		<xs:sequence>
+			<xs:element name="ID" type="xs:int" />
+		</xs:sequence>
+	</xs:complexType>
+	
+</xs:schema>
