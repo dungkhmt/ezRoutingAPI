@@ -35,7 +35,7 @@
 			<xs:enumeration value="PLN" />
 		</xs:restriction>
 	</xs:simpleType>
-	
+
 	<!-- New function -->
 	<xs:element name="getAddRequest">
 		<xs:complexType>
@@ -53,7 +53,7 @@
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	
+
 	<!-- New function -->
 	<xs:element name="getSubRequest">
 		<xs:complexType>
@@ -71,56 +71,56 @@
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	
+
 	<!-- ComputeRoutes inprogress -->
 	<xs:element name="getComputeRouteRequest">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="Points" type="xs:rPoint" />
-				<xs:element name="DiffConstraints" type="xs:DiffConstraint" />
+				<xs:element minOccurs="1" maxOccurs="unbounded" name="points" type="tns:points" />
+				<xs:element minOccurs="1" maxOccurs="unbounded" name="diffConstraints" type="tns:diffConstraints" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	
-	<xs:complexType name="rPoint">
+
+	<xs:complexType name="points">
 		<xs:sequence>
-			<xs:element name="ID" type="xs:int" />
-			<xs:element name="Type" type="xs:int" />
-			<xs:element name="Lat" type="xs:double" />
-			<xs:element name="Lng" type="xs:double" />
-			<xs:element name="Info1" type="xs:int" />
-			<xs:element name="Info2" type="xs:int" />
+			<xs:element name="id" type="xs:int" />
+			<xs:element name="type" type="xs:int" />
+			<xs:element name="lat" type="xs:decimal" />
+			<xs:element name="lng" type="xs:decimal" />
+			<xs:element name="info1" type="xs:int" />
+			<xs:element name="info2" type="xs:int" />
 		</xs:sequence>
 	</xs:complexType>
-	
-	<xs:complexType name="DiffConstraint">
+
+	<xs:complexType name="diffConstraints">
 		<xs:sequence>
-			<xs:element name="ID1" type="xs:int" />
-			<xs:element name="ID2" type="xs:int" />
+			<xs:element name="id1" type="xs:int" />
+			<xs:element name="id2" type="xs:int" />
 		</xs:sequence>
 	</xs:complexType>
 
 	<xs:element name="getComputeRouteResponse">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="Routes" type="xs:Route" />
-				<xs:element name="TotalDistance" type="xs:double" />
-				<xs:element name="Violations" type="xs:int" />
+				<xs:element minOccurs="1" maxOccurs="unbounded" name="routes" type="tns:routes" />
+				<xs:element name="totalDistance" type="xs:decimal" />
+				<xs:element name="violations" type="xs:int" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	
-	<xs:complexType name="Route">
+
+	<xs:complexType name="routes">
 		<xs:sequence>
-			<xs:element name="ID" type="xs:int" />
-			<xs:element name="ClientIDs" type="xs:ClientID" />
+			<xs:element name="id" type="xs:int" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="clientIDs" type="tns:clientIDs" />
 		</xs:sequence>
 	</xs:complexType>
-	
-	<xs:complexType name="ClientID">
+
+	<xs:complexType name="clientIDs">
 		<xs:sequence>
-			<xs:element name="ID" type="xs:int" />
+			<xs:element name="id" type="xs:int" />
 		</xs:sequence>
 	</xs:complexType>
-	
+
 </xs:schema>
