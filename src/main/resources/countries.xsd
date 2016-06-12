@@ -35,49 +35,13 @@
 			<xs:enumeration value="PLN" />
 		</xs:restriction>
 	</xs:simpleType>
-
-	<!-- New function -->
-	<xs:element name="getAddRequest">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="var1" type="xs:int" />
-				<xs:element name="var2" type="xs:int" />
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
-
-	<xs:element name="getAddResponse">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="sum" type="xs:int" />
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
-
-	<!-- New function -->
-	<xs:element name="getSubRequest">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="var1" type="xs:int" />
-				<xs:element name="var2" type="xs:int" />
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
-
-	<xs:element name="getSubResponse">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="subtraction" type="xs:int" />
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
-
-	<!-- ComputeRoutes inprogress -->
+	
+	<!-- ComputeRoutes in progress -->
 	<xs:element name="getComputeRouteRequest">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element minOccurs="1" maxOccurs="unbounded" name="points" type="tns:points" />
-				<xs:element minOccurs="1" maxOccurs="unbounded" name="diffConstraints" type="tns:diffConstraints" />
+				<xs:element minOccurs="0" maxOccurs="unbounded" name="points" type="tns:points" />
+				<xs:element minOccurs="0" maxOccurs="unbounded" name="diffConstraints" type="tns:diffConstraints" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -103,7 +67,7 @@
 	<xs:element name="getComputeRouteResponse">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element minOccurs="1" maxOccurs="unbounded" name="routes" type="tns:routes" />
+				<xs:element minOccurs="0" maxOccurs="unbounded" name="routes" type="tns:routes" />
 				<xs:element name="totalDistance" type="xs:decimal" />
 				<xs:element name="violations" type="xs:int" />
 			</xs:sequence>

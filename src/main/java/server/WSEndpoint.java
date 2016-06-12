@@ -7,14 +7,10 @@ import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
-
-import io.spring.guides.gs_producing_web_service.GetAddRequest;
-import io.spring.guides.gs_producing_web_service.GetAddResponse;
+import io.spring.guides.gs_producing_web_service.GetComputeRouteRequest;
 import io.spring.guides.gs_producing_web_service.GetComputeRouteResponse;
 import io.spring.guides.gs_producing_web_service.GetCountryRequest;
 import io.spring.guides.gs_producing_web_service.GetCountryResponse;
-import io.spring.guides.gs_producing_web_service.GetSubRequest;
-import io.spring.guides.gs_producing_web_service.GetSubResponse;
 import io.spring.guides.gs_producing_web_service.Routes;
 
 @Endpoint
@@ -36,29 +32,10 @@ public class WSEndpoint {
 
 		return response;
 	}
-	
-	
-	@PayloadRoot(namespace = NAMESPACE_URI, localPart = "getAddRequest")
-	@ResponsePayload
-	public GetAddResponse getCountry(@RequestPayload GetAddRequest request) {
-		GetAddResponse response = new GetAddResponse();
-		response.setSum(countryRepository.sumReturn(request.getVar1(), request.getVar2()));
 
-		return response;
-	}
-	
-	@PayloadRoot(namespace = NAMESPACE_URI, localPart = "getSubRequest")
-	@ResponsePayload
-	public GetSubResponse getCountry(@RequestPayload GetSubRequest request) {
-		GetSubResponse response = new GetSubResponse();
-		response.setSubtraction(countryRepository.subReturn(request.getVar1(), request.getVar2()));
-
-		return response;
-	}
-	
 	@PayloadRoot(namespace = NAMESPACE_URI, localPart = "getComputeRouteRequest")
 	@ResponsePayload
-	public GetComputeRouteResponse getComputeRoutes(@RequestPayload GetSubRequest request) {
+	public GetComputeRouteResponse getComputeRoutes(@RequestPayload GetComputeRouteRequest request) {
 		GetComputeRouteResponse response = new GetComputeRouteResponse();
 
 		// Preparing response data
@@ -68,6 +45,8 @@ public class WSEndpoint {
 		// Set value Routes
 		Routes routes = new Routes();
 		routes.setId(1);
+		routes.setId(2);
+		routes.setId(3);
 		response.getRoutes().add(routes);
 		
 		return response;
