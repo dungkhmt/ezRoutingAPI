@@ -52,12 +52,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kse.ezRoutingAPI.model.DeliveryInput;
+import com.kse.ezRoutingAPI.model.DeliveryRequest;
 import com.kse.ezRoutingAPI.model.PickupDeliveryInput;
 import com.kse.ezRoutingAPI.model.PickupDeliveryProblemInput;
 import com.kse.ezRoutingAPI.model.PickupDeliveryRequest;
 import com.kse.ezRoutingAPI.model.Route;
 import com.kse.ezRoutingAPI.model.RouteElement;
 import com.kse.ezRoutingAPI.model.SolutionRoutes;
+import com.kse.ezRoutingAPI.model.TSPInput;
 import com.kse.ezRoutingAPI.model.VehicleInfo;
 
 import java.util.*;
@@ -322,9 +325,454 @@ public class RoutingAPI {
 	}
 	*/
 	
+	@RequestMapping(value="/tsp", method = RequestMethod.POST)
+	public SolutionRoutes computeTSP(@RequestBody TSPInput input){
+		ArrayList<Point> startPoints = new ArrayList<Point>();
+		ArrayList<Point> endPoints = new ArrayList<Point>();
+		ArrayList<Point> deliveryPoints = new ArrayList<Point>();
+		ArrayList<Point> allPoints = new ArrayList<Point>();
+		
+		HashMap<Integer, Point> mID2Point = new HashMap<Integer, Point>();
+			VehicleInfo vh = input.getVehicle();
+			int startID = vh.getStartPoint();
+			Point startPoint = new Point(startID);
+			startPoints.add(startPoint);
+			allPoints.add(startPoint);
+			mID2Point.put(startID, startPoint);
+			
+			int endID = vh.getEndPoint();
+			Point endPoint = new Point(endID);
+			endPoints.add(endPoint);
+			allPoints.add(endPoint);
+			mID2Point.put(endID, endPoint);
+			
+		
+		for(int i = 0; i < input.getRequests().length; i++){
+			DeliveryRequest req = input.getRequests()[i];
+			
+			int id = req.getPoint();
+			Point delivery = new Point(id);
+			deliveryPoints.add(delivery);
+			allPoints.add(delivery);
+			mID2Point.put(id, delivery);
+			
+		}
+		
+	
+		ArcWeightsManager awm = new ArcWeightsManager(allPoints);
+		for(int i = 0; i < input.getDistances().length; i++){
+			int from = input.getDistances()[i].getFromPoint();
+			int to = input.getDistances()[i].getToPoint();
+			double d = input.getDistances()[i].getDistance();
+			Point fromPoint = mID2Point.get(from);
+			Point toPoint = mID2Point.get(to);
+			awm.setWeight(fromPoint, toPoint, d);
+		}
+		
 
-	@RequestMapping(value="/compute-route", method = RequestMethod.POST)
-	public SolutionRoutes computeRoute(@RequestBody PickupDeliveryProblemInput input){
+		ArcWeightsManager travelTime = new ArcWeightsManager(allPoints);
+		for(int i = 0; i < input.getTravelTimes().length; i++){
+			int from = input.getTravelTimes()[i].getFromPoint();
+			int to = input.getTravelTimes()[i].getToPoint();
+			double tt = input.getTravelTimes()[i].getDistance();
+			Point fromPoint = mID2Point.get(from);
+			Point toPoint = mID2Point.get(to);
+			travelTime.setWeight(fromPoint, toPoint, tt);
+		}
+		
+		NodeWeightsManager nwm = new NodeWeightsManager(allPoints);
+		for(int i = 0; i < input.getRequests().length; i++){
+			DeliveryRequest req = input.getRequests()[i];
+			Point delivery = mID2Point.get(req.getPoint());
+			nwm.setWeight(delivery, req.getDemand());
+		}
+
+			vh = input.getVehicle();
+			Point start = mID2Point.get(vh.getStartPoint());
+			Point end = mID2Point.get(vh.getEndPoint());
+			nwm.setWeight(start, 0);
+			nwm.setWeight(end, 0);
+		
+		
+		HashMap<Point, Integer> earliestAllowedArrivalTime = new HashMap<Point, Integer>();
+		HashMap<Point, Integer> serviceDuration = new HashMap<Point, Integer>();
+		HashMap<Point, Integer> latestAllowedArrivalTime = new HashMap<Point, Integer>();
+
+		ArrayList<Point> requestPoints = new ArrayList<Point>();
+
+		for(int i = 0; i < input.getRequests().length; i++){
+			DeliveryRequest req = input.getRequests()[i];
+			Point delivery = mID2Point.get(req.getPoint());
+
+			requestPoints.add(delivery);
+
+			earliestAllowedArrivalTime.put(delivery, req.getEarlyDeliveryTime());
+			
+			latestAllowedArrivalTime.put(delivery, req.getLateDeliveryTime());
+			
+			serviceDuration.put(delivery, req.getServiceDuration());
+		}
+		
+			vh = input.getVehicle();
+			startPoint = mID2Point.get(vh.getStartPoint());
+			endPoint = mID2Point.get(vh.getEndPoint());
+			earliestAllowedArrivalTime.put(startPoint, vh.getEarlyStartTimePoint());
+			latestAllowedArrivalTime.put(startPoint, vh.getLateStartTimePoint());
+			serviceDuration.put(startPoint, 0);
+			
+			earliestAllowedArrivalTime.put(endPoint, vh.getEarlyEndTimePoint());
+			latestAllowedArrivalTime.put(endPoint, vh.getLateEndTimePoint());
+			serviceDuration.put(endPoint, 0);
+		
+
+			// modelling
+			VRManager mgr = new VRManager();
+			VarRoutesVR XR = new VarRoutesVR(mgr);
+			ConstraintSystemVR CS = new ConstraintSystemVR(mgr);
+			
+			for(int i = 0; i < startPoints.size(); i++){
+				XR.addRoute(startPoints.get(i), endPoints.get(i));
+			}
+			
+			for(int i = 0; i < deliveryPoints.size(); i++){
+				XR.addClientPoint(deliveryPoints.get(i));
+			}
+			
+			int K = XR.getNbRoutes();
+			
+			AccumulatedWeightEdgesVR awe = new AccumulatedWeightEdgesVR(XR,
+					awm);
+			AccumulatedWeightNodesVR awn = new AccumulatedWeightNodesVR(XR,
+					nwm);
+			AccumulatedWeightEdgesVR arrivalTime = new AccumulatedWeightEdgesVR(XR, travelTime);
+			
+				awe.setAccumulatedWeightStartPoint(1, 0);
+				arrivalTime.setAccumulatedWeightStartPoint(1, vh.getEarlyStartTimePoint());// start time point of vehicle k
+				awn.setAccumulatedWeightStartPoint(1, 0);
+	
+			HashMap<Point, IFunctionVR> accDemand = new HashMap<Point, IFunctionVR>();
+			HashMap<Point, IFunctionVR> accDistance = new HashMap<Point, IFunctionVR>();
+			for (Point v : allPoints) {
+				IFunctionVR dv = new AccumulatedNodeWeightsOnPathVR(awn, v);
+				accDemand.put(v, dv);
+				
+				IFunctionVR disv = new AccumulatedEdgeWeightsOnPathVR(awe, v);
+				accDistance.put(v, disv);
+				
+				IFunctionVR idR = new RouteIndex(XR,v);
+				
+				IConstraintVR c = new Leq(dv, input.getVehicle().getCapacity()); 
+				CS.post(c);
+				
+			}
+			HashMap<Point, IFunctionVR> routeOfPoint = new HashMap<Point, IFunctionVR>();
+			HashMap<Point, IFunctionVR> indexOfPointOnRoute = new HashMap<Point, IFunctionVR>();
+			
+			
+			
+			EarliestArrivalTimeVR eat = new EarliestArrivalTimeVR(XR,
+					 travelTime, earliestAllowedArrivalTime, serviceDuration);
+					
+					CEarliestArrivalTimeVR twCtrs = new
+					 CEarliestArrivalTimeVR(eat, latestAllowedArrivalTime);
+					CS.post(twCtrs);
+			
+			IFunctionVR obj = new TotalCostVR(XR, awm);
+			LexMultiFunctions F = new LexMultiFunctions();
+			F.add(new ConstraintViolationsVR(CS));
+			F.add(obj);
+			
+			mgr.close();
+		
+			
+			ArrayList<INeighborhoodExplorer> NE = new ArrayList<INeighborhoodExplorer>();
+			NE.add(new GreedyOnePointMoveExplorer(XR, F));
+			
+			NE.add(new GreedyThreeOptMove1Explorer(XR, F));
+			NE.add(new GreedyThreeOptMove2Explorer(XR, F));
+			NE.add(new GreedyThreeOptMove3Explorer(XR, F));
+			NE.add(new GreedyThreeOptMove4Explorer(XR, F));
+			NE.add(new GreedyThreeOptMove5Explorer(XR, F));
+			NE.add(new GreedyThreeOptMove6Explorer(XR, F));
+			NE.add(new GreedyThreeOptMove7Explorer(XR, F));
+			NE.add(new GreedyThreeOptMove8Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove1Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove2Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove3Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove4Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove5Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove6Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove7Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove8Explorer(XR, F));
+		
+			
+			GenericLocalSearch se = new GenericLocalSearch(mgr);
+			se.setNeighborhoodExplorer(NE);
+			se.setObjectiveFunction(F);
+			se.setMaxStable(50);
+			
+			se.search(input.getMaxIter(), input.getTimeLimit());
+		
+			
+			
+			Route[] routes = new Route[startPoints.size()];
+			for(int k = 1; k <= XR.getNbRoutes(); k++){
+				ArrayList<RouteElement> L = new ArrayList<RouteElement>();
+				//int depTime = (int)arrivalTime.getCostRight(XR.startPoint(k));
+				for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
+					int point = p.ID;
+					int arrTime = (int)eat.getEarliestArrivalTime(p);
+					int serviceT = arrTime > earliestAllowedArrivalTime.get(p) ? arrTime : earliestAllowedArrivalTime.get(p);
+					int depTime = (int) serviceT + serviceDuration.get(p);
+					double tt = travelTime.getDistance(p, XR.next(p));
+					System.out.println("travelTime[" + p.ID + " --> " + XR.next(p).ID + "] = " + tt);
+					double distance = awe.getCostRight(p);
+					RouteElement e = new RouteElement(point,arrTime,depTime,distance);
+					L.add(e);
+				}
+				Point p = XR.endPoint(k);
+				int point = p.ID;
+				int arrTime = (int)eat.getEarliestArrivalTime(p);
+				int serviceT = arrTime > earliestAllowedArrivalTime.get(p) ? arrTime : earliestAllowedArrivalTime.get(p);
+				int depTime = (int) serviceT + serviceDuration.get(p);
+				double distance = awe.getCostRight(p);
+				
+				L.add(new RouteElement(point, arrTime,depTime,distance	));
+				
+				RouteElement[] sequence = new RouteElement[L.size()];
+				for(int i = 0; i < L.size(); i++)
+					sequence[i] = L.get(i);
+				int len = L.size();
+				routes[k-1] = new Route(len,awe.getCostRight(XR.endPoint(k)),sequence);
+			}
+			return new SolutionRoutes(CS.violations(),obj.getValue(),routes);
+	}
+	
+	@RequestMapping(value="/delivery-route-plan", method = RequestMethod.POST)
+	public SolutionRoutes computeDeliveryRoutePlan(@RequestBody DeliveryInput input){
+		ArrayList<Point> startPoints = new ArrayList<Point>();
+		ArrayList<Point> endPoints = new ArrayList<Point>();
+		ArrayList<Point> deliveryPoints = new ArrayList<Point>();
+		ArrayList<Point> allPoints = new ArrayList<Point>();
+		
+		HashMap<Integer, Point> mID2Point = new HashMap<Integer, Point>();
+		for(int i = 0; i < input.getVehicles().length; i++){
+			VehicleInfo vh = input.getVehicles()[i];
+			int startID = vh.getStartPoint();
+			Point startPoint = new Point(startID);
+			startPoints.add(startPoint);
+			allPoints.add(startPoint);
+			mID2Point.put(startID, startPoint);
+			
+			int endID = vh.getEndPoint();
+			Point endPoint = new Point(endID);
+			endPoints.add(endPoint);
+			allPoints.add(endPoint);
+			mID2Point.put(endID, endPoint);
+		}
+		
+		for(int i = 0; i < input.getRequests().length; i++){
+			DeliveryRequest req = input.getRequests()[i];
+			
+			int id = req.getPoint();
+			Point delivery = new Point(id);
+			deliveryPoints.add(delivery);
+			allPoints.add(delivery);
+			mID2Point.put(id, delivery);
+			
+		}
+		
+	
+		ArcWeightsManager awm = new ArcWeightsManager(allPoints);
+		for(int i = 0; i < input.getDistances().length; i++){
+			int from = input.getDistances()[i].getFromPoint();
+			int to = input.getDistances()[i].getToPoint();
+			double d = input.getDistances()[i].getDistance();
+			Point fromPoint = mID2Point.get(from);
+			Point toPoint = mID2Point.get(to);
+			awm.setWeight(fromPoint, toPoint, d);
+		}
+		
+
+		ArcWeightsManager travelTime = new ArcWeightsManager(allPoints);
+		for(int i = 0; i < input.getTravelTimes().length; i++){
+			int from = input.getTravelTimes()[i].getFromPoint();
+			int to = input.getTravelTimes()[i].getToPoint();
+			double tt = input.getTravelTimes()[i].getDistance();
+			Point fromPoint = mID2Point.get(from);
+			Point toPoint = mID2Point.get(to);
+			travelTime.setWeight(fromPoint, toPoint, tt);
+		}
+		
+		NodeWeightsManager nwm = new NodeWeightsManager(allPoints);
+		for(int i = 0; i < input.getRequests().length; i++){
+			DeliveryRequest req = input.getRequests()[i];
+			Point delivery = mID2Point.get(req.getPoint());
+			nwm.setWeight(delivery, req.getDemand());
+		}
+		for(int i = 0; i < input.getVehicles().length; i++){
+			VehicleInfo vh = input.getVehicles()[i];
+			Point start = mID2Point.get(vh.getStartPoint());
+			Point end = mID2Point.get(vh.getEndPoint());
+			nwm.setWeight(start, 0);
+			nwm.setWeight(end, 0);
+		}
+		
+		HashMap<Point, Integer> earliestAllowedArrivalTime = new HashMap<Point, Integer>();
+		HashMap<Point, Integer> serviceDuration = new HashMap<Point, Integer>();
+		HashMap<Point, Integer> latestAllowedArrivalTime = new HashMap<Point, Integer>();
+
+		ArrayList<Point> requestPoints = new ArrayList<Point>();
+
+		for(int i = 0; i < input.getRequests().length; i++){
+			DeliveryRequest req = input.getRequests()[i];
+			Point delivery = mID2Point.get(req.getPoint());
+
+			requestPoints.add(delivery);
+
+			earliestAllowedArrivalTime.put(delivery, req.getEarlyDeliveryTime());
+			
+			latestAllowedArrivalTime.put(delivery, req.getLateDeliveryTime());
+			
+			serviceDuration.put(delivery, req.getServiceDuration());
+		}
+		
+		for(int i = 0; i < input.getVehicles().length; i++){
+			VehicleInfo vh = input.getVehicles()[i];
+			Point startPoint = mID2Point.get(vh.getStartPoint());
+			Point endPoint = mID2Point.get(vh.getEndPoint());
+			earliestAllowedArrivalTime.put(startPoint, vh.getEarlyStartTimePoint());
+			latestAllowedArrivalTime.put(startPoint, vh.getLateStartTimePoint());
+			serviceDuration.put(startPoint, 0);
+			
+			earliestAllowedArrivalTime.put(endPoint, vh.getEarlyEndTimePoint());
+			latestAllowedArrivalTime.put(endPoint, vh.getLateEndTimePoint());
+			serviceDuration.put(endPoint, 0);
+		}
+
+			// modelling
+			VRManager mgr = new VRManager();
+			VarRoutesVR XR = new VarRoutesVR(mgr);
+			ConstraintSystemVR CS = new ConstraintSystemVR(mgr);
+			
+			for(int i = 0; i < startPoints.size(); i++){
+				XR.addRoute(startPoints.get(i), endPoints.get(i));
+			}
+			
+			for(int i = 0; i < deliveryPoints.size(); i++){
+				XR.addClientPoint(deliveryPoints.get(i));
+			}
+			
+			int K = XR.getNbRoutes();
+			
+			AccumulatedWeightEdgesVR awe = new AccumulatedWeightEdgesVR(XR,
+					awm);
+			AccumulatedWeightNodesVR awn = new AccumulatedWeightNodesVR(XR,
+					nwm);
+			AccumulatedWeightEdgesVR arrivalTime = new AccumulatedWeightEdgesVR(XR, travelTime);
+		
+			for(int i = 0; i < input.getVehicles().length; i++){
+				VehicleInfo vh = input.getVehicles()[i];
+				awe.setAccumulatedWeightStartPoint(i+1, 0);
+				arrivalTime.setAccumulatedWeightStartPoint(i+1, vh.getEarlyStartTimePoint());// start time point of vehicle k
+				awn.setAccumulatedWeightStartPoint(i+1, 0);
+			}
+			
+			HashMap<Point, IFunctionVR> accDemand = new HashMap<Point, IFunctionVR>();
+			HashMap<Point, IFunctionVR> accDistance = new HashMap<Point, IFunctionVR>();
+			
+			for(int k = 1; k <= XR.getNbRoutes(); k++){
+				IFunctionVR dis = new AccumulatedEdgeWeightsOnPathVR(awe, XR.endPoint(k));
+				CS.post(new Leq(dis,input.getVehicles()[k-1].getCapacity()));
+			}
+			
+			
+			EarliestArrivalTimeVR eat = new EarliestArrivalTimeVR(XR,
+					 travelTime, earliestAllowedArrivalTime, serviceDuration);
+					
+					CEarliestArrivalTimeVR twCtrs = new
+					 CEarliestArrivalTimeVR(eat, latestAllowedArrivalTime);
+					CS.post(twCtrs);
+			
+			IFunctionVR obj = new TotalCostVR(XR, awm);
+			LexMultiFunctions F = new LexMultiFunctions();
+			F.add(new ConstraintViolationsVR(CS));
+			F.add(obj);
+			
+			mgr.close();
+		
+			
+			ArrayList<INeighborhoodExplorer> NE = new ArrayList<INeighborhoodExplorer>();
+			NE.add(new GreedyOnePointMoveExplorer(XR, F));
+			
+			NE.add(new GreedyOrOptMove1Explorer(XR, F));
+			NE.add(new GreedyOrOptMove2Explorer(XR, F));
+			NE.add(new GreedyThreeOptMove1Explorer(XR, F));
+			NE.add(new GreedyThreeOptMove2Explorer(XR, F));
+			NE.add(new GreedyThreeOptMove3Explorer(XR, F));
+			NE.add(new GreedyThreeOptMove4Explorer(XR, F));
+			NE.add(new GreedyThreeOptMove5Explorer(XR, F));
+			NE.add(new GreedyThreeOptMove6Explorer(XR, F));
+			NE.add(new GreedyThreeOptMove7Explorer(XR, F));
+			NE.add(new GreedyThreeOptMove8Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove1Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove2Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove3Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove4Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove5Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove6Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove7Explorer(XR, F));
+			NE.add(new GreedyTwoOptMove8Explorer(XR, F));
+			// NE.add(new GreedyTwoPointsMoveExplorer(XR, F));
+			NE.add(new GreedyCrossExchangeMoveExplorer(XR, F));
+			// NE.add(new GreedyAddOnePointMoveExplorer(XR, F));
+		
+			
+			GenericLocalSearch se = new GenericLocalSearch(mgr);
+			se.setNeighborhoodExplorer(NE);
+			se.setObjectiveFunction(F);
+			se.setMaxStable(50);
+			
+			se.search(input.getMaxIter(), input.getTimeLimit());
+		
+			
+			
+			Route[] routes = new Route[startPoints.size()];
+			for(int k = 1; k <= XR.getNbRoutes(); k++){
+				ArrayList<RouteElement> L = new ArrayList<RouteElement>();
+				//int depTime = (int)arrivalTime.getCostRight(XR.startPoint(k));
+				for(Point p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
+					int point = p.ID;
+					int arrTime = (int)eat.getEarliestArrivalTime(p);
+					int serviceT = arrTime > earliestAllowedArrivalTime.get(p) ? arrTime : earliestAllowedArrivalTime.get(p);
+					int depTime = (int) serviceT + serviceDuration.get(p);
+					double tt = travelTime.getDistance(p, XR.next(p));
+					System.out.println("travelTime[" + p.ID + " --> " + XR.next(p).ID + "] = " + tt);
+					double distance = awe.getCostRight(p);
+					RouteElement e = new RouteElement(point,arrTime,depTime,distance);
+					L.add(e);
+				}
+				Point p = XR.endPoint(k);
+				int point = p.ID;
+				int arrTime = (int)eat.getEarliestArrivalTime(p);
+				int serviceT = arrTime > earliestAllowedArrivalTime.get(p) ? arrTime : earliestAllowedArrivalTime.get(p);
+				int depTime = (int) serviceT + serviceDuration.get(p);
+				double distance = awe.getCostRight(p);
+				
+				L.add(new RouteElement(point, arrTime,depTime,distance	));
+				
+				RouteElement[] sequence = new RouteElement[L.size()];
+				for(int i = 0; i < L.size(); i++)
+					sequence[i] = L.get(i);
+				int len = L.size();
+				routes[k-1] = new Route(len,awe.getCostRight(XR.endPoint(k)),sequence);
+			}
+			return new SolutionRoutes(CS.violations(),obj.getValue(),routes);
+	}
+
+	
+	@RequestMapping(value="/pickup-delivery-route-plan", method = RequestMethod.POST)
+	public SolutionRoutes computePickupDeliveryRoutePlan(@RequestBody PickupDeliveryProblemInput input){
 	
 		
 		ArrayList<Point> startPoints = new ArrayList<Point>();
@@ -638,4 +1086,5 @@ public class RoutingAPI {
 		
 	}
 
+	
 }
