@@ -299,6 +299,18 @@ public class GoogleMapsQuery {
 
 		return t;
 	}
+	public int getTravelTime(String originAddr, String destinationAddr, String mode) {
+		// try to probe maximum 20 times
+		int t = -1;
+		int maxTrials = 2;
+		for (int i = 0; i < maxTrials; i++) {
+			t = getTravelTimeOnePost(originAddr, destinationAddr, mode);
+			if (t > -1)
+				break;
+		}
+
+		return t;
+	}
 
 	private int getTravelTimeOnePost(double lat1, double lng1, double lat2,
 			double lng2, String mode) {
@@ -309,6 +321,97 @@ public class GoogleMapsQuery {
 					"http://maps.google.com/maps/api/directions/xml?origin="
 							+ lat1 + "," + lng1 + "&destination=" + lat2 + ","
 							+ lng2 + "&sensor=false&units=metric");
+		} catch (MalformedURLException ex) {
+			ex.printStackTrace();
+		}
+
+		HttpURLConnection urlConn = null;
+		try {
+			// URL connection channel.
+			urlConn = (HttpURLConnection) url.openConnection();
+		} catch (IOException ex) {
+			System.out.println("openConnection failed");
+			ex.printStackTrace();
+		}
+
+		// Let the run-time system (RTS) know that we want input.
+		urlConn.setDoInput(true);
+
+		// Let the RTS know that we want to do output.
+		urlConn.setDoOutput(true);
+
+		// No caching, we want the real thing.
+		urlConn.setUseCaches(false);
+
+		try {
+			urlConn.setRequestMethod("POST");
+		} catch (ProtocolException ex) {
+			ex.printStackTrace();
+		}
+
+		try {
+			urlConn.connect();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
+		DataOutputStream output = null;
+		DataInputStream input = null;
+
+		try {
+			output = new DataOutputStream(urlConn.getOutputStream());
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
+		// Get response data.
+		String str = null;
+		int duration = -1;// in seconds
+		try {
+			input = new DataInputStream(urlConn.getInputStream());
+			try {
+				DocumentBuilder builder = DocumentBuilderFactory.newInstance()
+						.newDocumentBuilder();
+				Document doc = builder.parse(input);
+
+				doc.getDocumentElement().normalize();
+
+				NodeList nl = doc.getElementsByTagName("leg");
+				Node nod = nl.item(0);
+				Element e = (Element) nod;
+				if (e == null) {
+					return -1;
+				}
+				nl = e.getElementsByTagName("duration");
+				nod = nl.item(nl.getLength() - 1);
+				
+				e = (Element) nod;
+				nl = e.getElementsByTagName("value");
+				nod = nl.item(0);
+
+				e = (Element) nod;
+
+				duration = Integer.valueOf(e.getChildNodes().item(0)
+						.getNodeValue());
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			input.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
+		return duration;
+	}
+	private int getTravelTimeOnePost(String originAddr, String destinationAddr, String mode) {
+
+		URL url = null;
+		try {
+			url = new URL(
+					"http://maps.google.com/maps/api/directions/xml?origin="
+							+ originAddr + "&destination=" + destinationAddr + "&sensor=false&units=metric");
 		} catch (MalformedURLException ex) {
 			ex.printStackTrace();
 		}
@@ -543,7 +646,7 @@ public class GoogleMapsQuery {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
+			
 			input.close();
 		} catch (IOException ex) {
 			ex.printStackTrace();
