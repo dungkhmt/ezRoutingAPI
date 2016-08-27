@@ -66,7 +66,9 @@ import com.kse.ezRoutingAPI.model.TSPInput;
 import com.kse.ezRoutingAPI.model.VehicleInfo;
 import com.kse.ezRoutingAPI.model.dichung.SharedTaxiInput;
 import com.kse.ezRoutingAPI.model.dichung.SharedTaxiRequest;
+import com.kse.ezRoutingAPI.model.dichung.SharedTaxiRoute;
 import com.kse.ezRoutingAPI.model.dichung.SharedTaxiSolution;
+import com.kse.utils.DateTimeUtils;
 
 import java.util.*;
 
@@ -285,6 +287,7 @@ public class RoutingAPI {
 			mRequest2ID.put(requests[i], i);
 
 		GoogleMapsQuery G = new GoogleMapsQuery();
+		
 		int[][] travelTimes = new int[N][N];// travelTimes[i][j] is the travel
 											// time from pickup point of request
 											// i to pickup point of request j
@@ -293,34 +296,84 @@ public class RoutingAPI {
 				int t = G.getTravelTime(requests[i].getPickupAddress(),
 						requests[j].getPickupAddress(), "driving");
 				travelTimes[i][j] = t;
+				System.out.println(name() + "::computeSharedTaxiSolution, TT[" + i + "," + j + "] = " + travelTimes[i][j]);
+				if(travelTimes[i][j] < 0){
+					System.out.println(name() + "::computeSharedTaxiSolution exception from " + 
+				requests[i].getPickupAddress() + " to " + requests[j].getPickupAddress());
+					System.exit(-1);
+				}
 			}
 		}
-
+		
+		
+		HashMap<Point, SharedTaxiRequest> mPoint2Request = new HashMap<Point, SharedTaxiRequest>();
+		
 		int K = requests.length;// init nbVehicles
 		ArrayList<Point> startPoints = new ArrayList<Point>();
 		ArrayList<Point> endPoints = new ArrayList<Point>();
 		ArrayList<Point> clientPoints = new ArrayList<Point>();
 		ArrayList<Point> allPoints = new ArrayList<Point>();
 
+		HashMap<Point, Integer> earliestAllowedArrivalTime = new HashMap<Point, Integer>();
+		HashMap<Point, Integer> serviceDuration = new HashMap<Point, Integer>();
+		HashMap<Point, Integer> latestAllowedArrivalTime = new HashMap<Point, Integer>();
+
 		int id = -1;
 
+		long minTimePoint = Integer.MAX_VALUE;
+		for(int i = 0; i < requests.length; i++){
+			long t = DateTimeUtils.dateTime2Int(requests[i].getEarlyPickupDateTime());
+			minTimePoint = minTimePoint < t ? minTimePoint : t;
+			t = DateTimeUtils.dateTime2Int(requests[i].getLatePickupDateTime());
+			minTimePoint = minTimePoint < t ? minTimePoint : t;
+		}
+		int dt = 10000;
+		int pickupDuration = 60;// 60 seconds
+		int D = 10000;// distance from start/end poitns to each client point
+		
 		for (int i = 0; i < K; i++) {
 			id++;
 			Point p = new Point(id);
 			clientPoints.add(p);
+			
+			long et = DateTimeUtils.dateTime2Int(requests[i].getEarlyPickupDateTime());
+			long lt = DateTimeUtils.dateTime2Int(requests[i].getLateDeliveryDateTime());
+			int converted_et = (int)(et - minTimePoint) + dt;
+			int converted_lt = (int)(lt - minTimePoint) + dt;
+			earliestAllowedArrivalTime.put(p, converted_et);
+			latestAllowedArrivalTime.put(p,converted_lt);
+			serviceDuration.put(p, pickupDuration);// pickup duration is assumed to be 1 minute
+			
 			allPoints.add(p);
+			
+			mPoint2Request.put(p, requests[i]);
 		}
+		
+		
 		for (int i = 0; i < K; i++) {
 			id++;
 			Point s = new Point(id);
 			startPoints.add(s);
 			allPoints.add(s);
-
+			
 			id++;
 			Point t = new Point(id);
 			endPoints.add(t);
 			allPoints.add(t);
 		}
+
+		for(Point s: startPoints){
+			earliestAllowedArrivalTime.put(s, 0);
+			latestAllowedArrivalTime.put(s,Integer.MAX_VALUE);
+			serviceDuration.put(s, 0);// pickup duration is assumed to be 0
+		}
+		for(Point t: endPoints){
+			earliestAllowedArrivalTime.put(t, 0);
+			latestAllowedArrivalTime.put(t,Integer.MAX_VALUE);
+			serviceDuration.put(t, 0);// pickup duration is assumed to be 0
+		}
+		
+
 		ArcWeightsManager awm = new ArcWeightsManager(allPoints);
 		for (int i = 0; i < clientPoints.size(); i++) {
 			for (int j = 0; j < clientPoints.size(); j++) {
@@ -330,15 +383,20 @@ public class RoutingAPI {
 		}
 		for (Point p : clientPoints) {
 			for (Point s : startPoints) {
-				awm.setWeight(s, p, 0);
-				awm.setWeight(p, s, 0);
-				;
+				awm.setWeight(s, p, D);
+				awm.setWeight(p, s, D);
+				
 			}
 			for (Point t : endPoints) {
-				awm.setWeight(p, t, 0);
-				awm.setWeight(t, p, 0);
+				awm.setWeight(p, t, D);
+				awm.setWeight(t, p, D);
 			}
 		}
+		for(Point s: startPoints){
+			for(Point t: endPoints)
+				awm.setWeight(s, t, 0);
+		}
+		
 		int capacity = 0;
 		for(int i = 0; i < input.getVehicleCapacities().length; i++)
 			capacity = capacity < input.getVehicleCapacities()[i] ? input.getVehicleCapacities()[i] : capacity;
@@ -352,7 +410,6 @@ public class RoutingAPI {
 			nwm.setWeight(s, 0);
 		for(Point t: endPoints)
 			nwm.setWeight(t, 0);
-		
 		
 		
 		// model
@@ -376,15 +433,80 @@ public class RoutingAPI {
 			d[i] = new AccumulatedEdgeWeightsOnPathVR(awe, t); 
 			w[i] = new AccumulatedNodeWeightsOnPathVR(awn, t);
 			CS.post(new Leq(w[i],capacity));
-			
-		}
+			CS.post(new Leq(d[i],input.getMaxWaitTime()));
+		}		
 		
-		
+		EarliestArrivalTimeVR eat = new EarliestArrivalTimeVR(XR, awm,
+				earliestAllowedArrivalTime, serviceDuration);
+
+		CEarliestArrivalTimeVR twCtrs = new CEarliestArrivalTimeVR(eat,
+				latestAllowedArrivalTime);
+		CS.post(twCtrs);
+
+		IFunctionVR obj = new TotalCostVR(XR, awm);
+		LexMultiFunctions F = new LexMultiFunctions();
+		F.add(new ConstraintViolationsVR(CS));
+		F.add(obj);
 		
 		
 		mgr.close();
 
-		return null;
+		ArrayList<INeighborhoodExplorer> NE = new ArrayList<INeighborhoodExplorer>();
+		NE.add(new GreedyOnePointMoveExplorer(XR, F));
+
+		NE.add(new GreedyOrOptMove1Explorer(XR, F));
+		NE.add(new GreedyOrOptMove2Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove1Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove2Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove3Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove4Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove5Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove6Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove7Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove8Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove1Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove2Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove3Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove4Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove5Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove6Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove7Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove8Explorer(XR, F));
+		// NE.add(new GreedyTwoPointsMoveExplorer(XR, F));
+		NE.add(new GreedyCrossExchangeMoveExplorer(XR, F));
+		// NE.add(new GreedyAddOnePointMoveExplorer(XR, F));
+
+		GenericLocalSearch se = new GenericLocalSearch(mgr);
+		se.setNeighborhoodExplorer(NE);
+		se.setObjectiveFunction(F);
+		se.setMaxStable(50);
+
+		se.search(5, input.getMaxTime());
+
+		ArrayList<SharedTaxiRoute> routes = new ArrayList<SharedTaxiRoute>();
+		
+		for(int k = 1; k <= XR.getNbRoutes(); k++){
+			Point s = XR.startPoint(k);
+			Point t = XR.endPoint(k);
+			if(XR.next(s) != t){
+				ArrayList<Point> points = new ArrayList<Point>();
+				for(Point x = XR.next(s); x != t; x = XR.next(x)){
+					points.add(x);
+				}
+				String[] ticketCodes = new String[points.size()];
+				for(int i = 0; i < points.size(); i++){
+					SharedTaxiRequest req = mPoint2Request.get(points.get(i));
+					ticketCodes[i] = req.getTicketCode();
+				}
+				SharedTaxiRoute r = new SharedTaxiRoute(ticketCodes);
+				routes.add(r);
+			}
+		}
+		SharedTaxiRoute[] A = new SharedTaxiRoute[routes.size()];
+		for(int i = 0; i < routes.size(); i++){
+			A[i] = routes.get(i);
+		}
+		return new SharedTaxiSolution(A);
 	}
 
 	@RequestMapping(value = "/tsp", method = RequestMethod.POST)

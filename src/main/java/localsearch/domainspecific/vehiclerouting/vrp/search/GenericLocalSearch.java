@@ -108,6 +108,7 @@ public class GenericLocalSearch implements ISearch {
 	public void generateInitialSolution(){
 		XR.setRandom();
 	}
+	
 	public void search(int maxIter, int timeLimit){
 		bestSolution = new ValueRoutesVR(XR);
 		currentIter = 0;

@@ -286,6 +286,14 @@ public class GoogleMapsQuery {
 		return d;
 	}
 
+	public int estimateTravelTime(double lat1, double lng1, double lat2,
+			double lng2, String mode, int speed, double APPX) {
+		double d = computeDistanceHaversine(lat1,lng1,lat2,lng2);
+		int appxt = (int)(d*1000*APPX/speed);// approximate traveltime
+		int t = getTravelTime(lat1,lng1,lat2,lng2, mode);
+		if(t < 0) t = appxt;
+		return t;
+	}
 	public int getTravelTime(double lat1, double lng1, double lat2,
 			double lng2, String mode) {
 		// try to probe maximum 20 times
@@ -302,7 +310,7 @@ public class GoogleMapsQuery {
 	public int getTravelTime(String originAddr, String destinationAddr, String mode) {
 		// try to probe maximum 20 times
 		int t = -1;
-		int maxTrials = 2;
+		int maxTrials = 10;
 		for (int i = 0; i < maxTrials; i++) {
 			t = getTravelTimeOnePost(originAddr, destinationAddr, mode);
 			if (t > -1)
@@ -405,13 +413,27 @@ public class GoogleMapsQuery {
 
 		return duration;
 	}
+	
+	public String standardizeAddr(String addr){
+		String stdAddr = "";
+		String[] s = addr.split(" ");
+		for(int i = 0; i < s.length-1; i++)
+			stdAddr += s[i].trim() + "+";
+		stdAddr += s[s.length-1].trim();
+		return stdAddr;
+	}
+	
+	
 	private int getTravelTimeOnePost(String originAddr, String destinationAddr, String mode) {
-
+		String stdOriginAddr = standardizeAddr(originAddr);
+		String stdDestinationAddr = standardizeAddr(destinationAddr);
+		
+		
 		URL url = null;
 		try {
 			url = new URL(
 					"http://maps.google.com/maps/api/directions/xml?origin="
-							+ originAddr + "&destination=" + destinationAddr + "&sensor=false&units=metric");
+							+ stdOriginAddr + "&destination=" + stdDestinationAddr + "&sensor=false&units=metric");
 		} catch (MalformedURLException ex) {
 			ex.printStackTrace();
 		}
@@ -495,6 +517,117 @@ public class GoogleMapsQuery {
 		}
 
 		return duration;
+	}
+
+	public String getLatLngFromAddress(String addr) {
+		String latlng = "";
+		for(int i = 0; i < 100; i++){
+			latlng = getLatLngFromAddressOnePost(addr);
+			if(!latlng.equals("") && latlng != null) return latlng;
+		}
+		return latlng;
+	}
+	public String getLatLngFromAddressOnePost(String addr) {
+		String stdAddr = standardizeAddr(addr);
+		
+		
+		URL url = null;
+		try {
+			url = new URL(
+					"http://maps.google.com/maps/api/geocode/xml?address="
+							+ stdAddr + "&sensor=false&units=metric");
+			//System.out.println(url);
+		} catch (MalformedURLException ex) {
+			ex.printStackTrace();
+		}
+
+		HttpURLConnection urlConn = null;
+		try {
+			// URL connection channel.
+			urlConn = (HttpURLConnection) url.openConnection();
+		} catch (IOException ex) {
+			System.out.println("openConnection failed");
+			ex.printStackTrace();
+		}
+
+		// Let the run-time system (RTS) know that we want input.
+		urlConn.setDoInput(true);
+
+		// Let the RTS know that we want to do output.
+		urlConn.setDoOutput(true);
+
+		// No caching, we want the real thing.
+		urlConn.setUseCaches(false);
+
+		try {
+			urlConn.setRequestMethod("POST");
+		} catch (ProtocolException ex) {
+			ex.printStackTrace();
+		}
+
+		try {
+			urlConn.connect();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
+		DataOutputStream output = null;
+		DataInputStream input = null;
+
+		try {
+			output = new DataOutputStream(urlConn.getOutputStream());
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
+		// Get response data.
+		String str = null;
+		int duration = -1;// in seconds
+		try {
+			input = new DataInputStream(urlConn.getInputStream());
+			try {
+				DocumentBuilder builder = DocumentBuilderFactory.newInstance()
+						.newDocumentBuilder();
+				Document doc = builder.parse(input);
+
+				doc.getDocumentElement().normalize();
+
+				NodeList nl = doc.getElementsByTagName("geometry");
+				Node nod = nl.item(0);
+				Element e = (Element) nod;
+				if (e == null) {
+					return "";
+				}
+				nl = e.getElementsByTagName("location");
+				nod = nl.item(0);
+				
+				e = (Element) nod;
+				//nl = e.getElementsByTagName("lat");
+				Node nodLat = e.getElementsByTagName("lat").item(0);
+
+				Node nodLng = e.getElementsByTagName("lng").item(0);
+				
+				e = (Element) nodLat;
+
+				String lat = e.getChildNodes().item(0)
+						.getNodeValue();
+				
+				e = (Element) nodLng;
+				String lng = e.getChildNodes().item(0)
+						.getNodeValue();
+				
+				return lat + "," + lng;
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			input.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
+		return "";
 	}
 
 	public Direction getDirection(double lat1, double lng1, double lat2,
@@ -660,6 +793,12 @@ public class GoogleMapsQuery {
 	
 	public static void main(String[] args){
 		GoogleMapsQuery G = new GoogleMapsQuery();
-		G.getDirection(21, 105, 21.01, 105, "driving");
+		//G.getDirection(21, 105, 21.01, 105, "driving");
+		//int t = G.getTravelTime("50 nguyen thai hoc, hanoi, vietnam", "1 Dai Co Viet, Hai Ba Trung, Hanoi, Vietnam", "driving");
+		//System.out.println("t = " + t);
+		
+		
+		String latlng = G.getLatLngFromAddress("1 Dai Co Viet, Hai Ba Trung, Hanoi, Vietnam");
+		System.out.println("Location = " + latlng);
 	}
 }
