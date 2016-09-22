@@ -37,6 +37,9 @@ import org.w3c.dom.NodeList;
 
 
 
+
+import com.kse.utils.DateTimeUtils;
+
 import java.net.URLEncoder;
 
 import localsearch.domainspecific.vehiclerouting.vrp.entities.Point;
@@ -286,6 +289,16 @@ public class GoogleMapsQuery {
 		return d;
 	}
 
+	// distance is measured in m
+	public double estimateDistanceMeter(double lat1, double lng1, double lat2,
+			double lng2){
+		double d = getDistance(lat1, lng1, lat2, lng2);
+		if(d < 0)
+			return getApproximateDistanceMeter(lat1, lng1, lat2, lng2);
+		
+		return d*1000;
+	}
+	// speed is measured in m/s
 	public int estimateTravelTime(double lat1, double lng1, double lat2,
 			double lng2, String mode, int speed, double APPX) {
 		double d = computeDistanceHaversine(lat1,lng1,lat2,lng2);
@@ -294,6 +307,28 @@ public class GoogleMapsQuery {
 		if(t < 0) t = appxt;
 		return t;
 	}
+	// speeds are measured in m/s
+	public int estimateTravelTimeWithTimeFrame(double lat1, double lng1, double lat2,
+			double lng2, String mode, String startDateTime, double stdSpeed, double denseTrafficSpeed) {
+		double d = computeDistanceHaversine(lat1,lng1,lat2,lng2);
+		double appxd = d*1000*RATIO;
+		int hour = DateTimeUtils.getHour(startDateTime);
+		double speed = stdSpeed;
+		
+		if(7 <= hour && hour <= 9 || 16 <= hour && hour <= 18)
+			speed = denseTrafficSpeed;
+		
+		int appxt = (int)(appxd/speed);// approximate traveltime
+		//int t = getTravelTime(lat1,lng1,lat2,lng2, mode);
+		double dis = getDistance(lat1, lng1, lat2, lng2);
+		int t = (int)(dis*1000/speed);
+		
+		if(t < 0) t = appxt;
+		//System.out.println(name() + "::estimateTravelTimeWithTimeFrame, d = " + d + ", dis = " + dis);
+		
+		return t;
+	}
+	
 	public int getTravelTime(double lat1, double lng1, double lat2,
 			double lng2, String mode) {
 		// try to probe maximum 20 times
@@ -329,6 +364,7 @@ public class GoogleMapsQuery {
 					"http://maps.google.com/maps/api/directions/xml?origin="
 							+ lat1 + "," + lng1 + "&destination=" + lat2 + ","
 							+ lng2 + "&sensor=false&units=metric");
+			
 		} catch (MalformedURLException ex) {
 			ex.printStackTrace();
 		}
@@ -423,7 +459,9 @@ public class GoogleMapsQuery {
 		return stdAddr;
 	}
 	
-	
+	public String name(){
+		return "GoogleMapsQuery";
+	}
 	private int getTravelTimeOnePost(String originAddr, String destinationAddr, String mode) {
 		String stdOriginAddr = standardizeAddr(originAddr);
 		String stdDestinationAddr = standardizeAddr(destinationAddr);
@@ -434,6 +472,7 @@ public class GoogleMapsQuery {
 			url = new URL(
 					"http://maps.google.com/maps/api/directions/xml?origin="
 							+ stdOriginAddr + "&destination=" + stdDestinationAddr + "&sensor=false&units=metric");
+			System.out.println(name() + "::getTravelTimeOnePost, url = " + url);
 		} catch (MalformedURLException ex) {
 			ex.printStackTrace();
 		}
@@ -794,11 +833,21 @@ public class GoogleMapsQuery {
 	public static void main(String[] args){
 		GoogleMapsQuery G = new GoogleMapsQuery();
 		//G.getDirection(21, 105, 21.01, 105, "driving");
-		//int t = G.getTravelTime("50 nguyen thai hoc, hanoi, vietnam", "1 Dai Co Viet, Hai Ba Trung, Hanoi, Vietnam", "driving");
-		//System.out.println("t = " + t);
+		//int t = G.getTravelTime("135 Nguyen Van Cu, Gia Lam, hanoi, vietnam", "45 Nguyen Van Cu, Gia Lam, hanoi, vietnam", "driving");
+		
+		String src = "1 Tran Hung Dao, Hoan Kiem, Hanoi, Vietnam";
+		String dest = "36 Tran Hung Dao, Hoan Kiem, Hanoi, Vietnam";
+		LatLng lls = G.getCoordinate(src);
+		LatLng lld = G.getCoordinate(dest);
+		
+		int t = G.getTravelTime(src, dest, "driving");
+		int te = G.estimateTravelTimeWithTimeFrame(lls.lat, lls.lng, lld.lat, lld.lng, "driving", "2016-02-02 12:12:00", 10, 3);
+		double de = G.estimateDistanceMeter(lls.lat, lls.lng, lld.lat, lld.lng);
+		double d = G.getDistance(lls.lat, lls.lng, lld.lat, lld.lng)*1000;
+		System.out.println("t = " + t + ", te = " + te + ", d = " + d + ", de = " + de);
 		
 		
-		String latlng = G.getLatLngFromAddress("1 Dai Co Viet, Hai Ba Trung, Hanoi, Vietnam");
-		System.out.println("Location = " + latlng);
+		//String latlng = G.getLatLngFromAddress("1 Dai Co Viet, Hai Ba Trung, Hanoi, Vietnam");
+		//System.out.println("Location = " + latlng);
 	}
 }

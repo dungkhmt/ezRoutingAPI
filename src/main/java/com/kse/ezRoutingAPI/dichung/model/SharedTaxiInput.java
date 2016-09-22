@@ -5,22 +5,56 @@ public class SharedTaxiInput {
 	private int[] vehicleCapacities;
 	private int maxWaitTime;// in seconds
 	
-	private int maxTime;
+	private int forbidenStraightDistance;// in meters. 
+						//If the straight distance between two pickups is greater than forbidenStraightDistance
+						// then these requests cannot be shared
+	private int forbidenTimeDistance;// in seconds
+						// If the distance between two pickup times is greater than forbidenTimeDistance
+						// then these requests cannot be shared
+	
+	
+	private int maxTime;// in seconds: max computation time
+	
 	
 	public SharedTaxiInput() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 	
+	
 	public SharedTaxiInput(SharedTaxiRequest[] requests,
-			int[] vehicleCapacities, int maxWaitTime, int maxTime) {
+			int[] vehicleCapacities, int maxWaitTime,
+			int forbidenStraightDistance, int forbidenTimeDistance, int maxTime) {
 		super();
 		this.requests = requests;
 		this.vehicleCapacities = vehicleCapacities;
-		this.maxTime = maxTime;
 		this.maxWaitTime = maxWaitTime;
+		this.forbidenStraightDistance = forbidenStraightDistance;
+		this.forbidenTimeDistance = forbidenTimeDistance;
+		this.maxTime = maxTime;
 	}
-	
+
+
+	public int getForbidenStraightDistance() {
+		return forbidenStraightDistance;
+	}
+
+
+	public void setForbidenStraightDistance(int forbidenStraightDistance) {
+		this.forbidenStraightDistance = forbidenStraightDistance;
+	}
+
+
+	public int getForbidenTimeDistance() {
+		return forbidenTimeDistance;
+	}
+
+
+	public void setForbidenTimeDistance(int forbidenTimeDistance) {
+		this.forbidenTimeDistance = forbidenTimeDistance;
+	}
+
+
 	public int getMaxWaitTime() {
 		return maxWaitTime;
 	}

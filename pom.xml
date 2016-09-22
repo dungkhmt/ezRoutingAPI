@@ -8,6 +8,13 @@
   <name>API for ezRouting</name>
   <url>http://maven.apache.org</url>
   <dependencies>
+  
+  		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.11</version>
+	    </dependency>
+  
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
