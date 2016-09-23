@@ -3,21 +3,54 @@ package com.kse.ezRoutingAPI.pickupdeliverycontainers.model;
 public class PickupDeliveryRouteElement {
 	private String requestCode;
 	private String arrivalDateTime;
+	private String address;
+	private String latlng;
 	private String action;// PICKUP or DELIVERY
 	private int quantity;
+	private String timeToNext;
+	private String distanceToNext;
+	
 	public PickupDeliveryRouteElement() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 	public PickupDeliveryRouteElement(String requestCode,
-			String arrivalDateTime, String action, int quantity) {
+			String arrivalDateTime, String address, String latlng, String action, int quantity, String timeToNext, String distanceToNext) {
 		super();
 		this.requestCode = requestCode;
 		this.arrivalDateTime = arrivalDateTime;
+		this.address = address;
+		this.latlng = latlng;
 		this.action = action;
 		this.quantity = quantity;
+		this.timeToNext = timeToNext;
+		this.distanceToNext = distanceToNext;
 	}
 	
+	public String getTimeToNext() {
+		return timeToNext;
+	}
+	public void setTimeToNext(String timeToNext) {
+		this.timeToNext = timeToNext;
+	}
+	public String getDistanceToNext() {
+		return distanceToNext;
+	}
+	public void setDistanceToNext(String distanceToNext) {
+		this.distanceToNext = distanceToNext;
+	}
+	public String getLatlng() {
+		return latlng;
+	}
+	public void setLatlng(String latlng) {
+		this.latlng = latlng;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
 	public int getQuantity() {
 		return quantity;
 	}

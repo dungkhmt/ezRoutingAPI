@@ -417,18 +417,52 @@ public class PickupDeliveryContainerService {
 		ArrayList<PickupDeliveryRoute> routes = new ArrayList<PickupDeliveryRoute>();
 		for(int k = 1; k <= solver.XR.getNbRoutes(); k++){
 			Point s = solver.XR.startPoint(k);
+			Point ns = solver.XR.next(s);
+			//PickupDeliveryRequest re = mPoint2Request.get(s);
 			Truck tck = mPoint2Truck.get(s);
 			ArrayList<PickupDeliveryRouteElement> r = new ArrayList<PickupDeliveryRouteElement>();
-			PickupDeliveryRouteElement e = new PickupDeliveryRouteElement(tck.getCode(),"-","-",0);
+			PickupDeliveryRouteElement e = new PickupDeliveryRouteElement(tck.getCode(),"-","-",s.getX() + "," + s.getY(),"-",0,
+					DateTimeUtils.second2HMS((int)travelTimes.getDistance(s, ns)), distances.getDistance(s,ns) + "");
+			
 			r.add(e);
+			//String arrTime = DateTimeUtils.unixTimeStamp2DateTime((long)(solver.eat.getEarliestArrivalTime(s)) + 
+			//		(long)travelTimes.getDistance(s, ns) + minUnixTime - maxTravelTime);
+			String arrTime = DateTimeUtils.unixTimeStamp2DateTime((long)(solver.eat.getEarliestArrivalTime(ns)) + 
+					+ minUnixTime - maxTravelTime);
+			
 			for(Point p = solver.XR.next(s); p != solver.XR.endPoint(k);p = solver.XR.next(p)){
+				Point np = solver.XR.next(p);
 				PickupDeliveryRequest rp = mPoint2Request.get(p);
-				String action = "PICKUP";
-				if(p == mReq2Delivery.get(rp)) action = "DELIVERY";
-				String arrTime = DateTimeUtils.unixTimeStamp2DateTime((long)(solver.eat.getEarliestArrivalTime(p)) + minUnixTime - maxTravelTime);
+				String addr = rp.getPickupAddress();
+				String latlng = rp.getPickupLatLng();
+				String distance2Next = "-";
+				String travelTime2Next = "-";
 				
-				e = new PickupDeliveryRouteElement(rp.getRequestCode(), arrTime, action, rp.getQuantity());
+				String action = "PICKUP";
+				if(p == mReq2Delivery.get(rp)){
+					action = "DELIVERY";
+					addr = rp.getDeliveryAddress();
+					latlng = rp.getDeliveryLatLng();
+				}
+				
+				if(np != solver.XR.endPoint(k)){
+					distance2Next = distances.getDistance(p, np)+"";
+					travelTime2Next = DateTimeUtils.second2HMS((int)travelTimes.getDistance(p, np));
+				}
+				//String arrTime = DateTimeUtils.unixTimeStamp2DateTime((long)(solver.eat.getEarliestArrivalTime(p)) + minUnixTime - maxTravelTime);
+				
+				e = new PickupDeliveryRouteElement(rp.getRequestCode(), arrTime, addr, latlng, action, rp.getQuantity(), 
+						travelTime2Next,
+						distance2Next);
 				r.add(e);
+				
+				if(np != solver.XR.endPoint(k)){
+				arrTime = DateTimeUtils.unixTimeStamp2DateTime((long)(solver.eat.getEarliestArrivalTime(p)) + 
+						+ serviceDuration.get(p) + 
+						+ (long) travelTimes.getDistance(p, np) + 
+						minUnixTime - maxTravelTime);
+				}
+				
 			}
 			PickupDeliveryRouteElement[] arr = new PickupDeliveryRouteElement[r.size()];
 			for(int i = 0;i < r.size(); i++) arr[i] = r.get(i);
