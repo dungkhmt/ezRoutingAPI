@@ -75,7 +75,7 @@ public class DichungAPIController {
 			@RequestBody SharedTaxiInput input) {
 		
 		DichungService dichungService = new DichungService();
-		return dichungService.computeSharedTaxiSolution(input,10);
+		return dichungService.computeSharedTaxiHanoiNoiBaiSolution(input);
 		
 		
 		/*

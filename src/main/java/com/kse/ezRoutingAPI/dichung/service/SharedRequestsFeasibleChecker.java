@@ -3,6 +3,7 @@ package com.kse.ezRoutingAPI.dichung.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.kse.ezRoutingAPI.dichung.model.SharedTaxiInput;
 import com.kse.ezRoutingAPI.dichung.model.SharedTaxiRequest;
 import com.kse.utils.DateTimeUtils;
 import com.kse.utils.traveltimeestimator.HanoiTravelTimeEstimator;
@@ -14,6 +15,7 @@ import com.kse.utils.traveltimeestimator.HanoiTravelTimeEstimator;
  */
 
 public class SharedRequestsFeasibleChecker {
+	public SharedTaxiInput input;
 	public SharedTaxiRequest[] requests;
 	public double[][] distances;// distances[i][j] is the distance from request i to request j
 	public long[] earlyTime;
@@ -36,12 +38,13 @@ public class SharedRequestsFeasibleChecker {
 	
 	private HanoiTravelTimeEstimator travelTimeEstimator;
 	
-	public SharedRequestsFeasibleChecker(SharedTaxiRequest[] requests,
+	public SharedRequestsFeasibleChecker(SharedTaxiInput input, SharedTaxiRequest[] requests,
 			int maxWaitTime,
 			double[][] distances,
 			HashMap<SharedTaxiRequest, Double> extraDistances,
 			HashMap<SharedTaxiRequest, Double> distanceOfRequest){
 	
+		this.input = input;
 		travelTimeEstimator = new HanoiTravelTimeEstimator();
 		
 		this.requests = requests;
@@ -53,8 +56,9 @@ public class SharedRequestsFeasibleChecker {
 		earlyTime = new long[N];
 		lateTime = new long[N];
 		for(int i = 0; i < N; i++){
-			earlyTime[i] = DateTimeUtils.dateTime2Int(requests[i].getEarlyPickupDateTime());
-			lateTime[i] = DateTimeUtils.dateTime2Int(requests[i].getLatePickupDateTime());
+			long t = DateTimeUtils.dateTime2Int(requests[i].getDepartTime());
+			earlyTime[i] = t - input.getMaxWaitTime();//  DateTimeUtils.dateTime2Int(requests[i].getEarlyPickupDateTime());
+			lateTime[i] = t + input.getMaxWaitTime();//DateTimeUtils.dateTime2Int(requests[i].getLatePickupDateTime());
 		}
 	}
 	
@@ -68,7 +72,7 @@ public class SharedRequestsFeasibleChecker {
 		for(int i = 0; i < n-1; i++){
 			int I = a[x[i]];
 			int J = a[x[i+1]];
-			int t = travelTimeEstimator.estimateTravelTime(requests[I].getEarlyPickupDateTime(), distances[I][J]); 
+			int t = travelTimeEstimator.estimateTravelTime(requests[I].getDepartTime(), distances[I][J]); 
 			// consider requests I and J
 			//ok  = ok & (earlyTime[J] <= lateTime[I] + t && 
 			//		 earlyTime[I] + t <= lateTime[J]);

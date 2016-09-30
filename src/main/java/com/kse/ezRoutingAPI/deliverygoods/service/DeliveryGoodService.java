@@ -262,7 +262,8 @@ public class DeliveryGoodService {
 				listElements.add(e);
 				
 				if(np != solver.XR.endPoint(k)){
-					arrivalDateTime = DateTimeUtils.unixTimeStamp2DateTime((long)(solver.eat.getEarliestArrivalTime(p)) + 
+					arrivalDateTime = DateTimeUtils.unixTimeStamp2DateTime(
+							(long)(solver.eat.getEarliestArrivalTime(p)) + 
 						+ serviceDuration.get(p) + 
 						+ (long) travelTimes.getDistance(p, np) + 
 						minUnixTime - maxTravelTime);

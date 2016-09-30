@@ -66,10 +66,10 @@ public class Excel2JSON {
 				Cell c = r.getCell(0);
 				
 				String ticketCode = getStringValue(c);
+				
 				c = r.getCell(1);
 				String dt = getStringValue(c);
-				c = r.getCell(3);
-				String addr = getStringValue(c);
+				
 				String[] s = dt.split(" ");
 				String[] s1 = s[0].split(":");
 				String hour = s1[0];
@@ -80,18 +80,32 @@ public class Excel2JSON {
 				String year = s1[2];
 				
 				String stdDT = year + "-" + month + "-" + dd + " " + hour + ":" + minute + ":" + "00";
-				long udt = DateTimeUtils.dateTime2Int(stdDT);
-				String earlyPickup = DateTimeUtils.unixTimeStamp2DateTime(udt - DT);
-				String latePickup = DateTimeUtils.unixTimeStamp2DateTime(udt + DT);
-				String deliveryAddr = "Noi Bai International Airport, Phu Cuong, Hanoi, Vietnam";
 				
-				String nbPassengers = getStringValue(r.getCell(5));
+				c = r.getCell(2);
+				String chunkName = getStringValue(c);
 				
-				System.out.println(ticketCode + "\t" + dt + "\t" + stdDT + "\t" + earlyPickup + "\t" + 
-				latePickup + "\t" + addr + "\t" + nbPassengers);
+				c = r.getCell(3);
+				String pickupAddr = getStringValue(c);
 				
-				SharedTaxiRequest req = new SharedTaxiRequest(ticketCode,addr,earlyPickup,latePickup,
-						deliveryAddr,"-",(int)Math.floor(Double.valueOf(nbPassengers)));
+				c = r.getCell(4);
+				String deliveryAddr = getStringValue(c);
+				
+				//long udt = DateTimeUtils.dateTime2Int(stdDT);
+				//String earlyPickup = DateTimeUtils.unixTimeStamp2DateTime(udt - DT);
+				//String latePickup = DateTimeUtils.unixTimeStamp2DateTime(udt + DT);
+				//String deliveryAddr = "Noi Bai International Airport, Phu Cuong, Hanoi, Vietnam";
+				
+				c = r.getCell(5);
+				String sNbPassengers = getStringValue(c);
+				int nbPassengers = (int)Math.floor(Double.valueOf(sNbPassengers));
+				
+				//System.out.println(ticketCode + "\t" + dt + "\t" + stdDT + "\t" + earlyPickup + "\t" + 
+				//latePickup + "\t" + addr + "\t" + nbPassengers);
+				
+				//SharedTaxiRequest req = new SharedTaxiRequest(ticketCode,addr,earlyPickup,latePickup,
+				//		deliveryAddr,"-",(int)Math.floor(Double.valueOf(nbPassengers)));
+				
+				SharedTaxiRequest req = new SharedTaxiRequest(ticketCode,stdDT,chunkName,pickupAddr,deliveryAddr,nbPassengers);
 				
 				requests.add(req);
 				
@@ -130,7 +144,8 @@ public class Excel2JSON {
 			for(int i = 0; i < requests.size(); i++) 
 				R[i] = requests.get(i);
 			int[] cap = new int[]{4,6};
-			SharedTaxiInput input = new SharedTaxiInput(R, cap, 900, 10000, 3600, 5);
+			SharedTaxiInput input = new SharedTaxiInput(R, cap, 900, 10000, 3600, 5000,3000,1800,900,5,
+					1.5,10,5,2,700/36,900);
 			ObjectMapper mapper = new ObjectMapper();
 			String json = mapper.writeValueAsString(input);
 			return json;
@@ -140,7 +155,7 @@ public class Excel2JSON {
 		return null;
 	}
 
-	public static String excel2JSONPickupDeliveryContainer(String fn){
+	public static String excel2JSONDeliveryGoods(String fn){
 		try{
 			
 			XSSFWorkbook wb = null;
@@ -276,7 +291,7 @@ public class Excel2JSON {
 		return null;
 	}
 
-	public static String excel2JSONDeliveryGoods(String fn){
+	public static String excel2JSONPickupDeliveryContainer(String fn){
 		try{
 			
 			XSSFWorkbook wb = null;
@@ -379,11 +394,11 @@ public class Excel2JSON {
 	}
 
 	public static void main(String[] args){
-		//String json = excel2JSONdichung("C:/DungPQ/projects/ezRoutingAPI/Export_08092016_2999.xls");
+		String json = excel2JSONdichung("C:/DungPQ/projects/ezRoutingAPI/Export_08092016_2999.xls");
 		
 		//String json = excel2JSONPickupDeliveryContainer("C:/DungPQ/projects/ezRoutingAPI/pickup-delivery-container.xlsx");
 		
-		String json = excel2JSONPickupDeliveryContainer("C:/DungPQ/projects/ezRoutingAPI/delivery-input-template.xlsx");
+		//String json = excel2JSONPickupDeliveryContainer("C:/DungPQ/projects/ezRoutingAPI/delivery-input-template.xlsx");
 		
 		System.out.println(json);
 		

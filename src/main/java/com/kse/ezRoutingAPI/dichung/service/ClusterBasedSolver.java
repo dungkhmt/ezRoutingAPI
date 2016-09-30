@@ -113,7 +113,7 @@ public class ClusterBasedSolver {
 			}
 		}
 
-		checker = new SharedRequestsFeasibleChecker(requests, maxWaitTime, estimated_distances, extraDistance, distanceOfRequest);
+		checker = new SharedRequestsFeasibleChecker(input,requests, maxWaitTime, estimated_distances, extraDistance, distanceOfRequest);
 	}
 
 	//3-sharing
@@ -126,16 +126,15 @@ public class ClusterBasedSolver {
 											// destination)
 		for (int i = 0; i < N; i++) {
 			SharedTaxiRequest ri = requests[i];
-			int ei = (int) DateTimeUtils.dateTime2Int(ri
-					.getEarlyPickupDateTime());
-			int li = (int) DateTimeUtils.dateTime2Int(ri
-					.getLatePickupDateTime());
+			
+			//int ei = (int) DateTimeUtils.dateTime2Int(ri.getEarlyPickupDateTime());
+			//int li = (int) DateTimeUtils.dateTime2Int(ri.getLatePickupDateTime());
 			for (int j = 0; j < N; j++) {
 				SharedTaxiRequest rj = requests[j];
-				int ej = (int) DateTimeUtils.dateTime2Int(rj
-						.getEarlyPickupDateTime());
-				int lj = (int) DateTimeUtils.dateTime2Int(rj
-						.getLatePickupDateTime());
+				//int ej = (int) DateTimeUtils.dateTime2Int(rj
+				//		.getEarlyPickupDateTime());
+				//int lj = (int) DateTimeUtils.dateTime2Int(rj
+				//		.getLatePickupDateTime());
 
 				boolean ok = ri.getNumberPassengers()
 						+ rj.getNumberPassengers() <= C;
@@ -242,17 +241,18 @@ public class ClusterBasedSolver {
 			int load = 0;
 			ArrayList<SharedTaxiRouteElement> route = new ArrayList<SharedTaxiRouteElement>();
 
-			long earlyI = DateTimeUtils.dateTime2Int(requests[i]
-					.getEarlyPickupDateTime());
-			long lateI = DateTimeUtils.dateTime2Int(requests[i]
-					.getLatePickupDateTime());
-			long expectedPickupTimePointI = (earlyI + lateI) / 2;
+			//long earlyI = DateTimeUtils.dateTime2Int(requests[i].getEarlyPickupDateTime());
+			//long lateI = DateTimeUtils.dateTime2Int(requests[i].getLatePickupDateTime());
+			long expectedPickupTimePointI = DateTimeUtils.dateTime2Int(requests[i].getDepartTime());//(earlyI + lateI) / 2;
+			
 			String expectedPickupTimeI = DateTimeUtils
 					.unixTimeStamp2DateTime(expectedPickupTimePointI);
 
 			SharedTaxiRouteElement eI = new SharedTaxiRouteElement(
 					requests[i].getTicketCode(),
-					requests[i].getPickupAddress(), "-", expectedPickupTimeI,
+					requests[i].getPickupAddress(), 
+					mPickup2LatLng.get(requests[i]).toString(),
+					"-", expectedPickupTimeI,
 					"-", "-", "-","-");
 			load += requests[i].getNumberPassengers();
 			route.add(eI);
@@ -262,11 +262,9 @@ public class ClusterBasedSolver {
 				//eI.setTravelTimeToNext(time2NextI);
 				eI.setDistanceToNext((int)estimated_distances[i][j] + "");
 				
-				long earlyJ = DateTimeUtils.dateTime2Int(requests[j]
-						.getEarlyPickupDateTime());
-				long lateJ = DateTimeUtils.dateTime2Int(requests[j]
-						.getLatePickupDateTime());
-				long expectedPickupTimePointJ = (earlyJ + lateJ) / 2;
+				//long earlyJ = DateTimeUtils.dateTime2Int(requests[j].getEarlyPickupDateTime());
+				//long lateJ = DateTimeUtils.dateTime2Int(requests[j].getLatePickupDateTime());
+				long expectedPickupTimePointJ = DateTimeUtils.dateTime2Int(requests[j].getDepartTime());//(earlyJ + lateJ) / 2;
 
 				/*
 				long suggestedPickupTimePointI = DateTimeUtils
@@ -299,7 +297,8 @@ public class ClusterBasedSolver {
 				
 				SharedTaxiRouteElement eJ = new SharedTaxiRouteElement(
 						requests[j].getTicketCode(),
-						requests[j].getPickupAddress(), 
+						requests[j].getPickupAddress(),
+						mPickup2LatLng.get(requests[j]).toString(),
 						//suggestedPickupTimeJ,
 						"-",
 						//expectedPickupTimeJ, time2NextJ, time2NextJ, "-");
@@ -324,7 +323,20 @@ public class ClusterBasedSolver {
 			SharedTaxiRoute r = new SharedTaxiRoute(aRoute, load, "-");
 			routes[k] = r;
 		}
-		return new SharedTaxiSolution(routes);
+		
+		int nb2Sharings = 0;
+		int nb3Sharings = 0;
+		int nbRequests = 0;
+		for(int i = 0; i < routes.length; i++){
+			if(routes[i].getTicketCodes().length == 2){
+				nb2Sharings++;
+			}else if(routes[i].getTicketCodes().length == 3){
+				nb3Sharings++;
+			}
+			nbRequests += routes[i].getTicketCodes().length;
+		}
+		
+		return new SharedTaxiSolution(nb2Sharings,nb3Sharings,nbRequests,routes);
 	}
 	
 	
@@ -340,16 +352,18 @@ public class ClusterBasedSolver {
 											// destination)
 		for (int i = 0; i < N; i++) {
 			SharedTaxiRequest ri = requests[i];
-			int ei = (int) DateTimeUtils.dateTime2Int(ri
-					.getEarlyPickupDateTime());
-			int li = (int) DateTimeUtils.dateTime2Int(ri
-					.getLatePickupDateTime());
+			int ti = (int) DateTimeUtils.dateTime2Int(ri.getDepartTime());
+			//int ei = (int) DateTimeUtils.dateTime2Int(ri
+			//		.getEarlyPickupDateTime());
+			//int li = (int) DateTimeUtils.dateTime2Int(ri
+			//		.getLatePickupDateTime());
 			for (int j = 0; j < N; j++) {
 				SharedTaxiRequest rj = requests[j];
-				int ej = (int) DateTimeUtils.dateTime2Int(rj
-						.getEarlyPickupDateTime());
-				int lj = (int) DateTimeUtils.dateTime2Int(rj
-						.getLatePickupDateTime());
+				int tj = (int) DateTimeUtils.dateTime2Int(rj.getDepartTime());
+				//int ej = (int) DateTimeUtils.dateTime2Int(rj
+				//		.getEarlyPickupDateTime());
+				//int lj = (int) DateTimeUtils.dateTime2Int(rj
+				//		.getLatePickupDateTime());
 
 				boolean ok = ri.getNumberPassengers()
 						+ rj.getNumberPassengers() <= C;
@@ -372,7 +386,7 @@ public class ClusterBasedSolver {
 				*/
 				
 				maxSharedDistance = 6000;
-				if(DateTimeUtils.isHighTraffic(ri.getEarlyPickupDateTime())){
+				if(DateTimeUtils.isHighTraffic(ri.getDepartTime())){
 					maxSharedDistance = 3000; 
 				}else{
 					
@@ -381,14 +395,14 @@ public class ClusterBasedSolver {
 				ok = ok & estimated_distances[i][j] <= maxSharedDistance;
 				
 				
-				int mi = (ei + li)/2;
-				int mj = (ej + lj)/2;
-				int mij = mj-mi;
+				//int mi = (ei + li)/2;
+				//int mj = (ej + lj)/2;
+				int mij = tj-ti;//mj-mi;
 				
-				if(ri.getTicketCode().equals("TK0016") && rj.getTicketCode().equals("TK0017")){
-					System.out.println("mj - mi = " + mij + ", maxSharedTime = " + maxSharedTime + ", maxSharedDistance = " + maxSharedDistance
-							+ ", distance[i-j] = " + estimated_distances[i][j] + ", ri.pickupDateTime = " + ri.getEarlyPickupDateTime() + ", ok = " + ok);
-				}
+				//if(ri.getTicketCode().equals("TK0016") && rj.getTicketCode().equals("TK0017")){
+			//	System.out.println("mj - mi = " + mij + ", maxSharedTime = " + maxSharedTime + ", maxSharedDistance = " + maxSharedDistance
+			//				+ ", distance[i-j] = " + estimated_distances[i][j] + ", ri.pickupDateTime = " + ri.getEarlyPickupDateTime() + ", ok = " + ok);
+				//}
 				
 				ok = ok & (0 <= mij && mij <= maxSharedTime);// the30 minutes
 				
@@ -496,17 +510,17 @@ public class ClusterBasedSolver {
 			int load = 0;
 			ArrayList<SharedTaxiRouteElement> route = new ArrayList<SharedTaxiRouteElement>();
 
-			long earlyI = DateTimeUtils.dateTime2Int(requests[i]
-					.getEarlyPickupDateTime());
-			long lateI = DateTimeUtils.dateTime2Int(requests[i]
-					.getLatePickupDateTime());
-			long expectedPickupTimePointI = (earlyI + lateI) / 2;
+			//long earlyI = DateTimeUtils.dateTime2Int(requests[i].getEarlyPickupDateTime());
+			//long lateI = DateTimeUtils.dateTime2Int(requests[i].getLatePickupDateTime());
+			long expectedPickupTimePointI = DateTimeUtils.dateTime2Int(requests[i].getDepartTime());//(earlyI + lateI) / 2;
 			String expectedPickupTimeI = DateTimeUtils
 					.unixTimeStamp2DateTime(expectedPickupTimePointI);
 
 			SharedTaxiRouteElement eI = new SharedTaxiRouteElement(
 					requests[i].getTicketCode(),
-					requests[i].getPickupAddress(), "-", expectedPickupTimeI,
+					requests[i].getPickupAddress(),
+					mPickup2LatLng.get(requests[i]).toString(),
+					"-", expectedPickupTimeI,
 					"-", "-", "-","-");
 			load += requests[i].getNumberPassengers();
 			route.add(eI);
@@ -516,11 +530,9 @@ public class ClusterBasedSolver {
 				//eI.setTravelTimeToNext(time2NextI);
 				eI.setDistanceToNext((int)estimated_distances[i][j] + "");
 				
-				long earlyJ = DateTimeUtils.dateTime2Int(requests[j]
-						.getEarlyPickupDateTime());
-				long lateJ = DateTimeUtils.dateTime2Int(requests[j]
-						.getLatePickupDateTime());
-				long expectedPickupTimePointJ = (earlyJ + lateJ) / 2;
+				//long earlyJ = DateTimeUtils.dateTime2Int(requests[j].getEarlyPickupDateTime());
+				//long lateJ = DateTimeUtils.dateTime2Int(requests[j].getLatePickupDateTime());
+				long expectedPickupTimePointJ = DateTimeUtils.dateTime2Int(requests[j].getDepartTime());//(earlyJ + lateJ) / 2;
 
 				/*
 				long suggestedPickupTimePointI = DateTimeUtils
@@ -554,6 +566,7 @@ public class ClusterBasedSolver {
 				SharedTaxiRouteElement eJ = new SharedTaxiRouteElement(
 						requests[j].getTicketCode(),
 						requests[j].getPickupAddress(), 
+						mPickup2LatLng.get(requests[j]).toString(),
 						//suggestedPickupTimeJ,
 						"-",
 						//expectedPickupTimeJ, time2NextJ, time2NextJ, "-");
@@ -578,7 +591,19 @@ public class ClusterBasedSolver {
 			SharedTaxiRoute r = new SharedTaxiRoute(aRoute, load, "-");
 			routes[k] = r;
 		}
-		return new SharedTaxiSolution(routes);
+		int nb2Sharings = 0;
+		int nb3Sharings = 0;
+		int nbRequests = 0;
+		for(int i = 0; i < routes.length; i++){
+			if(routes[i].getTicketCodes().length == 2){
+				nb2Sharings++;
+			}else if(routes[i].getTicketCodes().length == 3){
+				nb3Sharings++;
+			}
+			nbRequests += routes[i].getTicketCodes().length;
+		}
+		
+		return new SharedTaxiSolution(nb2Sharings,nb3Sharings,nbRequests,routes);
 	}
 
 	public String name(){

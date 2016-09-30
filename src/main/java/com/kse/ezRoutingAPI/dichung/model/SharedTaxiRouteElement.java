@@ -3,6 +3,7 @@ package com.kse.ezRoutingAPI.dichung.model;
 public class SharedTaxiRouteElement {
 	private String ticketCode;
 	private String address;
+	private String latlng;
 	private String pickupDateTime;
 	private String expectedPickupDateTime;
 	private String travelTimeToDestination;
@@ -17,18 +18,30 @@ public class SharedTaxiRouteElement {
 
 
 	public SharedTaxiRouteElement(String ticketCode, String address,
+			String latlng,
 			String pickupDateTime, String expectedPickupDateTime,
 			String travelTimeToDestination, String travelTimeToNext,
 			String distanceToNext, String maxTravelTimeToDestinationAllowed) {
 		super();
 		this.ticketCode = ticketCode;
 		this.address = address;
+		this.latlng = latlng;
 		this.pickupDateTime = pickupDateTime;
 		this.expectedPickupDateTime = expectedPickupDateTime;
 		this.travelTimeToDestination = travelTimeToDestination;
 		this.travelTimeToNext = travelTimeToNext;
 		this.distanceToNext = distanceToNext;
 		this.maxTravelTimeToDestinationAllowed = maxTravelTimeToDestinationAllowed;
+	}
+
+
+	public String getLatlng() {
+		return latlng;
+	}
+
+
+	public void setLatlng(String latlng) {
+		this.latlng = latlng;
 	}
 
 
