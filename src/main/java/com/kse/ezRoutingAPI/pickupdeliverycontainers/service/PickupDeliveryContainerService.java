@@ -139,8 +139,13 @@ public class PickupDeliveryContainerService {
 		int maxTravelTime = -1;
 		for(Point p1: clientPoints){
 			for(Point p2: clientPoints){
-				double d = G.estimateDistanceMeter(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+				//double d = G.estimateDistanceMeter(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+				//int t = G.estimateTravelTime(p1.getX(), p1.getY(), p2.getX(), p2.getY(), "driving", SPEED, APPX);
+				
+				double d = G.getApproximateDistanceMeter(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+				
 				int t = G.estimateTravelTime(p1.getX(), p1.getY(), p2.getX(), p2.getY(), "driving", SPEED, APPX);
+				
 				distances.setWeight(p1, p2, d);
 				travelTimes.setWeight(p1, p2, t);
 				if(maxTravelTime < t) maxTravelTime = t;

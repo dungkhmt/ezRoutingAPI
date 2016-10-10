@@ -251,6 +251,7 @@ public class ClusterBasedSolver {
 			SharedTaxiRouteElement eI = new SharedTaxiRouteElement(
 					requests[i].getTicketCode(),
 					requests[i].getPickupAddress(), 
+					requests[i].getDeliveryAddress(),
 					mPickup2LatLng.get(requests[i]).toString(),
 					"-", expectedPickupTimeI,
 					"-", "-", "-","-");
@@ -298,6 +299,7 @@ public class ClusterBasedSolver {
 				SharedTaxiRouteElement eJ = new SharedTaxiRouteElement(
 						requests[j].getTicketCode(),
 						requests[j].getPickupAddress(),
+						requests[j].getDeliveryAddress(),
 						mPickup2LatLng.get(requests[j]).toString(),
 						//suggestedPickupTimeJ,
 						"-",
@@ -320,7 +322,10 @@ public class ClusterBasedSolver {
 			for (int k1 = 0; k1 < route.size(); k1++)
 				aRoute[k1] = route.get(k1);
 
-			SharedTaxiRoute r = new SharedTaxiRoute(aRoute, load, "-");
+			String taxiType = "7-places";
+			if(load <= 4) taxiType = "4-places";
+			
+			SharedTaxiRoute r = new SharedTaxiRoute(aRoute, taxiType, load, "-");
 			routes[k] = r;
 		}
 		
@@ -519,6 +524,7 @@ public class ClusterBasedSolver {
 			SharedTaxiRouteElement eI = new SharedTaxiRouteElement(
 					requests[i].getTicketCode(),
 					requests[i].getPickupAddress(),
+					requests[i].getDeliveryAddress(),
 					mPickup2LatLng.get(requests[i]).toString(),
 					"-", expectedPickupTimeI,
 					"-", "-", "-","-");
@@ -566,6 +572,7 @@ public class ClusterBasedSolver {
 				SharedTaxiRouteElement eJ = new SharedTaxiRouteElement(
 						requests[j].getTicketCode(),
 						requests[j].getPickupAddress(), 
+						requests[j].getDeliveryAddress(),
 						mPickup2LatLng.get(requests[j]).toString(),
 						//suggestedPickupTimeJ,
 						"-",
@@ -588,7 +595,10 @@ public class ClusterBasedSolver {
 			for (int k1 = 0; k1 < route.size(); k1++)
 				aRoute[k1] = route.get(k1);
 
-			SharedTaxiRoute r = new SharedTaxiRoute(aRoute, load, "-");
+			String taxiType = "7-places";
+			if(load <= 4) taxiType = "4-places";
+			
+			SharedTaxiRoute r = new SharedTaxiRoute(aRoute,  taxiType, load, "-");
 			routes[k] = r;
 		}
 		int nb2Sharings = 0;

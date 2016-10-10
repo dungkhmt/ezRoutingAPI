@@ -292,20 +292,21 @@ public class GoogleMapsQuery {
 	// distance is measured in m
 	public double estimateDistanceMeter(double lat1, double lng1, double lat2,
 			double lng2){
-		double d = getDistance(lat1, lng1, lat2, lng2);
-		if(d < 0)
+		//double d = getDistance(lat1, lng1, lat2, lng2);
+		//if(d < 0)
 			return getApproximateDistanceMeter(lat1, lng1, lat2, lng2);
 		
-		return d*1000;
+		//return d*1000;
 	}
 	// speed is measured in m/s
 	public int estimateTravelTime(double lat1, double lng1, double lat2,
 			double lng2, String mode, int speed, double APPX) {
 		double d = computeDistanceHaversine(lat1,lng1,lat2,lng2);
 		int appxt = (int)(d*1000*APPX/speed);// approximate traveltime
-		int t = getTravelTime(lat1,lng1,lat2,lng2, mode);
-		if(t < 0) t = appxt;
-		return t;
+		//int t = getTravelTime(lat1,lng1,lat2,lng2, mode);
+		//if(t < 0) t = appxt;
+		//return t;
+		return appxt;
 	}
 	// speeds are measured in m/s
 	public int estimateTravelTimeWithTimeFrame(double lat1, double lng1, double lat2,

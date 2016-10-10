@@ -2,6 +2,7 @@ package com.kse.ezRoutingAPI.dichung.model;
 
 public class SharedTaxiRoute {
 	private SharedTaxiRouteElement[] ticketCodes;
+	private String taxiType;
 	private int nbPeople;
 	private String arrTimeDestination;
 	
@@ -12,12 +13,25 @@ public class SharedTaxiRoute {
 
 	
 
-	public SharedTaxiRoute(SharedTaxiRouteElement[] ticketCodes, int nbPeople,
+	public SharedTaxiRoute(SharedTaxiRouteElement[] ticketCodes, String taxiType, int nbPeople,
 			String arrTimeDestination) {
 		super();
 		this.ticketCodes = ticketCodes;
+		this.taxiType = taxiType;
 		this.nbPeople = nbPeople;
 		this.arrTimeDestination = arrTimeDestination;
+	}
+
+
+
+	public String getTaxiType() {
+		return taxiType;
+	}
+
+
+
+	public void setTaxiType(String taxiType) {
+		this.taxiType = taxiType;
 	}
 
 
