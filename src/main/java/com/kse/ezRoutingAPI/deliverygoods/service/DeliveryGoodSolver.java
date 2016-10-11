@@ -18,11 +18,32 @@ import localsearch.domainspecific.vehiclerouting.vrp.functions.AccumulatedEdgeWe
 import localsearch.domainspecific.vehiclerouting.vrp.functions.AccumulatedNodeWeightsOnPathVR;
 import localsearch.domainspecific.vehiclerouting.vrp.functions.ConstraintViolationsVR;
 import localsearch.domainspecific.vehiclerouting.vrp.functions.LexMultiFunctions;
+import localsearch.domainspecific.vehiclerouting.vrp.functions.MaxVR;
 import localsearch.domainspecific.vehiclerouting.vrp.functions.TotalCostVR;
 import localsearch.domainspecific.vehiclerouting.vrp.invariants.AccumulatedWeightEdgesVR;
 import localsearch.domainspecific.vehiclerouting.vrp.invariants.AccumulatedWeightNodesVR;
 import localsearch.domainspecific.vehiclerouting.vrp.invariants.EarliestArrivalTimeVR;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyCrossExchangeMoveExplorer;
 import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyKPointsMoveExplorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyOnePointMoveExplorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyOrOptMove1Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyOrOptMove2Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove1Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove2Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove3Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove4Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove5Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove6Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove7Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove8Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove1Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove2Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove3Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove4Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove5Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove6Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove7Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove8Explorer;
 import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.INeighborhoodExplorer;
 import localsearch.domainspecific.vehiclerouting.vrp.search.GenericLocalSearch;
 
@@ -43,12 +64,14 @@ class DeliveryGoodSearch extends GenericLocalSearch{
 	
 	public void generateInitialSolution(){
 		VarRoutesVR XR = mgr.getVarRoutesVR();
+		int k = 0;
 		for(int i = 0; i < req.length; i++){
-			int k = i+1;
+			k = k+1;
 			if(k > XR.getNbRoutes()) k = 1;
 			Point p = XR.prev(XR.endPoint(k));
 			Point delivery = mReq2Delivery.get(req[i]);
 			mgr.performAddOnePoint(delivery, p);
+			System.out.println(name() + "::generateInitialSolution, addPoint " + delivery.ID + ", p = " + p.ID + ", k = " + k + ", XR = " + XR.toString());
 		}
 	}
 	
@@ -126,6 +149,7 @@ public class DeliveryGoodSolver {
 			IFunctionVR disv = new AccumulatedEdgeWeightsOnPathVR(awe, v);
 			accDistance.put(v, disv);
 		}
+		IFunctionVR[] distanceOfRoute = new IFunctionVR[XR.getNbRoutes()];
 		
 		for(int k = 1; k <= XR.getNbRoutes(); k++){
 			Point s = XR.startPoint(k);
@@ -133,6 +157,9 @@ public class DeliveryGoodSolver {
 			Shipper sh = mPoint2Shipper.get(s);
 			IFunctionVR f = accDemand.get(e);
 			CS.post(new Leq(f,sh.getWeight()));
+			
+			
+			distanceOfRoute[k-1] = accDistance.get(e);
 		}
 
 		eat = new EarliestArrivalTimeVR(XR, travelTimes,
@@ -144,8 +171,11 @@ public class DeliveryGoodSolver {
 
 		obj = new TotalCostVR(XR, distances);
 		F = new LexMultiFunctions();
+		IFunctionVR maxDistanceRoute = new MaxVR(distanceOfRoute);
 		F.add(new ConstraintViolationsVR(CS));
-		F.add(obj);
+		F.add(maxDistanceRoute);
+		//F.add(obj);
+		
 
 		mgr.close();
 
@@ -187,7 +217,7 @@ public class DeliveryGoodSolver {
 		 */
 
 		ArrayList<INeighborhoodExplorer> NE = new ArrayList<INeighborhoodExplorer>();
-		/*
+		
 		NE.add(new GreedyOnePointMoveExplorer(XR, F));
 
 		
@@ -212,12 +242,11 @@ public class DeliveryGoodSolver {
 		// NE.add(new GreedyTwoPointsMoveExplorer(XR, F));
 		NE.add(new GreedyCrossExchangeMoveExplorer(XR, F));
 		// NE.add(new GreedyAddOnePointMoveExplorer(XR, F));
-		*/
 		
-		HashSet<Point> mandatory = new HashSet<Point>();
-		for(Point p: clientPoints) mandatory.add(p);
 		
-		NE.add(new GreedyKPointsMoveExplorer(XR, F, 2, mandatory));
+		//HashSet<Point> mandatory = new HashSet<Point>();
+		//for(Point p: clientPoints) mandatory.add(p);
+		//NE.add(new GreedyKPointsMoveExplorer(XR, F, 2, mandatory));
 
 		//GenericLocalSearch se = new GenericLocalSearch(mgr);
 		DeliveryGoodSearch se = new DeliveryGoodSearch(mgr, req, mReq2Delivery);
@@ -226,8 +255,8 @@ public class DeliveryGoodSolver {
 		
 		se.setMaxStable(50);
 
-		se.search(5, 5);
-
+		se.search(1000, 10);
+		//se.generateInitialSolution();
 
 		for(int k = 1; k <= XR.getNbRoutes(); k++){
 			Point s=XR.startPoint(k);

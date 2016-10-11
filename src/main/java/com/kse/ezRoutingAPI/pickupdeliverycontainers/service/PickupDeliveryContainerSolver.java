@@ -69,12 +69,17 @@ class ContainerSearch extends GenericLocalSearch{
 	}
 	
 	public void generateInitialSolution(){
+		int k = 0;
 		for(int i = 0; i < req.length; i++){
-			Point s = XR.startPoint(i+1);
+			k = k+1;
+			if(k > XR.getNbRoutes()) k= 1;
+			Point s = XR.startPoint(k);
 			Point pickup = mReq2Pickup.get(req[i]);
 			Point delivery = mReq2Delivery.get(req[i]);
 			mgr.performAddOnePoint(pickup, s);
 			mgr.performAddOnePoint(delivery, pickup);
+			System.out.println(name() + "::generateInitialSolution, add pickup " + pickup.ID + 
+					", delivery " + delivery.ID + " to route " + k + ", XR = " + XR.toString());
 		}
 	}
 	
@@ -270,11 +275,12 @@ public class PickupDeliveryContainerSolver {
 		// NE.add(new GreedyAddOnePointMoveExplorer(XR, F));
 		*/
 		
+		/*
 		HashSet<Point> mandatory = new HashSet<Point>();
 		for(Point p: clientPoints) mandatory.add(p);
-		
 		NE.add(new GreedyKPointsMoveExplorer(XR, F, 2, mandatory));
-
+		*/
+		
 		//GenericLocalSearch se = new GenericLocalSearch(mgr);
 		ContainerSearch se = new ContainerSearch(mgr, req, mReq2Pickup, mReq2Delivery);
 		se.setNeighborhoodExplorer(NE);
@@ -282,8 +288,8 @@ public class PickupDeliveryContainerSolver {
 		
 		se.setMaxStable(50);
 
-		se.search(5, 5);
-
+		//se.search(5, 5);
+		se.generateInitialSolution();
 		
 
 		for(int k = 1; k <= XR.getNbRoutes(); k++){

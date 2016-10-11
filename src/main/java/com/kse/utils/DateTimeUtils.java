@@ -31,6 +31,9 @@ public class DateTimeUtils {
 		int second = Integer.valueOf(t[2]);
 		*/
 		try{
+			//System.out.println(name() + "::dateTime2Int, dt = " + dt);
+			String[] s = dt.split(":");
+			if(s.length < 3) dt += ":00";// add :ss to hh:mm --> hh:mm::ss
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date date = dateFormat.parse(dt);
 			return date.getTime()/1000;// in seconds
