@@ -90,12 +90,27 @@ public class Excel2JSON {
 				c = r.getCell(4);
 				String deliveryAddr = getStringValue(c);
 				
+				c = r.getCell(5);
+				String pickupPos = "20.983108, 105.830205";
+				if(c != null) pickupPos = getStringValue(c);
+				
+				c = r.getCell(6);
+				String deliveryPos = "21.004091, 105.847178";
+				if(c != null) deliveryPos = getStringValue(c);
+				
+				/*
+				if(pickupPos == null || pickupPos.equals(""))
+					pickupPos = "20.983108, 105.830205";
+				
+				if(deliveryPos == null || deliveryPos.equals(""))
+					deliveryPos = "21.004091, 105.847178";
+				*/	
 				//long udt = DateTimeUtils.dateTime2Int(stdDT);
 				//String earlyPickup = DateTimeUtils.unixTimeStamp2DateTime(udt - DT);
 				//String latePickup = DateTimeUtils.unixTimeStamp2DateTime(udt + DT);
 				//String deliveryAddr = "Noi Bai International Airport, Phu Cuong, Hanoi, Vietnam";
 				
-				c = r.getCell(5);
+				c = r.getCell(7);
 				String sNbPassengers = getStringValue(c);
 				int nbPassengers = (int)Math.floor(Double.valueOf(sNbPassengers));
 				
@@ -105,7 +120,9 @@ public class Excel2JSON {
 				//SharedTaxiRequest req = new SharedTaxiRequest(ticketCode,addr,earlyPickup,latePickup,
 				//		deliveryAddr,"-",(int)Math.floor(Double.valueOf(nbPassengers)));
 				
-				SharedTaxiRequest req = new SharedTaxiRequest(ticketCode,stdDT,chunkName,pickupAddr,deliveryAddr,nbPassengers);
+				SharedTaxiRequest req = new SharedTaxiRequest(ticketCode,stdDT,chunkName,pickupAddr,deliveryAddr,
+						pickupPos, deliveryPos,
+						nbPassengers);
 				
 				requests.add(req);
 				
@@ -144,7 +161,10 @@ public class Excel2JSON {
 			for(int i = 0; i < requests.size(); i++) 
 				R[i] = requests.get(i);
 			int[] cap = new int[]{4,6};
-			SharedTaxiInput input = new SharedTaxiInput(R, cap, 900, 10000, 3600, 5000,3000,1800,900,5,
+			SharedTaxiInput input = new SharedTaxiInput(
+					"Noi Bai International Airport, Phú Cường, Hanoi, Vietnam",
+					"21.218845, 105.804149",
+					R, cap, 900, 10000, 3600, 5000,3000,1800,900,5,
 					1.5,10,5,2,700/36,900);
 			ObjectMapper mapper = new ObjectMapper();
 			String json = mapper.writeValueAsString(input);
@@ -394,7 +414,8 @@ public class Excel2JSON {
 	}
 
 	public static void main(String[] args){
-		String json = excel2JSONdichung("C:/DungPQ/projects/ezRoutingAPI/Export_08092016_2999.xls");
+		//String json = excel2JSONdichung("C:/DungPQ/projects/ezRoutingAPI/Export_08092016_2999.xls");
+		String json = excel2JSONdichung("C:/DungPQ/projects/ezRoutingAPI/Export_08092016_2999_with_LatLng.xls");
 		
 		//String json = excel2JSONPickupDeliveryContainer("C:/DungPQ/projects/ezRoutingAPI/pickup-delivery-container.xlsx");
 		

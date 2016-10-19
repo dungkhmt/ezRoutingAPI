@@ -174,7 +174,7 @@ public class DeliveryGoodSolver {
 		IFunctionVR maxDistanceRoute = new MaxVR(distanceOfRoute);
 		F.add(new ConstraintViolationsVR(CS));
 		F.add(maxDistanceRoute);
-		//F.add(obj);
+		F.add(obj);
 		
 
 		mgr.close();

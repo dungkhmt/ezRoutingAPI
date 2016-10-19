@@ -1544,8 +1544,8 @@ public class DichungService {
 		
 		
 		GoogleMapsQuery G = new GoogleMapsQuery();
-		String noiBaiAirport = "Noi Bai International Airport, Phú Cường, Hanoi, Vietnam";
-		String ll = G.getLatLngFromAddress(noiBaiAirport);
+		String noiBaiAirport = input.getAirportAddress();//"Noi Bai International Airport, Phú Cường, Hanoi, Vietnam";
+		String ll = input.getAirportPos();//G.getLatLngFromAddress(noiBaiAirport);
 		if(ll.equals("") || ll == null) 
 			ll = "21.218845, 105.804149";		
 		LatLng llNoiBaiAirport = new LatLng(ll);//G.getCoordinate(noiBaiAirport);
@@ -1562,10 +1562,8 @@ public class DichungService {
 		boolean[] latlngOK = new boolean[requests.length];
 
 		for (int i = 0; i < requests.length; i++) {
-			String latlngPickup = G.getLatLngFromAddress(requests[i]
-					.getPickupAddress());
-			String latlngDelivery = G.getLatLngFromAddress(requests[i]
-					.getDeliveryAddress());
+			String latlngPickup = requests[i].getPickupPos();//G.getLatLngFromAddress(requests[i].getPickupAddress());
+			String latlngDelivery = requests[i].getDeliveryPos();//G.getLatLngFromAddress(requests[i].getDeliveryAddress());
 
 			System.out.println(name()
 					+ "::computeSharedTaxiHanoiNoiBaiSolution, request "
@@ -1602,7 +1600,10 @@ public class DichungService {
 				.size()];
 		for (int i = 0; i < requestHanoiToNoiBai.size(); i++)
 			R[i] = requestHanoiToNoiBai.get(i);
-		SharedTaxiInput input1 = new SharedTaxiInput(R,
+		SharedTaxiInput input1 = new SharedTaxiInput(
+				input.getAirportAddress(),
+				input.getAirportPos(),
+				R,
 				input.getVehicleCapacities(), 
 				input.getMaxWaitTime(),
 				input.getForbidenStraightDistance(),
@@ -1779,7 +1780,10 @@ public class DichungService {
 				R[i] = requests[cc.get(i)];
 			}
 
-			SharedTaxiInput I = new SharedTaxiInput(R,
+			SharedTaxiInput I = new SharedTaxiInput(
+					input.getAirportAddress(),
+					input.getAirportPos(),
+					R,
 					input.getVehicleCapacities(), input.getMaxWaitTime(),
 					input.getForbidenStraightDistance(),
 					input.getForbidenTimeDistance(), 

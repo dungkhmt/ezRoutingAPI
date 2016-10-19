@@ -70,7 +70,7 @@ public class DichungAPIController {
 	}
 
 
-	@RequestMapping(value = "/shared-taxi-plan-dichung", method = RequestMethod.POST)
+	@RequestMapping(value = "/shared-taxi-plan-dichung-airport", method = RequestMethod.POST)
 	public SharedTaxiSolution computeSharedTaxiSolution(
 			@RequestBody SharedTaxiInput input) {
 		
