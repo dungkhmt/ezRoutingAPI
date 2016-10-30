@@ -222,7 +222,10 @@ public class PickupDeliveryContainerService {
 		HashMap<Point, Integer> serviceDuration = new HashMap<Point, Integer>();
 		HashMap<Point, Integer> latestAllowedArrivalTime = new HashMap<Point, Integer>();
 
+		System.out.println(name() + "::computePickupDeliveryContainerSolution, req.length  = " + req.length);
+		
 		int minUnixTime = (int)DateTimeUtils.dateTime2Int(req[0].getPickupDateTime());
+		
 		for(int i = 0; i < req.length; i++){
 			int t = (int)DateTimeUtils.dateTime2Int(req[i].getPickupDateTime());
 			if(minUnixTime > t) minUnixTime = t;
