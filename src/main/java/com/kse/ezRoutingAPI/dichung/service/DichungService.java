@@ -1733,6 +1733,20 @@ public class DichungService {
 		if(llAirport == null) return new SharedTaxiSolution();
 		String unknownLatLng = "100000,100000";
 
+		for(int i = 0; i < input.getRequests().length; i++){
+			SharedTaxiRequest r = input.getRequests()[i];
+			if(r.getPickupPos().equals("-")){
+				LatLng l = G.getCoordinate(r.getPickupAddress());
+				System.out.println(name() + "::computeSharedTaxiHanoiNoiBaiSolution, query pickup position of " + r.getPickupAddress() + " = " + l.toString());
+				r.setPickupPos(l.lat + "," + l.lng);
+			}
+			if(r.getDeliveryPos().equals("-")){
+				LatLng l = G.getCoordinate(r.getDeliveryAddress());
+				System.out.println(name() + "::computeSharedTaxiHanoiNoiBaiSolution, query delivery position of " + r.getDeliveryAddress() + " = " + l.toString());
+				r.setDeliveryPos(l.lat + "," + l.lng);
+			}
+		}
+		
 		ArrayList<SharedTaxiRequest> requestHanoiToNoiBai = new ArrayList<SharedTaxiRequest>();
 		ArrayList<SharedTaxiRequest> remainRequestHanoiNoiBai = new ArrayList<SharedTaxiRequest>();
 		HashMap<SharedTaxiRequest, LatLng> mPickup2LatLng = new HashMap<SharedTaxiRequest, LatLng>();
