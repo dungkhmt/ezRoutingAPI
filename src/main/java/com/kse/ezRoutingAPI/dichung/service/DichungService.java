@@ -1408,6 +1408,20 @@ public class DichungService {
 		return new SharedTaxiSolution(-1, -1, -1, A);
 	}
 
+	public SharedTaxiRoute[] establishRoutesEachForOneRequest(ArrayList<SharedTaxiRequest> req){
+		SharedTaxiRoute[] routes = new SharedTaxiRoute[req.size()];
+		for(int i = 0; i < req.size(); i++)
+			routes[i] = establishRouteForOneRequest(req.get(i),req.get(i).getPickupPos());
+		return routes;
+	}
+	public SharedTaxiRoute[] concat(SharedTaxiRoute[] A, SharedTaxiRoute[] B){
+		SharedTaxiRoute[] C = new SharedTaxiRoute[A.length + B.length];
+		for(int i = 0; i < A.length; i++)
+			C[i] = A[i];
+		for(int i = 0; i < B.length; i++)
+			C[i + A.length] = B[i];
+		return C;
+	}
 	public SharedTaxiRoute establishRouteForOneRequest(SharedTaxiRequest req,
 			String latlng) {
 		SharedTaxiRouteElement e = establishRouteElementForOneRequest(req,
@@ -1981,7 +1995,15 @@ public class DichungService {
 				llAirport, input.getMaxWaitTimeAirport(),
 				input.getMaxStandardSharingDistance(), maxNbPlaces);
 
-		SharedTaxiSolution solutionToAndFromAirport = matchReturnTrips(solutionToAirport.getRoutes(), RFA, 1800);
+		SharedTaxiRoute[] routesPrivateToAirport = establishRoutesEachForOneRequest(requestPrivateToAirport);
+		SharedTaxiRoute[] routesPrivateFromAirport = establishRoutesEachForOneRequest(requestPrivateFromAirport);
+		
+		SharedTaxiRoute[] routesToAirport = concat(routesPrivateToAirport, solutionToAirport.getRoutes());
+		SharedTaxiRoute[] routesFromAirport = concat(routesPrivateFromAirport, RFA);
+		
+		
+		//SharedTaxiSolution solutionToAndFromAirport = matchReturnTrips(solutionToAirport.getRoutes(), RFA, 1800);
+		SharedTaxiSolution solutionToAndFromAirport = matchReturnTrips(routesToAirport, routesFromAirport, 1800);
 
 		SharedTaxiRoute[] remainRoutes = new SharedTaxiRoute[remainPrivateRequests.size() + remainShareRequests.size()];
 		for(int i = 0;i < remainPrivateRequests.size(); i++){
