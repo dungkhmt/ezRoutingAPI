@@ -99,10 +99,15 @@ public class DichungAPIController {
 			}
 			
 			ObjectMapper mapper = new ObjectMapper();
-			String json = mapper.writeValueAsString(sol);
+			String jsonsol = mapper.writeValueAsString(sol);
+			String jsoninput = mapper.writeValueAsString(input);
+			
+			out.println("input: JSON");
+			out.println(jsoninput);
 			
 			out.println("solution: JSON");
-			out.println(json);
+			out.println(jsonsol);
+			
 			out.close();
 		}catch(Exception ex){
 			ex.printStackTrace();

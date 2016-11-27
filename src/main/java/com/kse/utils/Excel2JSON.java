@@ -122,7 +122,7 @@ public class Excel2JSON {
 				
 				SharedTaxiRequest req = new SharedTaxiRequest(ticketCode,stdDT,chunkName,pickupAddr,deliveryAddr,
 						pickupPos, deliveryPos,
-						nbPassengers);
+						nbPassengers,1,100);
 				
 				requests.add(req);
 				
@@ -164,7 +164,7 @@ public class Excel2JSON {
 			SharedTaxiInput input = new SharedTaxiInput(
 					"Noi Bai International Airport, Phú Cường, Hanoi, Vietnam",
 					"21.218845, 105.804149",
-					R, cap, 900, 10000, 3600, 5000,3000,1800,900,5,
+					R, cap, 200, 900, 10000, 3600, 5000,3000,1800,900,5,
 					1.5,10,5,2,700/36,900);
 			ObjectMapper mapper = new ObjectMapper();
 			String json = mapper.writeValueAsString(input);

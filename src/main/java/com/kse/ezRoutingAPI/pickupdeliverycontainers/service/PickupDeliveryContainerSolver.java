@@ -14,6 +14,7 @@ import localsearch.domainspecific.vehiclerouting.vrp.constraints.eq.Eq;
 import localsearch.domainspecific.vehiclerouting.vrp.constraints.leq.Leq;
 import localsearch.domainspecific.vehiclerouting.vrp.constraints.timewindows.CEarliestArrivalTimeVR;
 import localsearch.domainspecific.vehiclerouting.vrp.entities.ArcWeightsManager;
+import localsearch.domainspecific.vehiclerouting.vrp.entities.LexMultiValues;
 import localsearch.domainspecific.vehiclerouting.vrp.entities.NodeWeightsManager;
 import localsearch.domainspecific.vehiclerouting.vrp.entities.Point;
 import localsearch.domainspecific.vehiclerouting.vrp.functions.AccumulatedEdgeWeightsOnPathVR;
@@ -26,6 +27,9 @@ import localsearch.domainspecific.vehiclerouting.vrp.functions.TotalCostVR;
 import localsearch.domainspecific.vehiclerouting.vrp.invariants.AccumulatedWeightEdgesVR;
 import localsearch.domainspecific.vehiclerouting.vrp.invariants.AccumulatedWeightNodesVR;
 import localsearch.domainspecific.vehiclerouting.vrp.invariants.EarliestArrivalTimeVR;
+import localsearch.domainspecific.vehiclerouting.vrp.moves.IVRMove;
+import localsearch.domainspecific.vehiclerouting.vrp.moves.KPointsMove;
+import localsearch.domainspecific.vehiclerouting.vrp.moves.TwoOptMove2;
 import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyCrossExchangeMoveExplorer;
 import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyKPointsMoveExplorer;
 import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyOnePointMoveExplorer;
@@ -49,10 +53,106 @@ import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.Gre
 import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove8Explorer;
 import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.INeighborhoodExplorer;
 import localsearch.domainspecific.vehiclerouting.vrp.search.GenericLocalSearch;
+import localsearch.domainspecific.vehiclerouting.vrp.search.ISearch;
+import localsearch.domainspecific.vehiclerouting.vrp.search.Neighborhood;
 
 import com.kse.ezRoutingAPI.pickupdeliverycontainers.model.PickupDeliveryRequest;
 import com.kse.ezRoutingAPI.pickupdeliverycontainers.model.PickupDeliverySolution;
 import com.kse.ezRoutingAPI.pickupdeliverycontainers.model.Truck;
+
+class PickupDeliveryExplorer implements INeighborhoodExplorer {
+	private VRManager mgr;
+	private VarRoutesVR XR;
+	private ISearch search;
+	private LexMultiFunctions F;
+	private LexMultiValues bestValue;
+	private boolean firstImprovement = true;
+	
+	private PickupDeliveryRequest[] req;
+	private HashMap<PickupDeliveryRequest, Point> mReq2Pickup;
+	private HashMap<PickupDeliveryRequest, Point> mReq2Delivery;
+	
+	public PickupDeliveryExplorer(VarRoutesVR XR, LexMultiFunctions F, PickupDeliveryRequest[] req, HashMap<PickupDeliveryRequest, Point> mReq2Pickup, 
+			HashMap<PickupDeliveryRequest, Point> mReq2Delivery) {
+		this.XR = XR;
+		this.F = F;
+		this.mgr = XR.getVRManager();
+		this.req = req;
+		this.mReq2Delivery = mReq2Delivery;
+		this.mReq2Pickup = mReq2Pickup;
+	}
+	public PickupDeliveryExplorer(VarRoutesVR XR, LexMultiFunctions F, boolean firstImprovement) {
+		this.XR = XR;
+		this.F = F;
+		this.mgr = XR.getVRManager();
+		this.firstImprovement = firstImprovement;
+	}
+	
+	public PickupDeliveryExplorer(ISearch search, VRManager mgr, LexMultiFunctions F){
+		this.search = search;
+		this.mgr = mgr;
+		this.XR = mgr.getVarRoutesVR();
+		this.F = F;
+		this.bestValue = search.getIncumbentValue();
+	}
+	public String name(){
+		return "PickupDeliveryExplorer";
+	}
+	public void exploreNeighborhood(Neighborhood N, LexMultiValues bestEval) {
+		// TODO Auto-generated method stub 
+		
+		
+		if(firstImprovement && N.hasImprovement()){
+			System.out.println(name() + "::exploreNeighborhood, has improvement --> RETURN");
+			return;
+		}
+		ArrayList<Point> P = new ArrayList<Point>();
+		for(int i = 0; i < req.length; i++){
+			Point d = mReq2Delivery.get(req[i]);
+			P.add(d);
+		}
+		for(int k = 1; k <= XR.getNbRoutes(); k++){
+			P.add(XR.startPoint(k));
+		}
+		
+		for(int i = 0; i < req.length; i++){
+			Point p = mReq2Pickup.get(req[i]);
+			Point d = mReq2Delivery.get(req[i]);
+			ArrayList<Point> X = new ArrayList<Point>();
+			X.add(p);
+			X.add(d);
+			
+			//for(int k = 1; k <= XR.getNbRoutes(); k++){
+			//	for(Point x = XR.startPoint(k); x != XR.endPoint(k); x = XR.next(x)){
+			//		for(Point y = XR.next(x); y != XR.endPoint(k); y = XR.next(y)){
+			for(Point x: P){
+				Point y = p;
+						if(x == d) continue;
+						//if(x == p || y == d) continue;
+						//if(XR.next(x) == p || XR.next(y) == d) continue;
+						ArrayList<Point> Y = new ArrayList<Point>();
+						Y.add(x);
+						Y.add(y);
+						
+						LexMultiValues eval = F.evaluateKPointsMove(X, Y);
+						//System.out.println("PickupDeliveryExplorer::exploreNeighborhood, eval = " + eval.toString());
+						if (eval.lt(bestEval)){
+							N.clear();
+							N.add(new KPointsMove(mgr, eval, X, Y));
+							bestEval.set(eval);
+						} else if (eval.eq(bestEval)) {
+							N.add(new KPointsMove(mgr, eval, X, Y));
+						}
+					}
+				//}
+			//}
+		}
+	}
+	
+	public void performMove(IVRMove m){
+		//DO NOTHING
+	}
+}
 
 class ContainerSearch extends GenericLocalSearch{
 	private PickupDeliveryRequest[] req;
@@ -70,6 +170,9 @@ class ContainerSearch extends GenericLocalSearch{
 	
 	public void generateInitialSolution(){
 		int k = 0;
+		//for(Point p: XR.getClientPoints()){
+			mgr.performRemoveAllClientPoints();
+		//}
 		for(int i = 0; i < req.length; i++){
 			k = k+1;
 			if(k > XR.getNbRoutes()) k= 1;
@@ -82,7 +185,72 @@ class ContainerSearch extends GenericLocalSearch{
 					", delivery " + delivery.ID + " to route " + k + ", XR = " + XR.toString());
 		}
 	}
-	
+	public void restart(){
+		
+		//XR.setRandom();
+		//generateInitialSolution();
+		generateInitialSolution();
+		System.out.println(name() + "::restart............, XR = " + XR.toString());
+		if(F.getValues().lt(bestValue)){
+			updateBest();
+		}
+		nic = 0;
+	}
+	/*
+	public void search(int maxIter, int maxTime){
+		generateInitialSolution();
+		double t0 = System.currentTimeMillis();
+		for(int it = 1; it <= maxIter; it++){
+			double t= System.currentTimeMillis();
+			t = t-t0;
+			t = t*0.001;
+			if(t > maxTime) break;
+			
+			// explore neighborhood
+			Point sel_pickup = null;
+			Point sel_delivery = null;
+			LexMultiValues bestEval = new LexMultiValues();
+			//bestEval.fill(F.size(), CBLSVR.MAX_INT);
+			bestEval.fill(F.size(), 0);
+			
+			Neighborhood N = new Neighborhood(mgr);
+			
+			for(int i = 0; i < req.length; i++){
+				Point p = mReq2Pickup.get(req[i]);
+				Point d = mReq2Delivery.get(req[i]);
+				ArrayList<Point> X = new ArrayList<Point>();
+				X.add(p);
+				X.add(d);
+				
+				for(int k = 1; k <= XR.getNbRoutes(); k++){
+					for(Point x = XR.startPoint(k); x != XR.endPoint(k); x = XR.next(x)){
+						for(Point y = XR.next(x); y != XR.endPoint(k); y = XR.next(y)){
+							if(x == p || x == d || y == p || y == d) continue;
+							ArrayList<Point> Y = new ArrayList<Point>();
+							Y.add(x);
+							Y.add(y);
+							
+							LexMultiValues eval = F.evaluateKPointsMove(X, Y);
+							if (eval.lt(bestEval)){
+								N.clear();
+								N.add(new KPointsMove(mgr, eval, X, Y));
+								bestEval.set(eval);
+							} else if (eval.eq(bestEval)) {
+								N.add(new KPointsMove(mgr, eval, X, Y));
+							}
+						}
+					}
+				}
+			}
+			
+			if(N.hasMove()){
+				IVRMove m = N.getAMove();
+				
+			}
+			
+		}
+	}
+	*/
 }
 public class PickupDeliveryContainerSolver {
 	
@@ -248,10 +416,11 @@ public class PickupDeliveryContainerSolver {
 		 */
 
 		ArrayList<INeighborhoodExplorer> NE = new ArrayList<INeighborhoodExplorer>();
+
+		NE.add(new PickupDeliveryExplorer(XR, F, req,mReq2Pickup,mReq2Delivery));
+		
 		/*
 		NE.add(new GreedyOnePointMoveExplorer(XR, F));
-
-		
 		NE.add(new GreedyOrOptMove1Explorer(XR, F));
 		NE.add(new GreedyOrOptMove2Explorer(XR, F));
 		NE.add(new GreedyThreeOptMove1Explorer(XR, F));
@@ -288,8 +457,8 @@ public class PickupDeliveryContainerSolver {
 		
 		se.setMaxStable(50);
 
-		//se.search(5, 5);
-		se.generateInitialSolution();
+		se.search(1000, 10);
+		//se.generateInitialSolution();
 		
 
 		for(int k = 1; k <= XR.getNbRoutes(); k++){

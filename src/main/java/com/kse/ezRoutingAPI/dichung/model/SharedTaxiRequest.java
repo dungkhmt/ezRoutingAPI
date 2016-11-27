@@ -9,10 +9,15 @@ public class SharedTaxiRequest {
 	private String pickupPos;
 	private String deliveryPos;
 	private int numberPassengers;
+	private int shared;// = 1 if the customer is willing to share a ride
+	private int price;// the price customer will pay for the ordered trip
+	
+	
+	
 	public SharedTaxiRequest(String ticketCode, String departTime,
 			String chungName, String pickupAddress, String deliveryAddress,
-			String pickupPos, String deliveryPos,
-			int numberPassengers) {
+			String pickupPos, String deliveryPos, int numberPassengers,
+			int shared, int price) {
 		super();
 		this.ticketCode = ticketCode;
 		this.departTime = departTime;
@@ -22,9 +27,31 @@ public class SharedTaxiRequest {
 		this.pickupPos = pickupPos;
 		this.deliveryPos = deliveryPos;
 		this.numberPassengers = numberPassengers;
+		this.shared = shared;
+		this.price = price;
 	}
-	
-	
+
+
+	public int getShared() {
+		return shared;
+	}
+
+
+	public void setShared(int shared) {
+		this.shared = shared;
+	}
+
+
+	public int getPrice() {
+		return price;
+	}
+
+
+	public void setPrice(int price) {
+		this.price = price;
+	}
+
+
 	public String getPickupPos() {
 		return pickupPos;
 	}

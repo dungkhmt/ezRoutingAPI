@@ -4,6 +4,7 @@ public class SharedTaxiInput {
 	private String airportAddress;
 	private String airportPos;
 	private SharedTaxiRequest[] requests;
+	private int minimumSharedPrice;// minimum total revenue for sharing ride
 	private int[] vehicleCapacities;
 
 	// algorithm parameters
@@ -60,6 +61,7 @@ public class SharedTaxiInput {
 													String airportPos,
 													SharedTaxiRequest[] requests,
 													int[] vehicleCapacities,
+													int minimumSharedPrice,
 													int maxWaitTime,
 													int forbidenStraightDistance,
 													int forbidenTimeDistance,
@@ -79,6 +81,7 @@ public class SharedTaxiInput {
 												this.airportPos = airportPos;
 												this.requests = requests;
 												this.vehicleCapacities = vehicleCapacities;
+												this.minimumSharedPrice = minimumSharedPrice;
 												this.maxWaitTime = maxWaitTime;
 												this.forbidenStraightDistance = forbidenStraightDistance;
 												this.forbidenTimeDistance = forbidenTimeDistance;
@@ -114,6 +117,17 @@ public class SharedTaxiInput {
 
 	public void setAirportPos(String airportPos) {
 		this.airportPos = airportPos;
+	}
+
+
+	
+	public int getMinimumSharedPrice() {
+		return minimumSharedPrice;
+	}
+
+
+	public void setMinimumSharedPrice(int minimumSharedPrice) {
+		this.minimumSharedPrice = minimumSharedPrice;
 	}
 
 

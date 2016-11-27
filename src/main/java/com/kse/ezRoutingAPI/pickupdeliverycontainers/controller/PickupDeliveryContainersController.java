@@ -13,10 +13,13 @@ import com.kse.ezRoutingAPI.pickupdeliverycontainers.service.PickupDeliveryConta
 @RestController
 public class PickupDeliveryContainersController {
 
+	public String name(){
+		return "PickupDeliveryContainersController";
+	}
 	@RequestMapping(value = "/pickup-delivery-containers-plan", method = RequestMethod.POST)
 	public PickupDeliverySolution computePickupDeliveryContainerSolution(
 			@RequestBody PickupDeliveryInput input) {
-		
+		System.out.println(name() + "::computePickupDeliveryContainerSolution");
 		PickupDeliveryContainerService service = new PickupDeliveryContainerService();
 		return service.computePickupDeliveryContainerSolution(input);
 		

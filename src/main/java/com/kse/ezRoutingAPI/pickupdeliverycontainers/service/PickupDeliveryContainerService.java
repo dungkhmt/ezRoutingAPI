@@ -483,7 +483,10 @@ public class PickupDeliveryContainerService {
 		for(int i= 0; i < routes.size(); i++){
 			arrRoutes[i] = routes.get(i);
 		}
-		return new PickupDeliverySolution(arrRoutes);
+		
+		double violations = solver.F.getValues().get(0);
+		double traveldistance = solver.F.getValues().get(1);
+		return new PickupDeliverySolution(violations, traveldistance,arrRoutes);
 		
 	}
 	

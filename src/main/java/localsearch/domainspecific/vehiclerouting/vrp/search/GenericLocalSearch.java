@@ -159,7 +159,7 @@ public class GenericLocalSearch implements ISearch {
 				}
 			} else {
 				System.out.println(name()
-						+ "::search --> no move available, break");
+						+ "::search --> no move available, restart");
 				//break;
 				restart();
 			}

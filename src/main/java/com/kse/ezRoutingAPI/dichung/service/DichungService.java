@@ -115,65 +115,51 @@ public class DichungService {
 	}
 
 	/*
-	public SharedTaxiSolution establishSharedTaxiSolution(
-			ArrayList<SharedRoute> shared_routes, SharedTaxiRequest[] requests,
-			HashMap<SharedTaxiRequest, Integer> shortestTravelTime,
-			int[][] travelTimes) {
+	 * public SharedTaxiSolution establishSharedTaxiSolution(
+	 * ArrayList<SharedRoute> shared_routes, SharedTaxiRequest[] requests,
+	 * HashMap<SharedTaxiRequest, Integer> shortestTravelTime, int[][]
+	 * travelTimes) {
+	 * 
+	 * long[] earlyTime = new long[requests.length]; long[] lateTime = new
+	 * long[requests.length]; for (int i = 0; i < requests.length; i++) { long
+	 * departTime = DateTimeUtils.dateTime2Int(requests[i] .getDepartTime());
+	 * earlyTime[i] = departTime - DELTA_TIME;//
+	 * DateTimeUtils.dateTime2Int(requests[i].getEarlyPickupDateTime());
+	 * lateTime[i] = departTime + DELTA_TIME;//
+	 * /DateTimeUtils.dateTime2Int(requests[i].getLatePickupDateTime()); }
+	 * 
+	 * SharedTaxiRoute[] routes = new SharedTaxiRoute[shared_routes.size()]; for
+	 * (int k = 0; k < shared_routes.size(); k++) { SharedRoute sr =
+	 * shared_routes.get(k); int load = 0; ArrayList<SharedTaxiRouteElement>
+	 * route = new ArrayList<SharedTaxiRouteElement>(); long[]
+	 * suggestedPickupTimePoint = new long[sr.size()]; int[] time2Destination =
+	 * new int[sr.size()]; long earliestArrivalTime = earlyTime[sr.get(0)];
+	 * 
+	 * for (int idx = 0; idx < sr.size() - 1; idx++) { int I = sr.get(idx); int
+	 * J = sr.get(idx + 1);
+	 * 
+	 * suggestedPickupTimePoint[idx] = DateTimeUtils
+	 * .computeStartTimePoint(earliestArrivalTime, lateTime[I],
+	 * travelTimes[I][J], earlyTime[J], lateTime[J]);
+	 * 
+	 * earliestArrivalTime = suggestedPickupTimePoint[idx] + travelTimes[I][J];
+	 * 
+	 * } suggestedPickupTimePoint[sr.size() - 1] = earliestArrivalTime;
+	 * time2Destination[sr.size() - 1] = shortestTravelTime
+	 * .get(requests[sr.getLast()]); for (int idx = sr.size() - 1; idx > 0;
+	 * idx++) { int J = sr.get(idx); int I = sr.get(idx - 1);
+	 * time2Destination[idx - 1] = time2Destination[idx] + travelTimes[I][J]; }
+	 * 
+	 * SharedTaxiRouteElement[] aRoute = new SharedTaxiRouteElement[route
+	 * .size()]; for (int k1 = 0; k1 < route.size(); k1++) aRoute[k1] =
+	 * route.get(k1);
+	 * 
+	 * SharedTaxiRoute r = new SharedTaxiRoute(aRoute, load, "-"); routes[k] =
+	 * r; } return new SharedTaxiSolution(-1,-1,-1,routes);
+	 * 
+	 * }
+	 */
 
-		long[] earlyTime = new long[requests.length];
-		long[] lateTime = new long[requests.length];
-		for (int i = 0; i < requests.length; i++) {
-			long departTime = DateTimeUtils.dateTime2Int(requests[i]
-					.getDepartTime());
-			earlyTime[i] = departTime - DELTA_TIME;// DateTimeUtils.dateTime2Int(requests[i].getEarlyPickupDateTime());
-			lateTime[i] = departTime + DELTA_TIME;// /DateTimeUtils.dateTime2Int(requests[i].getLatePickupDateTime());
-		}
-
-		SharedTaxiRoute[] routes = new SharedTaxiRoute[shared_routes.size()];
-		for (int k = 0; k < shared_routes.size(); k++) {
-			SharedRoute sr = shared_routes.get(k);
-			int load = 0;
-			ArrayList<SharedTaxiRouteElement> route = new ArrayList<SharedTaxiRouteElement>();
-			long[] suggestedPickupTimePoint = new long[sr.size()];
-			int[] time2Destination = new int[sr.size()];
-			long earliestArrivalTime = earlyTime[sr.get(0)];
-
-			for (int idx = 0; idx < sr.size() - 1; idx++) {
-				int I = sr.get(idx);
-				int J = sr.get(idx + 1);
-
-				suggestedPickupTimePoint[idx] = DateTimeUtils
-						.computeStartTimePoint(earliestArrivalTime,
-								lateTime[I], travelTimes[I][J], earlyTime[J],
-								lateTime[J]);
-
-				earliestArrivalTime = suggestedPickupTimePoint[idx]
-						+ travelTimes[I][J];
-	
-			}
-			suggestedPickupTimePoint[sr.size() - 1] = earliestArrivalTime;
-			time2Destination[sr.size() - 1] = shortestTravelTime
-					.get(requests[sr.getLast()]);
-			for (int idx = sr.size() - 1; idx > 0; idx++) {
-				int J = sr.get(idx);
-				int I = sr.get(idx - 1);
-				time2Destination[idx - 1] = time2Destination[idx]
-						+ travelTimes[I][J];
-			}
-
-			SharedTaxiRouteElement[] aRoute = new SharedTaxiRouteElement[route
-					.size()];
-			for (int k1 = 0; k1 < route.size(); k1++)
-				aRoute[k1] = route.get(k1);
-
-			SharedTaxiRoute r = new SharedTaxiRoute(aRoute, load, "-");
-			routes[k] = r;
-		}
-		return new SharedTaxiSolution(-1,-1,-1,routes);
-
-	}
-	*/
-	
 	public SharedTaxiSolution computeSharedTaxiSolutionCluster(
 			SharedTaxiInput input,
 			HashMap<SharedTaxiRequest, LatLng> mPickup2LatLng,
@@ -225,12 +211,14 @@ public class DichungService {
 			// lld.lat, lld.lng, "driving",
 			// requests[i].getEarlyPickupDateTime(), STD_SPEED,
 			// HIGH_TRAFFIC_SPEED);
-			
-			//int d = (int) G.estimateDistanceMeter(llp.lat, llp.lng, lld.lat, lld.lng);
-			int d = (int) G.getApproximateDistanceMeter(llp.lat, llp.lng, lld.lat, lld.lng);
-			
-			int t = (int)Math.floor(d/(SPEED_TO_AIRPORT*1000/3600)); 
-			
+
+			// int d = (int) G.estimateDistanceMeter(llp.lat, llp.lng, lld.lat,
+			// lld.lng);
+			int d = (int) G.getApproximateDistanceMeter(llp.lat, llp.lng,
+					lld.lat, lld.lng);
+
+			int t = (int) Math.floor(d / (SPEED_TO_AIRPORT * 1000 / 3600));
+
 			shortestTravelTime.put(requests[i], t);
 
 		}
@@ -249,10 +237,13 @@ public class DichungService {
 				// li.lng, lj.lat, lj.lng, "driving",
 				// ri.getEarlyPickupDateTime(), STD_SPEED, HIGH_TRAFFIC_SPEED);
 
-				//estimated_distances[i][j] = G.estimateDistanceMeter(li.lat, li.lng, lj.lat, lj.lng);
-				estimated_distances[i][j] = G.getApproximateDistanceMeter(li.lat, li.lng, lj.lat, lj.lng);
-				
-				travelTimes[i][j] = (int) (estimated_distances[i][j] / input.getStdSpeed());
+				// estimated_distances[i][j] = G.estimateDistanceMeter(li.lat,
+				// li.lng, lj.lat, lj.lng);
+				estimated_distances[i][j] = G.getApproximateDistanceMeter(
+						li.lat, li.lng, lj.lat, lj.lng);
+
+				travelTimes[i][j] = (int) (estimated_distances[i][j] / input
+						.getStdSpeed());
 
 				// System.out.println(name()
 				// + "::computeSharedTaxiSolutionCluster, travelTimes["
@@ -270,9 +261,11 @@ public class DichungService {
 		double maxSharedDistance = 6000;// the distance of pickup points of
 										// shared a ride requests cannot exceed
 										// 6000m
-		double maxSharedTime = input.getMaxWaitTime();//1800;// the difference between pickup time of
-									// shared a ride requests cannot exceed 30
-									// minutes;
+		double maxSharedTime = input.getMaxWaitTime();// 1800;// the difference
+														// between pickup time
+														// of
+		// shared a ride requests cannot exceed 30
+		// minutes;
 
 		boolean[][] m = new boolean[N][N];// m[i][j] = 1 if request i can be
 											// followed requests j (i -> j ->
@@ -309,9 +302,10 @@ public class DichungService {
 				 * travelTimes[j][i] + shortestTravelTime.get(ri);
 				 */
 
-				maxSharedDistance = input.getMaxStandardSharingDistance();//6000;
+				maxSharedDistance = input.getMaxStandardSharingDistance();// 6000;
 				if (DateTimeUtils.isHighTraffic(ri.getDepartTime())) {
-					maxSharedDistance = input.getMaxHighTrafficSharingDistance();// 3000;
+					maxSharedDistance = input
+							.getMaxHighTrafficSharingDistance();// 3000;
 				} else {
 
 				}
@@ -334,6 +328,10 @@ public class DichungService {
 				// }
 
 				ok = ok & (0 <= mij && mij <= maxSharedTime);// the30 minutes
+
+				ok = ok
+						& (ri.getPrice() + rj.getPrice() >= input
+								.getMinimumSharedPrice());
 
 				// ok = ok & estimated_distances[i][j] +
 				// shortestTravelTime.get(rj) < estimated_distances[j][i] +
@@ -460,9 +458,8 @@ public class DichungService {
 			SharedTaxiRouteElement eI = new SharedTaxiRouteElement(
 					requests[i].getTicketCode(),
 					requests[i].getPickupAddress(),
-					requests[i].getDeliveryAddress(),
-					mPickup2LatLng.get(requests[i]).toString(),
-					"-", expectedPickupTimeI,
+					requests[i].getDeliveryAddress(), mPickup2LatLng.get(
+							requests[i]).toString(), "-", expectedPickupTimeI,
 					"-", "-", "-", "-");
 			load += requests[i].getNumberPassengers();
 			route.add(eI);
@@ -472,8 +469,7 @@ public class DichungService {
 				// DateTimeUtils.second2HMS(travelTimes[i][j]);
 				// eI.setTravelTimeToNext(time2NextI);
 				eI.setDistanceToNext((int) estimated_distances[i][j] + "");
-				
-				
+
 				// long earlyJ =
 				// DateTimeUtils.dateTime2Int(requests[j].getEarlyPickupDateTime());
 				// long lateJ =
@@ -510,32 +506,34 @@ public class DichungService {
 				 * .second2HMS(travelTimes[i][j] + T);
 				 * eI.setTravelTimeToDestination(time2DestinationI);
 				 */
-				
+
 				SharedTaxiRouteElement eJ = new SharedTaxiRouteElement(
 						requests[j].getTicketCode(),
 						requests[j].getPickupAddress(),
-						requests[j].getDeliveryAddress(),
-						mPickup2LatLng.get(requests[j]).toString(),
+						requests[j].getDeliveryAddress(), mPickup2LatLng.get(
+								requests[j]).toString(),
 						// suggestedPickupTimeJ,
 						"-",
 						// expectedPickupTimeJ, time2NextJ, time2NextJ, "-");
 						expectedPickupTimeJ, "-", "-", "-", "-");
-				
+
 				long t = shortestTravelTime.get(requests[j]);
 				t = t + DateTimeUtils.dateTime2Int(requests[j].getDepartTime());
-				String travelTimeToDestination = DateTimeUtils.unixTimeStamp2DateTime(t);
-				
+				String travelTimeToDestination = DateTimeUtils
+						.unixTimeStamp2DateTime(t);
+
 				eJ.setTravelTimeToDestination(travelTimeToDestination);
-				
+
 				load += requests[j].getNumberPassengers();
 				route.add(eJ);
 			} else {
 				long t = shortestTravelTime.get(requests[i]);
 				t = t + DateTimeUtils.dateTime2Int(requests[i].getDepartTime());
-				String travelTimeToDestination = DateTimeUtils.unixTimeStamp2DateTime(t);
-				
+				String travelTimeToDestination = DateTimeUtils
+						.unixTimeStamp2DateTime(t);
+
 				eI.setTravelTimeToDestination(travelTimeToDestination);
-				
+
 				//
 				/*
 				 * int T = shortestTravelTime.get(requests[i]); String
@@ -550,16 +548,19 @@ public class DichungService {
 				aRoute[k1] = route.get(k1);
 
 			String taxiType = "7-places";
-			if(load <= 4) taxiType = "5-palces";
+			if (load <= 4)
+				taxiType = "5-palces";
 			SharedTaxiRoute r = new SharedTaxiRoute(aRoute, taxiType, load, "-");
 			routes[k] = r;
 		}
 		int nb2Sharings = 0;
-		for(int i = 0; i < routes.length; i++){
-			if(routes[i].getTicketCodes().length == 2) nb2Sharings ++;
+		for (int i = 0; i < routes.length; i++) {
+			if (routes[i].getTicketCodes().length == 2)
+				nb2Sharings++;
 		}
 		int nb3Sharings = 0;
-		return new SharedTaxiSolution(nb2Sharings, nb3Sharings,requests.length,routes);
+		return new SharedTaxiSolution(nb2Sharings, nb3Sharings,
+				requests.length, routes);
 	}
 
 	public SharedTaxiSolution computeSharedTaxiSolutionCluster0(
@@ -879,10 +880,8 @@ public class DichungService {
 					int T = (int) eat.getEarliestArrivalTime(t)
 							- (int) eat.getEarliestArrivalTime(p);// (int)mPoint2TravelTime2Destination.get(p).getValue();
 					e[i] = new SharedTaxiRouteElement(req.getTicketCode(),
-							req.getPickupAddress(), 
-							req.getDeliveryAddress(),
-							mPickup2LatLng.get(req).toString(),
-							arrDT,
+							req.getPickupAddress(), req.getDeliveryAddress(),
+							mPickup2LatLng.get(req).toString(), arrDT,
 							// req.getLatePickupDateTime(), "-", "-", "-","-");
 							req.getDepartTime(), "-", "-", "-", "-");
 				}
@@ -890,10 +889,11 @@ public class DichungService {
 				arrTime2Destination += minTimePoint - dt;
 				String time2Destination = DateTimeUtils
 						.unixTimeStamp2DateTime(arrTime2Destination);
-				
+
 				String taxiType = "7-places";
-				if(load <= 4) taxiType = "5-places";
-				
+				if (load <= 4)
+					taxiType = "5-places";
+
 				SharedTaxiRoute r = new SharedTaxiRoute(e, taxiType,
 						(int) w[k - 1].getValue(), time2Destination);
 				routes.add(r);
@@ -903,7 +903,7 @@ public class DichungService {
 		for (int i = 0; i < routes.size(); i++) {
 			A[i] = routes.get(i);
 		}
-		return new SharedTaxiSolution(-1,-1,-1,A);
+		return new SharedTaxiSolution(-1, -1, -1, A);
 	}
 
 	public SharedTaxiSolution computeSharedTaxiSolutionCluster1(
@@ -1365,7 +1365,7 @@ public class DichungService {
 				// points.add(t);
 				SharedTaxiRouteElement[] e = new SharedTaxiRouteElement[points
 						.size()];
-				
+
 				int load = 0;
 				for (int i = 0; i < points.size(); i++) {
 					Point p = points.get(i);
@@ -1382,10 +1382,8 @@ public class DichungService {
 					int T = (int) eat.getEarliestArrivalTime(t)
 							- (int) eat.getEarliestArrivalTime(p);// (int)mPoint2TravelTime2Destination.get(p).getValue();
 					e[i] = new SharedTaxiRouteElement(req.getTicketCode(),
-							req.getPickupAddress(), 
-							req.getDeliveryAddress(),
-							mPickup2LatLng.get(req).toString(),
-							arrDT,
+							req.getPickupAddress(), req.getDeliveryAddress(),
+							mPickup2LatLng.get(req).toString(), arrDT,
 							// req.getLatePickupDateTime(), "-", "-", "-","-");
 							req.getDepartTime(), "-", "-", "-", "-");
 				}
@@ -1393,10 +1391,11 @@ public class DichungService {
 				arrTime2Destination += minTimePoint - dt;
 				String time2Destination = DateTimeUtils
 						.unixTimeStamp2DateTime(arrTime2Destination);
-				
+
 				String taxiType = "7-places";
-				if(load <= 4) taxiType = "5-places";
-				
+				if (load <= 4)
+					taxiType = "5-places";
+
 				SharedTaxiRoute r = new SharedTaxiRoute(e, taxiType,
 						(int) w[k - 1].getValue(), time2Destination);
 				routes.add(r);
@@ -1406,19 +1405,22 @@ public class DichungService {
 		for (int i = 0; i < routes.size(); i++) {
 			A[i] = routes.get(i);
 		}
-		return new SharedTaxiSolution(-1,-1,-1,A);
+		return new SharedTaxiSolution(-1, -1, -1, A);
 	}
 
-	public SharedTaxiRoute establishRouteForOneRequest(
-			SharedTaxiRequest req, String latlng) {
-		SharedTaxiRouteElement e = establishRouteElementForOneRequest(req,latlng);
+	public SharedTaxiRoute establishRouteForOneRequest(SharedTaxiRequest req,
+			String latlng) {
+		SharedTaxiRouteElement e = establishRouteElementForOneRequest(req,
+				latlng);
 		SharedTaxiRouteElement[] rr = new SharedTaxiRouteElement[1];
 		rr[0] = e;
 		String taxiType = "7-places";
-		if(req.getNumberPassengers() <= 4) taxiType = "5-places";
-		return new SharedTaxiRoute(rr, taxiType,req.getNumberPassengers(), "-");
-	
+		if (req.getNumberPassengers() <= 4)
+			taxiType = "5-places";
+		return new SharedTaxiRoute(rr, taxiType, req.getNumberPassengers(), "-");
+
 	}
+
 	public SharedTaxiRouteElement establishRouteElementForOneRequest(
 			SharedTaxiRequest req, String latlng) {
 		String ticketCode = req.getTicketCode();
@@ -1430,286 +1432,371 @@ public class DichungService {
 		String distanceToNext = "-";
 		String maxTravelTimeToDestinationAllowed = "-";
 		SharedTaxiRouteElement e = new SharedTaxiRouteElement(ticketCode,
-				address, req.getDeliveryAddress(), latlng, pickupDateTime, expectedPickupDateTime,
-				travelTimeToDestination, travelTimeToNext, distanceToNext,
+				address, req.getDeliveryAddress(), latlng, pickupDateTime,
+				expectedPickupDateTime, travelTimeToDestination,
+				travelTimeToNext, distanceToNext,
 				maxTravelTimeToDestinationAllowed);
 		return e;
 	}
 
-	public SharedTaxiRoute[] matchTripFromAirport(ArrayList<SharedTaxiRequest> req, LatLng llAirport,
-			int maxWaitTimeAirport, double maxDistance, int maxNbPlaces){
-		// match requests form the airport to other places (e.g., city center)
-		
+	public SharedTaxiRoute[] matchTripFromAirport(
+			ArrayList<SharedTaxiRequest> req, LatLng llAirport,
+			int maxWaitTimeAirport, double maxDistance, int maxNbPlaces) {
+		// match requests from the airport to other places (e.g., city center)
+
 		ArrayList<SharedTaxiRoute> A = new ArrayList<SharedTaxiRoute>();
-		
+
 		// sort requests in an increasing order of pickup-time
 		SharedTaxiRequest[] a = new SharedTaxiRequest[req.size()];
-		for(int i = 0; i < req.size(); i++)
+		for (int i = 0; i < req.size(); i++)
 			a[i] = req.get(i);
-		for(int i = 0; i < a.length-1; i++){
-			for(int j = i+1; j < a.length; j++){
+		for (int i = 0; i < a.length - 1; i++) {
+			for (int j = i + 1; j < a.length; j++) {
 				long di = DateTimeUtils.dateTime2Int(a[i].getDepartTime());
 				long dj = DateTimeUtils.dateTime2Int(a[j].getDepartTime());
-				if(di > dj){
-					SharedTaxiRequest tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+				if (di > dj) {
+					SharedTaxiRequest tmp = a[i];
+					a[i] = a[j];
+					a[j] = tmp;
 				}
 			}
 		}
 		GoogleMapsQuery G = new GoogleMapsQuery();
 		// scan and match requests in a greedy way
 		int i = 0;
-		while(i < a.length){
+		while (i < a.length) {
 			int load = a[i].getNumberPassengers();
 			ArrayList<SharedTaxiRequest> cluster = new ArrayList<SharedTaxiRequest>();
 			cluster.add(a[i]);
-			
+
 			ArrayList<SharedTaxiRouteElement> E = new ArrayList<SharedTaxiRouteElement>();
 			E.add(establishRouteElementForOneRequest(a[i], "latlng"));
-			
+
 			long di = DateTimeUtils.dateTime2Int(a[i].getDepartTime());
-			int j = i+1;
-			while(j < a.length){
+			int j = i + 1;
+			while (j < a.length) {
 				long dj = DateTimeUtils.dateTime2Int(a[j].getDepartTime());
-				if(dj - di > maxWaitTimeAirport){
+				if (dj - di > maxWaitTimeAirport) {
 					break;
 				}
-				
+
 				boolean distanceOK = true;
-				for(int k = 0; k < cluster.size(); k++){
-					double d = G.computeDistanceHaversine(a[j].getDeliveryPos(), a[k].getDeliveryPos());
-					if(d > maxDistance){
-						distanceOK = false; break;
+				for (int k = 0; k < cluster.size(); k++) {
+					double d = G.computeDistanceHaversine(
+							a[j].getDeliveryPos(), a[k].getDeliveryPos());
+					if (d > maxDistance) {
+						distanceOK = false;
+						break;
 					}
 				}
-				if(!distanceOK) break;
-				if(load + a[j].getNumberPassengers() > maxNbPlaces) break;
+				if (!distanceOK)
+					break;
+				if (load + a[j].getNumberPassengers() > maxNbPlaces)
+					break;
 				load += a[j].getNumberPassengers();
 				// add request a[j] to the cluster
 				cluster.add(a[j]);
 				E.add(establishRouteElementForOneRequest(a[j], "latlng"));
-				
-				
+
 				j++;
 			}
 			String taxiType = "5-places";
-			if(load > 4) taxiType = "7-places";
-			
+			if (load > 4)
+				taxiType = "7-places";
+
 			// establish a shared-route
 			SharedTaxiRouteElement[] AE = new SharedTaxiRouteElement[E.size()];
-			for(int k = 0; k < E.size(); k++) AE[k] = E.get(k);
+			for (int k = 0; k < E.size(); k++)
+				AE[k] = E.get(k);
 			SharedTaxiRoute r = new SharedTaxiRoute(AE, taxiType, load, "--");
 			A.add(r);
-			
+
 			i = j;
 		}
 		SharedTaxiRoute[] B = new SharedTaxiRoute[A.size()];
-		for(int j = 0;j < A.size(); j++) B[j] = A.get(j);
+		for (int j = 0; j < A.size(); j++)
+			B[j] = A.get(j);
 		return B;
 	}
-	
-	public SharedTaxiSolution matchReturnTrips(SharedTaxiRoute[] routesToAirport, SharedTaxiRoute[] routesFromAirport, int maxWaitTimeAirport){
+
+	public SharedTaxiSolution matchReturnTrips(
+			SharedTaxiRoute[] routesToAirport,
+			SharedTaxiRoute[] routesFromAirport, int maxWaitTimeAirport) {
 		GoogleMapsQuery G = new GoogleMapsQuery();
 		boolean[][] m = new boolean[routesToAirport.length][routesFromAirport.length];
-		for(int i = 0; i < routesToAirport.length; i++)
-			for(int j = 0; j < routesFromAirport.length; j++)
+		for (int i = 0; i < routesToAirport.length; i++)
+			for (int j = 0; j < routesFromAirport.length; j++)
 				m[i][j] = false;
-		for(int i = 0; i < routesToAirport.length; i++){
-			SharedTaxiRouteElement e = routesToAirport[i].getTicketCodes()[routesToAirport[i].getTicketCodes().length-1];
-			for(int j = 0; j < routesFromAirport.length; j++){
-				SharedTaxiRouteElement ej = routesToAirport[j].getTicketCodes()[routesToAirport[j].getTicketCodes().length-1];
-				
-				long ti = DateTimeUtils.dateTime2Int(e.getTravelTimeToDestination());
-				long tj = DateTimeUtils.dateTime2Int(e.getExpectedPickupDateTime());
-				if(ti < tj && tj-ti <= maxWaitTimeAirport)
+		for (int i = 0; i < routesToAirport.length; i++) {
+			SharedTaxiRouteElement e = routesToAirport[i].getTicketCodes()[routesToAirport[i]
+					.getTicketCodes().length - 1];
+			for (int j = 0; j < routesFromAirport.length; j++) {
+				SharedTaxiRouteElement ej = routesToAirport[j].getTicketCodes()[routesToAirport[j]
+						.getTicketCodes().length - 1];
+
+				long ti = DateTimeUtils.dateTime2Int(e
+						.getTravelTimeToDestination());
+				long tj = DateTimeUtils.dateTime2Int(e
+						.getExpectedPickupDateTime());
+				if (ti < tj && tj - ti <= maxWaitTimeAirport)
 					m[i][j] = true;
 			}
 		}
 		ArrayList<Integer> I = new ArrayList<Integer>();//
 		ArrayList<Integer> J = new ArrayList<Integer>();
-		boolean[] selected_routes = new boolean[routesToAirport.length];// selected_routes[i] = true if route i has been selected for sharing
-		boolean[] selected_requests = new boolean[routesFromAirport.length];// selected_requests[j] = true if request j has been selected for sharing
+		boolean[] selected_routes = new boolean[routesToAirport.length];// selected_routes[i]
+																		// =
+																		// true
+																		// if
+																		// route
+																		// i has
+																		// been
+																		// selected
+																		// for
+																		// sharing
+		boolean[] selected_requests = new boolean[routesFromAirport.length];// selected_requests[j]
+																			// =
+																			// true
+																			// if
+																			// request
+																			// j
+																			// has
+																			// been
+																			// selected
+																			// for
+																			// sharing
 		Arrays.fill(selected_routes, false);
 		Arrays.fill(selected_requests, false);
-		while(true){
+		while (true) {
 			boolean found = false;
 			int sel_i = -1;
 			int sel_j = -1;
-			for(int i = 0; i < routesToAirport.length; i++)if(!selected_routes[i]){
-				if(found) break;
-				for(int j = 0; j < routesFromAirport.length; j++)if(!selected_requests[j]){
-					if(found) break;
-					if(m[i][j]){
-						sel_i = i; sel_j = j;found = true;break;
-					}
+			for (int i = 0; i < routesToAirport.length; i++)
+				if (!selected_routes[i]) {
+					if (found)
+						break;
+					for (int j = 0; j < routesFromAirport.length; j++)
+						if (!selected_requests[j]) {
+							if (found)
+								break;
+							if (m[i][j]) {
+								sel_i = i;
+								sel_j = j;
+								found = true;
+								break;
+							}
+						}
 				}
-			}
-			if(!found) break;
+			if (!found)
+				break;
 			selected_routes[sel_i] = true;
 			selected_requests[sel_j] = true;
 			I.add(sel_i);
 			J.add(sel_j);
 		}
-		for(int k = 0; k < I.size(); k++){
+		for (int k = 0; k < I.size(); k++) {
 			int i = I.get(k);
 			SharedTaxiRoute ri = routesToAirport[i];
 			int j = J.get(k);
 			SharedTaxiRoute rj = routesFromAirport[j];
-			
-			//SharedTaxiRouteElement e = establishRouteElementForOneRequest(req.get(j),mPickup2LatLng.get(req.get(j)).toString());
-			
-			SharedTaxiRouteElement[] a = new SharedTaxiRouteElement[ri.getTicketCodes().length+rj.getTicketCodes().length];
-			for(int i1 = 0; i1 < ri.getTicketCodes().length; i1++){
+
+			// SharedTaxiRouteElement e =
+			// establishRouteElementForOneRequest(req.get(j),mPickup2LatLng.get(req.get(j)).toString());
+
+			SharedTaxiRouteElement[] a = new SharedTaxiRouteElement[ri
+					.getTicketCodes().length + rj.getTicketCodes().length];
+			for (int i1 = 0; i1 < ri.getTicketCodes().length; i1++) {
 				a[i1] = ri.getTicketCodes()[i1];
 			}
-			
-			for(int i2 = 0; i2 < rj.getTicketCodes().length; i2++){
+
+			for (int i2 = 0; i2 < rj.getTicketCodes().length; i2++) {
 				a[ri.getTicketCodes().length + i2] = rj.getTicketCodes()[i2];
 			}
-			
-			
-			//int load = r.getNbPeople() < req.get(j).getNumberPassengers() ? req.get(j).getNumberPassengers() : r.getNbPeople();
-			int load = ri.getNbPeople() < rj.getNbPeople() ? rj.getNbPeople() : ri.getNbPeople();
-			
+
+			// int load = r.getNbPeople() < req.get(j).getNumberPassengers() ?
+			// req.get(j).getNumberPassengers() : r.getNbPeople();
+			int load = ri.getNbPeople() < rj.getNbPeople() ? rj.getNbPeople()
+					: ri.getNbPeople();
+
 			String taxiType = "7-places";
-			if(load <= 4) taxiType = "5-places";
-			
-			routesToAirport[i] = new SharedTaxiRoute(a, taxiType, 0, ri.getArrTimeDestination());
+			if (load <= 4)
+				taxiType = "5-places";
+
+			routesToAirport[i] = new SharedTaxiRoute(a, taxiType, 0,
+					ri.getArrTimeDestination());
 		}
 		ArrayList<SharedTaxiRoute> R = new ArrayList<SharedTaxiRoute>();
-		for(int j = 0; j < routesFromAirport.length; j++) if(!selected_requests[j]){
-			//R.add(establishRouteForOneRequest(req.get(j),mPickup2LatLng.get(req.get(j)).toString()));
-			R.add(routesFromAirport[j]);
+		for (int j = 0; j < routesFromAirport.length; j++)
+			if (!selected_requests[j]) {
+				// R.add(establishRouteForOneRequest(req.get(j),mPickup2LatLng.get(req.get(j)).toString()));
+				R.add(routesFromAirport[j]);
+			}
+
+		for (int i = 0; i < routesToAirport.length; i++) {
+			R.add(0, routesToAirport[i]);
 		}
-		
-		for(int i = 0; i < routesToAirport.length; i++){
-			R.add(0,routesToAirport[i]);
-		}
-		
+
 		SharedTaxiRoute[] arr = new SharedTaxiRoute[R.size()];
-		for(int i =0; i < R.size(); i++)
+		for (int i = 0; i < R.size(); i++)
 			arr[i] = R.get(i);
-		System.out.println(name() + "::matchReturnTrips, nbRoutes = " + arr.length + ", nbReturnSharing = " + I.size());
+		System.out.println(name() + "::matchReturnTrips, nbRoutes = "
+				+ arr.length + ", nbReturnSharing = " + I.size());
 		int nb2Sharings = 0;
 		int nb3Sharings = 0;
 		int nbRequests = 0;
-		for(int i = 0; i < arr.length; i++){
-			if(arr[i].getTicketCodes().length == 2){
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i].getTicketCodes().length == 2) {
 				nb2Sharings++;
-			}else if(arr[i].getTicketCodes().length == 3){
+			} else if (arr[i].getTicketCodes().length == 3) {
 				nb3Sharings++;
 			}
 			nbRequests += arr[i].getTicketCodes().length;
 		}
-		
+
 		// sort arr in decresing order of nbSHarings
-		for(int i = 0;i < arr.length-1;i++){
-			for(int j = i+1; j < arr.length; j++){
-				if(arr[i].getTicketCodes().length < arr[j].getTicketCodes().length){
-					SharedTaxiRoute tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+		for (int i = 0; i < arr.length - 1; i++) {
+			for (int j = i + 1; j < arr.length; j++) {
+				if (arr[i].getTicketCodes().length < arr[j].getTicketCodes().length) {
+					SharedTaxiRoute tmp = arr[i];
+					arr[i] = arr[j];
+					arr[j] = tmp;
 				}
 			}
 		}
 		return new SharedTaxiSolution(nb2Sharings, nb3Sharings, nbRequests, arr);
-	
+
 	}
-			
-	public SharedTaxiSolution matchReturnTrips(SharedTaxiRoute[] routes, ArrayList<SharedTaxiRequest> req, 
-			HashMap<SharedTaxiRequest, LatLng> mPickup2LatLng, LatLng llNoiBaiAirport, int maxWaitTimeAirport){
+
+	public SharedTaxiSolution matchReturnTrips(SharedTaxiRoute[] routes,
+			ArrayList<SharedTaxiRequest> req,
+			HashMap<SharedTaxiRequest, LatLng> mPickup2LatLng,
+			LatLng llNoiBaiAirport, int maxWaitTimeAirport) {
 		GoogleMapsQuery G = new GoogleMapsQuery();
-		
+
 		boolean[][] m = new boolean[routes.length][req.size()];
-		for(int i = 0; i < routes.length; i++)
-			for(int j = 0; j < req.size(); j++)
+		for (int i = 0; i < routes.length; i++)
+			for (int j = 0; j < req.size(); j++)
 				m[i][j] = false;
-		for(int i = 0; i < routes.length; i++){
-			SharedTaxiRouteElement e = routes[i].getTicketCodes()[routes[i].getTicketCodes().length-1];
-			for(int j = 0; j < req.size(); j++){
+		for (int i = 0; i < routes.length; i++) {
+			SharedTaxiRouteElement e = routes[i].getTicketCodes()[routes[i]
+					.getTicketCodes().length - 1];
+			for (int j = 0; j < req.size(); j++) {
 				LatLng ll = mPickup2LatLng.get(req.get(j));
-				double d= G.computeDistanceHaversine(ll.lat,ll.lng,llNoiBaiAirport.lat,llNoiBaiAirport.lng);
-				if(d >= EPS) continue;
-				long ti = DateTimeUtils.dateTime2Int(e.getTravelTimeToDestination());
-				long tj = DateTimeUtils.dateTime2Int(req.get(j).getDepartTime());
-				if(ti < tj && tj-ti <= maxWaitTimeAirport)
+				double d = G.computeDistanceHaversine(ll.lat, ll.lng,
+						llNoiBaiAirport.lat, llNoiBaiAirport.lng);
+				if (d >= EPS)
+					continue;
+				long ti = DateTimeUtils.dateTime2Int(e
+						.getTravelTimeToDestination());
+				long tj = DateTimeUtils
+						.dateTime2Int(req.get(j).getDepartTime());
+				if (ti < tj && tj - ti <= maxWaitTimeAirport)
 					m[i][j] = true;
 			}
 		}
 		ArrayList<Integer> I = new ArrayList<Integer>();//
 		ArrayList<Integer> J = new ArrayList<Integer>();
-		boolean[] selected_routes = new boolean[routes.length];// selected_routes[i] = true if route i has been selected for sharing
-		boolean[] selected_requests = new boolean[req.size()];// selected_requests[j] = true if request j has been selected for sharing
+		boolean[] selected_routes = new boolean[routes.length];// selected_routes[i]
+																// = true if
+																// route i has
+																// been selected
+																// for sharing
+		boolean[] selected_requests = new boolean[req.size()];// selected_requests[j]
+																// = true if
+																// request j has
+																// been selected
+																// for sharing
 		Arrays.fill(selected_routes, false);
 		Arrays.fill(selected_requests, false);
-		while(true){
+		while (true) {
 			boolean found = false;
 			int sel_i = -1;
 			int sel_j = -1;
-			for(int i = 0; i < routes.length; i++)if(!selected_routes[i]){
-				if(found) break;
-				for(int j = 0; j < req.size(); j++)if(!selected_requests[j]){
-					if(found) break;
-					if(m[i][j]){
-						sel_i = i; sel_j = j;found = true;break;
-					}
+			for (int i = 0; i < routes.length; i++)
+				if (!selected_routes[i]) {
+					if (found)
+						break;
+					for (int j = 0; j < req.size(); j++)
+						if (!selected_requests[j]) {
+							if (found)
+								break;
+							if (m[i][j]) {
+								sel_i = i;
+								sel_j = j;
+								found = true;
+								break;
+							}
+						}
 				}
-			}
-			if(!found) break;
+			if (!found)
+				break;
 			selected_routes[sel_i] = true;
 			selected_requests[sel_j] = true;
 			I.add(sel_i);
 			J.add(sel_j);
 		}
-		for(int k = 0; k < I.size(); k++){
+		for (int k = 0; k < I.size(); k++) {
 			int i = I.get(k);
 			SharedTaxiRoute r = routes[i];
 			int j = J.get(k);
-			SharedTaxiRouteElement e = establishRouteElementForOneRequest(req.get(j),mPickup2LatLng.get(req.get(j)).toString());
-			SharedTaxiRouteElement[] a = new SharedTaxiRouteElement[r.getTicketCodes().length+1];
-			for(int i1 = 0; i1 < r.getTicketCodes().length; i1++){
+			SharedTaxiRouteElement e = establishRouteElementForOneRequest(
+					req.get(j), mPickup2LatLng.get(req.get(j)).toString());
+			SharedTaxiRouteElement[] a = new SharedTaxiRouteElement[r
+					.getTicketCodes().length + 1];
+			for (int i1 = 0; i1 < r.getTicketCodes().length; i1++) {
 				a[i1] = r.getTicketCodes()[i1];
 			}
 			a[r.getTicketCodes().length] = e;
-			int load = r.getNbPeople() < req.get(j).getNumberPassengers() ? req.get(j).getNumberPassengers() : r.getNbPeople();
-			
+			int load = r.getNbPeople() < req.get(j).getNumberPassengers() ? req
+					.get(j).getNumberPassengers() : r.getNbPeople();
+
 			String taxiType = "7-places";
-			if(load <= 4) taxiType = "5-places";
-			
-			routes[i] = new SharedTaxiRoute(a, taxiType, r.getNbPeople(), r.getArrTimeDestination());
+			if (load <= 4)
+				taxiType = "5-places";
+
+			routes[i] = new SharedTaxiRoute(a, taxiType, r.getNbPeople(),
+					r.getArrTimeDestination());
 		}
 		ArrayList<SharedTaxiRoute> R = new ArrayList<SharedTaxiRoute>();
-		for(int j = 0; j < req.size(); j++) if(!selected_requests[j]){
-			R.add(establishRouteForOneRequest(req.get(j),mPickup2LatLng.get(req.get(j)).toString()));
+		for (int j = 0; j < req.size(); j++)
+			if (!selected_requests[j]) {
+				R.add(establishRouteForOneRequest(req.get(j), mPickup2LatLng
+						.get(req.get(j)).toString()));
+			}
+		for (int i = 0; i < routes.length; i++) {
+			R.add(0, routes[i]);
 		}
-		for(int i = 0; i < routes.length; i++){
-			R.add(0,routes[i]);
-		}
-		
+
 		SharedTaxiRoute[] arr = new SharedTaxiRoute[R.size()];
-		for(int i =0; i < R.size(); i++)
+		for (int i = 0; i < R.size(); i++)
 			arr[i] = R.get(i);
-		System.out.println(name() + "::matchReturnTrips, nbRoutes = " + arr.length + ", nbReturnSharing = " + I.size());
+		System.out.println(name() + "::matchReturnTrips, nbRoutes = "
+				+ arr.length + ", nbReturnSharing = " + I.size());
 		int nb2Sharings = 0;
 		int nb3Sharings = 0;
 		int nbRequests = 0;
-		for(int i = 0; i < arr.length; i++){
-			if(arr[i].getTicketCodes().length == 2){
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i].getTicketCodes().length == 2) {
 				nb2Sharings++;
-			}else if(arr[i].getTicketCodes().length == 3){
+			} else if (arr[i].getTicketCodes().length == 3) {
 				nb3Sharings++;
 			}
 			nbRequests += arr[i].getTicketCodes().length;
 		}
-		
+
 		// sort arr in decresing order of nbSHarings
-		for(int i = 0;i < arr.length-1;i++){
-			for(int j = i+1; j < arr.length; j++){
-				if(arr[i].getTicketCodes().length < arr[j].getTicketCodes().length){
-					SharedTaxiRoute tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+		for (int i = 0; i < arr.length - 1; i++) {
+			for (int j = i + 1; j < arr.length; j++) {
+				if (arr[i].getTicketCodes().length < arr[j].getTicketCodes().length) {
+					SharedTaxiRoute tmp = arr[i];
+					arr[i] = arr[j];
+					arr[j] = tmp;
 				}
 			}
 		}
 		return new SharedTaxiSolution(nb2Sharings, nb3Sharings, nbRequests, arr);
 	}
-	
+
 	public SharedTaxiSolution computeSharedTaxiHanoiNoiBaiSolution(
 			SharedTaxiInput input) {
 		this.APPX = input.getApproximationDistanceFactor();
@@ -1717,146 +1804,227 @@ public class DichungService {
 		this.HIGH_TRAFFIC_SPEED = input.getHighTrafficSpeed();
 		this.EPS = input.getEps();
 		this.DELTA_TIME = input.getDeltaRequestTime();
-		
+
 		int maxNbPlaces = 0;
-		for(int i = 0; i < input.getVehicleCapacities().length; i++){
-			if(maxNbPlaces < input.getVehicleCapacities()[i]) maxNbPlaces = input.getVehicleCapacities()[i];
+		for (int i = 0; i < input.getVehicleCapacities().length; i++) {
+			if (maxNbPlaces < input.getVehicleCapacities()[i])
+				maxNbPlaces = input.getVehicleCapacities()[i];
 		}
-		
+
 		GoogleMapsQuery G = new GoogleMapsQuery();
-		String airport = input.getAirportAddress();//"Noi Bai International Airport, Phú Cường, Hanoi, Vietnam";
-		String ll = input.getAirportPos();//G.getLatLngFromAddress(noiBaiAirport);
-		if(ll.equals("") || ll == null) 
-			ll = "21.218845, 105.804149";		
-		LatLng llAirport = new LatLng(ll);//G.getCoordinate(noiBaiAirport);
-		
-		if(llAirport == null) return new SharedTaxiSolution();
+		String airport = input.getAirportAddress();// "Noi Bai International Airport, Phú Cường, Hanoi, Vietnam";
+		String ll = input.getAirportPos();// G.getLatLngFromAddress(noiBaiAirport);
+		if (ll.equals("") || ll == null)
+			ll = "21.218845, 105.804149";
+		LatLng llAirport = new LatLng(ll);// G.getCoordinate(noiBaiAirport);
+
+		if (llAirport == null)
+			return new SharedTaxiSolution();
 		String unknownLatLng = "100000,100000";
 
-		for(int i = 0; i < input.getRequests().length; i++){
+		for (int i = 0; i < input.getRequests().length; i++) {
 			SharedTaxiRequest r = input.getRequests()[i];
-			if(r.getPickupPos().equals("-")){
+			if (r.getPickupPos().equals("-")) {
 				LatLng l = G.getCoordinate(r.getPickupAddress());
-				System.out.println(name() + "::computeSharedTaxiHanoiNoiBaiSolution, query pickup position of " + r.getPickupAddress() + " = " + l.toString());
+				System.out
+						.println(name()
+								+ "::computeSharedTaxiHanoiNoiBaiSolution, query pickup position of "
+								+ r.getPickupAddress() + " = " + l.toString());
 				r.setPickupPos(l.lat + "," + l.lng);
 			}
-			if(r.getDeliveryPos().equals("-")){
+			if (r.getDeliveryPos().equals("-")) {
 				LatLng l = G.getCoordinate(r.getDeliveryAddress());
-				System.out.println(name() + "::computeSharedTaxiHanoiNoiBaiSolution, query delivery position of " + r.getDeliveryAddress() + " = " + l.toString());
+				System.out
+						.println(name()
+								+ "::computeSharedTaxiHanoiNoiBaiSolution, query delivery position of "
+								+ r.getDeliveryAddress() + " = " + l.toString());
 				r.setDeliveryPos(l.lat + "," + l.lng);
 			}
 		}
+
+		ArrayList<SharedTaxiRequest> requestShareToAirport = new ArrayList<SharedTaxiRequest>();
+		ArrayList<SharedTaxiRequest> requestShareFromAirport = new ArrayList<SharedTaxiRequest>();
+		ArrayList<SharedTaxiRequest> requestPrivateToAirport = new ArrayList<SharedTaxiRequest>();
+		ArrayList<SharedTaxiRequest> requestPrivateFromAirport = new ArrayList<SharedTaxiRequest>();
+		ArrayList<SharedTaxiRequest> remainShareRequests = new ArrayList<SharedTaxiRequest>();
+		ArrayList<SharedTaxiRequest> remainPrivateRequests = new ArrayList<SharedTaxiRequest>();
+
 		
-		ArrayList<SharedTaxiRequest> requestHanoiToNoiBai = new ArrayList<SharedTaxiRequest>();
-		ArrayList<SharedTaxiRequest> remainRequestHanoiNoiBai = new ArrayList<SharedTaxiRequest>();
 		HashMap<SharedTaxiRequest, LatLng> mPickup2LatLng = new HashMap<SharedTaxiRequest, LatLng>();
 		HashMap<SharedTaxiRequest, LatLng> mDelivery2LatLng = new HashMap<SharedTaxiRequest, LatLng>();
 
 		SharedTaxiRequest[] requests = input.getRequests();
 		boolean[] latlngOK = new boolean[requests.length];
 
-		
 		for (int i = 0; i < requests.length; i++) {
-			String latlngPickup = requests[i].getPickupPos();//G.getLatLngFromAddress(requests[i].getPickupAddress());
-			String latlngDelivery = requests[i].getDeliveryPos();//G.getLatLngFromAddress(requests[i].getDeliveryAddress());
 
-			System.out.println(name()
-					+ "::computeSharedTaxiHanoiNoiBaiSolution, request "
-					+ requests[i].getPickupAddress() + " --> " + latlngPickup
-					+ ", " + requests[i].getDeliveryAddress() + " --> "
-					+ latlngDelivery);
+			if (requests[i].getShared() == 0) {
+				// private requests
+				String latlngPickup = requests[i].getPickupPos();// G.getLatLngFromAddress(requests[i].getPickupAddress());
+				String latlngDelivery = requests[i].getDeliveryPos();// G.getLatLngFromAddress(requests[i].getDeliveryAddress());
 
-			if (!latlngPickup.equals("") && !latlngDelivery.equals("")) {
-				LatLng pickupLocation = new LatLng(latlngPickup);
-				LatLng deliveryLocation = new LatLng(latlngDelivery);
-				mPickup2LatLng.put(requests[i], pickupLocation);
-				mDelivery2LatLng.put(requests[i], deliveryLocation);
-				latlngOK[i] = true;
+				System.out.println(name()
+						+ "::computeSharedTaxiHanoiNoiBaiSolution, request "
+						+ requests[i].getPickupAddress() + " --> "
+						+ latlngPickup + ", "
+						+ requests[i].getDeliveryAddress() + " --> "
+						+ latlngDelivery);
 
-				double d = G.computeDistanceHaversine(deliveryLocation.lat,
-						deliveryLocation.lng, llAirport.lat,
-						llAirport.lng);
-				System.out.println(name() + "::computeSharedTaxiHanoiNoiBaiSolution, d = " + d + ", EPS = " + EPS + 
-						", airport = " + llAirport.toString() + ", delivery = " + deliveryLocation.toString());
-				if (d < EPS) {
-					requestHanoiToNoiBai.add(requests[i]);
+				if (!latlngPickup.equals("") && !latlngDelivery.equals("")) {
+					LatLng pickupLocation = new LatLng(latlngPickup);
+					LatLng deliveryLocation = new LatLng(latlngDelivery);
+					mPickup2LatLng.put(requests[i], pickupLocation);
+					mDelivery2LatLng.put(requests[i], deliveryLocation);
+					latlngOK[i] = true;
+
+					double d = G.computeDistanceHaversine(deliveryLocation.lat,
+							deliveryLocation.lng, llAirport.lat, llAirport.lng);
+					
+					System.out.println(name()
+							+ "::computeSharedTaxiHanoiNoiBaiSolution, d = "
+							+ d + ", EPS = " + EPS + ", airport = "
+							+ llAirport.toString() + ", delivery = "
+							+ deliveryLocation.toString());
+					if (d < EPS) {
+						requestPrivateToAirport.add(requests[i]);
+					}else{
+						d = G.computeDistanceHaversine(pickupLocation.lat,
+								pickupLocation.lng, llAirport.lat, llAirport.lng);
+						if(d < EPS){
+							requestPrivateFromAirport.add(requests[i]);
+						}else{
+							remainPrivateRequests.add(requests[i]);
+						}
+					}
+
 				} else {
-					remainRequestHanoiNoiBai.add(requests[i]);
+					mPickup2LatLng.put(requests[i], new LatLng(unknownLatLng));
+					mDelivery2LatLng
+							.put(requests[i], new LatLng(unknownLatLng));
+					latlngOK[i] = false;
+					remainPrivateRequests.add(requests[i]);
+				}
+				
+			} else {
+				// sharing requests
+				String latlngPickup = requests[i].getPickupPos();// G.getLatLngFromAddress(requests[i].getPickupAddress());
+				String latlngDelivery = requests[i].getDeliveryPos();// G.getLatLngFromAddress(requests[i].getDeliveryAddress());
+
+				System.out.println(name()
+						+ "::computeSharedTaxiHanoiNoiBaiSolution, request "
+						+ requests[i].getPickupAddress() + " --> "
+						+ latlngPickup + ", "
+						+ requests[i].getDeliveryAddress() + " --> "
+						+ latlngDelivery);
+
+				if (!latlngPickup.equals("") && !latlngDelivery.equals("")) {
+					LatLng pickupLocation = new LatLng(latlngPickup);
+					LatLng deliveryLocation = new LatLng(latlngDelivery);
+					mPickup2LatLng.put(requests[i], pickupLocation);
+					mDelivery2LatLng.put(requests[i], deliveryLocation);
+					latlngOK[i] = true;
+
+					double d = G.computeDistanceHaversine(deliveryLocation.lat,
+							deliveryLocation.lng, llAirport.lat, llAirport.lng);
+					
+					System.out.println(name()
+							+ "::computeSharedTaxiHanoiNoiBaiSolution, d = "
+							+ d + ", EPS = " + EPS + ", airport = "
+							+ llAirport.toString() + ", delivery = "
+							+ deliveryLocation.toString());
+					if (d < EPS) {
+						requestShareToAirport.add(requests[i]);
+					}else{
+						d = G.computeDistanceHaversine(pickupLocation.lat,
+								pickupLocation.lng, llAirport.lat, llAirport.lng);
+						if(d < EPS){
+							requestShareFromAirport.add(requests[i]);
+						}else{
+							remainShareRequests.add(requests[i]);
+						}
+					}
+
+				} else {
+					mPickup2LatLng.put(requests[i], new LatLng(unknownLatLng));
+					mDelivery2LatLng
+							.put(requests[i], new LatLng(unknownLatLng));
+					latlngOK[i] = false;
+					remainShareRequests.add(requests[i]);
 				}
 
-			} else {
-				mPickup2LatLng.put(requests[i], new LatLng(unknownLatLng));
-				mDelivery2LatLng.put(requests[i], new LatLng(unknownLatLng));
-				latlngOK[i] = false;
-				remainRequestHanoiNoiBai.add(requests[i]);
 			}
 		}
 
-		
-		SharedTaxiRequest[] R = new SharedTaxiRequest[requestHanoiToNoiBai
+		SharedTaxiRequest[] R = new SharedTaxiRequest[requestShareToAirport
 				.size()];
-		for (int i = 0; i < requestHanoiToNoiBai.size(); i++)
-			R[i] = requestHanoiToNoiBai.get(i);
-		SharedTaxiInput input1 = new SharedTaxiInput(
-				input.getAirportAddress(),
-				input.getAirportPos(),
-				R,
-				input.getVehicleCapacities(), 
-				input.getMaxWaitTime(),
+		for (int i = 0; i < requestShareToAirport.size(); i++)
+			R[i] = requestShareToAirport.get(i);
+		SharedTaxiInput input1 = new SharedTaxiInput(input.getAirportAddress(),
+				input.getAirportPos(), R, input.getVehicleCapacities(),
+				input.getMinimumSharedPrice(), input.getMaxWaitTime(),
 				input.getForbidenStraightDistance(),
-				input.getForbidenTimeDistance(), 
+				input.getForbidenTimeDistance(),
 				input.getMaxStandardSharingDistance(),
 				input.getMaxHighTrafficSharingDistance(),
-				input.getMaxWaitTimeAirport(),
-				input.getMinWaitTimeAirport(),
-				input.getMaxTime(),
-				input.getApproximationDistanceFactor(),
-				input.getEps(),
-				input.getStdSpeed(),
-				input.getHighTrafficSpeed(),
-				input.getSpeedToAirport(),
-				input.getDeltaRequestTime()
-				);
+				input.getMaxWaitTimeAirport(), input.getMinWaitTimeAirport(),
+				input.getMaxTime(), input.getApproximationDistanceFactor(),
+				input.getEps(), input.getStdSpeed(),
+				input.getHighTrafficSpeed(), input.getSpeedToAirport(),
+				input.getDeltaRequestTime());
 
 		// solution routes to airport
 		SharedTaxiSolution solutionToAirport = computeSharedTaxiHanoiToNoiBaiSolution(
 				input1, mPickup2LatLng, mDelivery2LatLng);
 
-		SharedTaxiRoute[] RFA = matchTripFromAirport(remainRequestHanoiNoiBai, llAirport, input.getMaxWaitTimeAirport(),
+		
+		SharedTaxiRoute[] RFA = matchTripFromAirport(requestShareFromAirport,
+				llAirport, input.getMaxWaitTimeAirport(),
 				input.getMaxStandardSharingDistance(), maxNbPlaces);
+
+		SharedTaxiSolution solutionToAndFromAirport = matchReturnTrips(solutionToAirport.getRoutes(), RFA, 1800);
+
+		SharedTaxiRoute[] remainRoutes = new SharedTaxiRoute[remainPrivateRequests.size() + remainShareRequests.size()];
+		for(int i = 0;i < remainPrivateRequests.size(); i++){
+			remainRoutes[i] = establishRouteForOneRequest(remainPrivateRequests.get(i), remainPrivateRequests.get(i).getPickupPos());
+		}
+		for(int i = 0;i < remainShareRequests.size(); i++){
+			remainRoutes[i + remainPrivateRequests.size()] = establishRouteForOneRequest(remainShareRequests.get(i), remainShareRequests.get(i).getPickupPos());
+		}
+		SharedTaxiRoute[] allRoutes = new SharedTaxiRoute[remainRoutes.length + solutionToAndFromAirport.getRoutes().length];
 		
-		return matchReturnTrips(solutionToAirport.getRoutes(), RFA,1800);
+		for(int i = 0; i < solutionToAndFromAirport.getRoutes().length; i++)
+			allRoutes[i] = solutionToAndFromAirport.getRoutes()[i];
+		for(int i = 0; i < remainRoutes.length; i++)
+			allRoutes[i + solutionToAndFromAirport.getRoutes().length] = remainRoutes[i];
 		
-		//return matchReturnTrips(solutionHanoiToNoiBai.getRoutes(), remainRequestHanoiNoiBai, 
-		//		mPickup2LatLng, llAirport, 1800);
+		return new SharedTaxiSolution(solutionToAndFromAirport.getNb2Sharings(), solutionToAndFromAirport.getNb3Sharings(), requests.length, allRoutes);
+				
 		
+		// return matchReturnTrips(solutionHanoiToNoiBai.getRoutes(),
+		// remainRequestHanoiNoiBai,
+		// mPickup2LatLng, llAirport, 1800);
+
 		/*
-		// establish routes for remaining requests
-		SharedTaxiRoute[] rRoutes = new SharedTaxiRoute[remainRequestHanoiNoiBai
-				.size()];
-		for (int i = 0; i < rRoutes.length; i++) {
-			SharedTaxiRequest req = remainRequestHanoiNoiBai.get(i);
-			SharedTaxiRouteElement e = establishRouteElementForOneRequest(req);
-			SharedTaxiRouteElement[] rr = new SharedTaxiRouteElement[1];
-			rr[0] = e;
-			rRoutes[i] = new SharedTaxiRoute(rr, req.getNumberPassengers(), "-");
-		}
-		
-		SharedTaxiRoute[] routes = new SharedTaxiRoute[solutionHanoiToNoiBai.getRoutes().length + rRoutes.length];
-		int ind = -1;
-		for(int i = 0; i < solutionHanoiToNoiBai.getRoutes().length;i++){
-			ind++;
-			routes[ind] = solutionHanoiToNoiBai.getRoutes()[i];
-		}
-		for(int i = 0; i < rRoutes.length; i++){
-			ind++;
-			routes[ind] = rRoutes[i];
-		}
-		System.out.println(name() + "::computeSharedTaxiHanoiNoibaiSolution, nbRoutes = " + routes.length + 
-				", nbRequests = " + input.getRequests().length);
-		
-		return new SharedTaxiSolution(routes);
-		*/
+		 * // establish routes for remaining requests SharedTaxiRoute[] rRoutes
+		 * = new SharedTaxiRoute[remainRequestHanoiNoiBai .size()]; for (int i =
+		 * 0; i < rRoutes.length; i++) { SharedTaxiRequest req =
+		 * remainRequestHanoiNoiBai.get(i); SharedTaxiRouteElement e =
+		 * establishRouteElementForOneRequest(req); SharedTaxiRouteElement[] rr
+		 * = new SharedTaxiRouteElement[1]; rr[0] = e; rRoutes[i] = new
+		 * SharedTaxiRoute(rr, req.getNumberPassengers(), "-"); }
+		 * 
+		 * SharedTaxiRoute[] routes = new
+		 * SharedTaxiRoute[solutionHanoiToNoiBai.getRoutes().length +
+		 * rRoutes.length]; int ind = -1; for(int i = 0; i <
+		 * solutionHanoiToNoiBai.getRoutes().length;i++){ ind++; routes[ind] =
+		 * solutionHanoiToNoiBai.getRoutes()[i]; } for(int i = 0; i <
+		 * rRoutes.length; i++){ ind++; routes[ind] = rRoutes[i]; }
+		 * System.out.println(name() +
+		 * "::computeSharedTaxiHanoiNoibaiSolution, nbRoutes = " + routes.length
+		 * + ", nbRequests = " + input.getRequests().length);
+		 * 
+		 * return new SharedTaxiSolution(routes);
+		 */
 	}
 
 	// applied for Hanoi --> Noibai
@@ -1865,8 +2033,6 @@ public class DichungService {
 			HashMap<SharedTaxiRequest, LatLng> mPickup2LatLng,
 			HashMap<SharedTaxiRequest, LatLng> mDelivery2LatLng) {
 
-		
-		
 		HashMap<SharedTaxiRequest, Integer> mRequest2ID = new HashMap<SharedTaxiRequest, Integer>();
 		SharedTaxiRequest[] requests = input.getRequests();
 
@@ -1909,8 +2075,9 @@ public class DichungService {
 		 * LatLng(unknownLatLng)); latlngOK[i] = false; } }
 		 */
 
-		System.out.println(name() + "::computeSharedTaxiHanoiToNoiBaiSolution, N = " + N);
-		
+		System.out.println(name()
+				+ "::computeSharedTaxiHanoiToNoiBaiSolution, N = " + N);
+
 		for (int i = 0; i < requests.length; i++) {
 			SharedTaxiRequest ri = requests[i];
 			LatLng li = mPickup2LatLng.get(ri);
@@ -1986,25 +2153,18 @@ public class DichungService {
 				R[i] = requests[cc.get(i)];
 			}
 
-			SharedTaxiInput I = new SharedTaxiInput(
-					input.getAirportAddress(),
-					input.getAirportPos(),
-					R,
-					input.getVehicleCapacities(), input.getMaxWaitTime(),
+			SharedTaxiInput I = new SharedTaxiInput(input.getAirportAddress(),
+					input.getAirportPos(), R, input.getVehicleCapacities(),
+					input.getMinimumSharedPrice(), input.getMaxWaitTime(),
 					input.getForbidenStraightDistance(),
-					input.getForbidenTimeDistance(), 
+					input.getForbidenTimeDistance(),
 					input.getMaxStandardSharingDistance(),
 					input.getMaxHighTrafficSharingDistance(),
 					input.getMaxWaitTimeAirport(),
-					input.getMinWaitTimeAirport(),
-					input.getMaxTime(),
-					input.getApproximationDistanceFactor(),
-					input.getEps(),
-					input.getStdSpeed(),
-					input.getHighTrafficSpeed(),
-					input.getSpeedToAirport(),
-					input.getDeltaRequestTime()
-					);
+					input.getMinWaitTimeAirport(), input.getMaxTime(),
+					input.getApproximationDistanceFactor(), input.getEps(),
+					input.getStdSpeed(), input.getHighTrafficSpeed(),
+					input.getSpeedToAirport(), input.getDeltaRequestTime());
 
 			// ClusterBasedSolver CS = new
 			// ClusterBasedSolver(I,mPickup2LatLng,mDelivery2LatLng,extraDistance,maxWaitTime);
@@ -2026,21 +2186,21 @@ public class DichungService {
 				System.out.print(requests[i].getPickupAddress() + "\n");
 			System.out.println();
 		}
-		
+
 		int nb2Sharings = 0;
 		int nb3Sharings = 0;
 		int nbRequests = 0;
-		for(int i = 0; i < arr_routes.length; i++){
-			if(arr_routes[i].getTicketCodes().length == 2){
+		for (int i = 0; i < arr_routes.length; i++) {
+			if (arr_routes[i].getTicketCodes().length == 2) {
 				nb2Sharings++;
-			}else if(arr_routes[i].getTicketCodes().length == 3){
+			} else if (arr_routes[i].getTicketCodes().length == 3) {
 				nb3Sharings++;
 			}
 			nbRequests += arr_routes[i].getTicketCodes().length;
 		}
-		
-		
-		return new SharedTaxiSolution(nb2Sharings, nb3Sharings, nbRequests, arr_routes);
+
+		return new SharedTaxiSolution(nb2Sharings, nb3Sharings, nbRequests,
+				arr_routes);
 
 		/*
 		 * HashMap<Point, SharedTaxiRequest> mPoint2Request = new HashMap<Point,

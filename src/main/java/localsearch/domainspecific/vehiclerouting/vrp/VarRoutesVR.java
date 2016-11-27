@@ -1749,9 +1749,11 @@ public class VarRoutesVR{
     	}
     	HashSet<Point> set = new HashSet<Point>(y);
     	for (Point p : x) {
-    		if ((!isClientPoint(p)) || set.contains(p)) {
+    		if ((!isClientPoint(p)) 
+    				//|| set.contains(p))
+    				)
     			return false;
-    		}
+    		
     	}
     	for(int i = 0; i < x.size(); i++){
     		Point px = x.get(i);
@@ -1759,7 +1761,7 @@ public class VarRoutesVR{
     		int ix = getIndex(px);
     		int iy = getIndex(py);
     		if(ix == Constants.NULL_POINT && iy == Constants.NULL_POINT) return false;
-    		if(next(py) == px) return false;
+    		//if(next(py) == px) return false;
     		
     		//if(route[ix] == Constants.NULL_POINT && route[iy] == Constants.NULL_POINT) return false;
     	}
