@@ -160,6 +160,19 @@ public class DichungService {
 	 * }
 	 */
 
+	public int estimateTravelTimeToAirport(LatLng llp, LatLng lld){
+		GoogleMapsQuery G = new GoogleMapsQuery();
+		int d = (int) G.getApproximateDistanceMeter(llp.lat, llp.lng,
+				lld.lat, lld.lng);
+
+		int t = (int) Math.floor(d / (SPEED_TO_AIRPORT * 1000 / 3600));
+		return t;
+	}
+	public String estimateArrivalTimeToAirport(String dt, LatLng llp, LatLng lld){
+		int t = estimateTravelTimeToAirport(llp, lld);
+		int dept = (int)DateTimeUtils.dateTime2Int(dt);
+		return DateTimeUtils.unixTimeStamp2DateTime(t + dept);
+	}
 	public SharedTaxiSolution computeSharedTaxiSolutionCluster(
 			SharedTaxiInput input,
 			HashMap<SharedTaxiRequest, LatLng> mPickup2LatLng,
@@ -193,32 +206,14 @@ public class DichungService {
 
 		HashMap<SharedTaxiRequest, Integer> shortestTravelTime = new HashMap<SharedTaxiRequest, Integer>();
 		for (int i = 0; i < N; i++) {
-			/*
-			 * int t = G.getTravelTime(requests[i].getPickupAddress(),
-			 * requests[i].getDeliveryAddress(), "driving");
-			 * 
-			 * if (t < 0) { LatLng llp = mPickup2LatLng.get(requests[i]); LatLng
-			 * lld = mDelivery2LatLng.get(requests[i]); double d =
-			 * G.computeDistanceHaversine(llp.lat, llp.lng, lld.lat, lld.lng); t
-			 * = (int) (d * 1000 * APPX / speed); }
-			 */
+			
 			LatLng llp = mPickup2LatLng.get(requests[i]);
 			LatLng lld = mDelivery2LatLng.get(requests[i]);
 
-			// int t = G.estimateTravelTime(llp.lat, llp.lng, lld.lat, lld.lng,
-			// "driving",speed,APPX);
-			// int t = G.estimateTravelTimeWithTimeFrame(llp.lat, llp.lng,
-			// lld.lat, lld.lng, "driving",
-			// requests[i].getEarlyPickupDateTime(), STD_SPEED,
-			// HIGH_TRAFFIC_SPEED);
-
-			// int d = (int) G.estimateDistanceMeter(llp.lat, llp.lng, lld.lat,
-			// lld.lng);
-			int d = (int) G.getApproximateDistanceMeter(llp.lat, llp.lng,
-					lld.lat, lld.lng);
-
-			int t = (int) Math.floor(d / (SPEED_TO_AIRPORT * 1000 / 3600));
-
+			//int d = (int) G.getApproximateDistanceMeter(llp.lat, llp.lng, lld.lat, lld.lng);
+			//int t = (int) Math.floor(d / (SPEED_TO_AIRPORT * 1000 / 3600));
+			int t= estimateTravelTimeToAirport(llp, lld);
+			
 			shortestTravelTime.put(requests[i], t);
 
 		}
@@ -1408,10 +1403,11 @@ public class DichungService {
 		return new SharedTaxiSolution(-1, -1, -1, A);
 	}
 
-	public SharedTaxiRoute[] establishRoutesEachForOneRequest(ArrayList<SharedTaxiRequest> req){
+	public SharedTaxiRoute[] establishRoutesEachForOneRequest(ArrayList<SharedTaxiRequest> req,
+			HashMap<SharedTaxiRequest, LatLng> mPickup2LatLng, HashMap<SharedTaxiRequest, LatLng> mDelivery2LatLng){
 		SharedTaxiRoute[] routes = new SharedTaxiRoute[req.size()];
 		for(int i = 0; i < req.size(); i++)
-			routes[i] = establishRouteForOneRequest(req.get(i),req.get(i).getPickupPos());
+			routes[i] = establishRouteForOneRequest(req.get(i),req.get(i).getPickupPos(), mPickup2LatLng, mDelivery2LatLng);
 		return routes;
 	}
 	public SharedTaxiRoute[] concat(SharedTaxiRoute[] A, SharedTaxiRoute[] B){
@@ -1423,7 +1419,7 @@ public class DichungService {
 		return C;
 	}
 	public SharedTaxiRoute establishRouteForOneRequest(SharedTaxiRequest req,
-			String latlng) {
+			String latlng, HashMap<SharedTaxiRequest, LatLng> mPickup2LatLng, HashMap<SharedTaxiRequest, LatLng> mDelivery2LatLng) {
 		SharedTaxiRouteElement e = establishRouteElementForOneRequest(req,
 				latlng);
 		SharedTaxiRouteElement[] rr = new SharedTaxiRouteElement[1];
@@ -1431,7 +1427,11 @@ public class DichungService {
 		String taxiType = "7-places";
 		if (req.getNumberPassengers() <= 4)
 			taxiType = "5-places";
-		return new SharedTaxiRoute(rr, taxiType, req.getNumberPassengers(), "-");
+		LatLng llp = mPickup2LatLng.get(req);
+		LatLng lld = mDelivery2LatLng.get(req);
+		String at = estimateArrivalTimeToAirport(req.getDepartTime(), llp, lld);
+		e.setTravelTimeToDestination(at);
+		return new SharedTaxiRoute(rr, taxiType, req.getNumberPassengers(), at);
 
 	}
 
@@ -1550,6 +1550,7 @@ public class DichungService {
 
 				long ti = DateTimeUtils.dateTime2Int(e
 						.getTravelTimeToDestination());
+				
 				long tj = DateTimeUtils.dateTime2Int(e
 						.getExpectedPickupDateTime());
 				if (ti < tj && tj - ti <= maxWaitTimeAirport)
@@ -1684,6 +1685,7 @@ public class DichungService {
 	public SharedTaxiSolution matchReturnTrips(SharedTaxiRoute[] routes,
 			ArrayList<SharedTaxiRequest> req,
 			HashMap<SharedTaxiRequest, LatLng> mPickup2LatLng,
+			HashMap<SharedTaxiRequest, LatLng> mDelivery2LatLng,
 			LatLng llNoiBaiAirport, int maxWaitTimeAirport) {
 		GoogleMapsQuery G = new GoogleMapsQuery();
 
@@ -1775,7 +1777,7 @@ public class DichungService {
 		for (int j = 0; j < req.size(); j++)
 			if (!selected_requests[j]) {
 				R.add(establishRouteForOneRequest(req.get(j), mPickup2LatLng
-						.get(req.get(j)).toString()));
+						.get(req.get(j)).toString(), mPickup2LatLng, mDelivery2LatLng));
 			}
 		for (int i = 0; i < routes.length; i++) {
 			R.add(0, routes[i]);
@@ -1995,8 +1997,8 @@ public class DichungService {
 				llAirport, input.getMaxWaitTimeAirport(),
 				input.getMaxStandardSharingDistance(), maxNbPlaces);
 
-		SharedTaxiRoute[] routesPrivateToAirport = establishRoutesEachForOneRequest(requestPrivateToAirport);
-		SharedTaxiRoute[] routesPrivateFromAirport = establishRoutesEachForOneRequest(requestPrivateFromAirport);
+		SharedTaxiRoute[] routesPrivateToAirport = establishRoutesEachForOneRequest(requestPrivateToAirport,mPickup2LatLng, mDelivery2LatLng);
+		SharedTaxiRoute[] routesPrivateFromAirport = establishRoutesEachForOneRequest(requestPrivateFromAirport, mPickup2LatLng, mDelivery2LatLng);
 		
 		SharedTaxiRoute[] routesToAirport = concat(routesPrivateToAirport, solutionToAirport.getRoutes());
 		SharedTaxiRoute[] routesFromAirport = concat(routesPrivateFromAirport, RFA);
@@ -2007,10 +2009,12 @@ public class DichungService {
 
 		SharedTaxiRoute[] remainRoutes = new SharedTaxiRoute[remainPrivateRequests.size() + remainShareRequests.size()];
 		for(int i = 0;i < remainPrivateRequests.size(); i++){
-			remainRoutes[i] = establishRouteForOneRequest(remainPrivateRequests.get(i), remainPrivateRequests.get(i).getPickupPos());
+			remainRoutes[i] = establishRouteForOneRequest(remainPrivateRequests.get(i), 
+					remainPrivateRequests.get(i).getPickupPos(), mPickup2LatLng, mDelivery2LatLng);
 		}
 		for(int i = 0;i < remainShareRequests.size(); i++){
-			remainRoutes[i + remainPrivateRequests.size()] = establishRouteForOneRequest(remainShareRequests.get(i), remainShareRequests.get(i).getPickupPos());
+			remainRoutes[i + remainPrivateRequests.size()] = establishRouteForOneRequest(remainShareRequests.get(i), 
+					remainShareRequests.get(i).getPickupPos(),mPickup2LatLng, mDelivery2LatLng);
 		}
 		SharedTaxiRoute[] allRoutes = new SharedTaxiRoute[remainRoutes.length + solutionToAndFromAirport.getRoutes().length];
 		

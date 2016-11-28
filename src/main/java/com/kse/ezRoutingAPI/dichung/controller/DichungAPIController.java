@@ -61,7 +61,9 @@ import com.kse.ezRoutingAPI.dichung.model.SharedTaxiSolution;
 import com.kse.ezRoutingAPI.dichung.service.DichungService;
 import com.kse.utils.DateTimeUtils;
 
+import java.io.File;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -84,7 +86,15 @@ public class DichungAPIController {
 			//System.out.println(dateFormat.format(date)); //2014/08/06 15:59:48
 			String dt = dateFormat.format(date);
 			String[] s  = dt.split(":"); 
-			String fn = ROOT_DIR + "dichungairport-requests-" + s[0] + s[1] + s[2] + "-" + s[3] + s[4] + s[5] + ".txt";
+			
+			String dir = ROOT_DIR + "/" + DateTimeUtils.currentDate();
+			File f = new File(dir);
+			if(!f.exists()){
+				f.mkdir();
+			}
+			
+			//String fn = ROOT_DIR + "dichungairport-requests-" + s[0] + s[1] + s[2] + "-" + s[3] + s[4] + s[5] + ".txt";
+			String fn = dir + "/dichungairport-requests-" + s[0] + s[1] + s[2] + "-" + s[3] + s[4] + s[5] + ".txt";
 			System.out.println(name() + "::writeRequest to file " + fn);
 			PrintWriter out = new PrintWriter(fn);
 			out.println("airport: (address \t lalng)");

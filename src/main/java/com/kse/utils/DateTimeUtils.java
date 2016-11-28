@@ -87,6 +87,17 @@ public class DateTimeUtils {
 		//System.out.println(name() + "::isHighTraffic, hm = " + hm);
 		return (8*60 <= hm && hm <= 9*60 || 16*60 <= hm && hm <= 18*60);
 	}
+	
+	public static String currentDate(){
+		DateFormat dateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss");
+		Date date = new Date();
+		
+		//System.out.println(dateFormat.format(date)); //2014/08/06 15:59:48
+		String DT = dateFormat.format(date);
+		System.out.println(DT);
+		String[] s = DT.split(":");
+		return s[0] + s[1] + s[2];
+	}
 	public static void main(String[] args){
 		String DT1 = "2016-10-04 10:30:15";
 		String DT2 = "2016-10-04 10:31:10";
@@ -104,5 +115,14 @@ public class DateTimeUtils {
 		
 		System.out.println(DateTimeUtils.unixTimeStamp2DateTime(Integer.MAX_VALUE));
 		
+		
+		DateFormat dateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss");
+		Date date = new Date();
+		
+		//System.out.println(dateFormat.format(date)); //2014/08/06 15:59:48
+		String DT = dateFormat.format(date);
+		System.out.println(DT);
+		
+		System.out.println(DateTimeUtils.currentDate());
 	}
 }
