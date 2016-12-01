@@ -640,7 +640,7 @@ public class CrossDockingProblemSolver {
 				//If there does not exist better solution in the first neighborhood, 
 				//finding in the second neighborhood (swapping)
 				if(maxReduce >= 0){
-					for(int i  = 0; i < N; i++){
+					for(int i  = 0; i < M; i++){
 						if(xtabu[i] == 0){
 							for(int j = 0; j < N; j++){
 								if(ytabu[j] == 0 && i != j){
