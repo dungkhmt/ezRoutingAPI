@@ -1,4 +1,5 @@
 package com.kse.crossDockingAPI.algorithms;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
@@ -7,406 +8,408 @@ import java.io.IOException;
 
 public class CrossDockingProblemSolver {
 	private String fileName;
-	
+
 	// Problem attributes
 	private int M; // Number of origins
 	private int N; // Number of destinations
 	private int I; // Number of strip doors
 	private int J; // Number of stack doors
-	
+
 	private int[][] w; // Number of trips required by the material handling
 						// equipment to move items originating from m to the
 						// cross-dock door where freight destined for n is
 						// being consolidated
-	private int[][] d; //Distance between strip door i and stack door j
+	private int[][] d; // Distance between strip door i and stack door j
 	private int[] s; // Volume of goods from origin m
 	private int[] S; // Capacity of strip door i
 	private int[] r; // Demand from destination n
 	private int[] R; // Capacity of stack door j
-	
 
-	//Best-known solution during the search
+	// Best-known solution during the search
 	public int[] bx = new int[M];
 	public int[] by = new int[N];
 	public int bVal = 0;
 
-	
 	/*
 	 * Constructor without any parameters
 	 */
-	public CrossDockingProblemSolver(String _fileName){
+	public CrossDockingProblemSolver(String _fileName) {
 		fileName = _fileName;
 	}
-	
-	public CrossDockingProblemSolver(
-			long nbInVehicles, long nbOutVehicles, int[] demandInVehicles, int [] demandOutVehicles,
-			long nbInDoors, long nbOutDoors, int[] capacityInDoors, int[] capacityOutDoors,
-			int[][] C, int[][] T)
-	{
-		//Origin + Destination
-		M = (int)nbInVehicles;
-		N = (int)nbOutVehicles;
-		
+
+	public CrossDockingProblemSolver(long nbInVehicles, long nbOutVehicles,
+			int[] demandInVehicles, int[] demandOutVehicles, long nbInDoors,
+			long nbOutDoors, int[] capacityInDoors, int[] capacityOutDoors,
+			int[][] C, int[][] T) {
+		// Origin + Destination
+		M = (int) nbInVehicles;
+		N = (int) nbOutVehicles;
+
 		s = new int[M];
-		for(int i = 0; i < demandInVehicles.length; i++){
+		for (int i = 0; i < demandInVehicles.length; i++) {
 			s[i] = demandInVehicles[i];
 		}
 		r = new int[N];
-		for(int i = 0; i < demandOutVehicles.length; i++){
+		for (int i = 0; i < demandOutVehicles.length; i++) {
 			r[i] = demandOutVehicles[i];
 		}
-			
-		//Strip door + Stack door
-		I = (int)nbInDoors;
-		J = (int)nbOutDoors;
-		
+
+		// Strip door + Stack door
+		I = (int) nbInDoors;
+		J = (int) nbOutDoors;
+
 		S = new int[I];
-		for(int i = 0; i < capacityInDoors.length; i++){
+		for (int i = 0; i < capacityInDoors.length; i++) {
 			S[i] = capacityInDoors[i];
 		}
 		R = new int[J];
-		for(int i = 0; i < capacityOutDoors.length; i++){
+		for (int i = 0; i < capacityOutDoors.length; i++) {
 			R[i] = capacityOutDoors[i];
 		}
-		
-		//Distance
+
+		// Distance
 		d = new int[I][J];
-		for(int i = 0; i < I; i++){
-			for(int j = 0; j < J; j++){
+		for (int i = 0; i < I; i++) {
+			for (int j = 0; j < J; j++) {
 				d[i][j] = C[i][j];
 			}
 		}
-		
-		//Trips
+
+		// Trips
 		w = new int[M][N];
-		for(int i = 0; i < M; i++){
-			for(int j = 0; j < N; j++){
+		for (int i = 0; i < M; i++) {
+			for (int j = 0; j < N; j++) {
 				w[i][j] = T[i][j];
 			}
 		}
 	}
-	
-	public void readProblemInstanceFromFile(){
-		try{
+
+	public void readProblemInstanceFromFile() {
+		try {
 			// Open the file
 			FileInputStream fstream = new FileInputStream(fileName);
-			BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
+			BufferedReader br = new BufferedReader(new InputStreamReader(
+					fstream));
 
 			String strLine;
 
-			//Line 1: #M
+			// Line 1: #M
 			br.readLine();
-			
-			//Line 2: M
-			if ((strLine = br.readLine()) != null){
+
+			// Line 2: M
+			if ((strLine = br.readLine()) != null) {
 				M = Integer.parseInt(strLine);
 			}
-			
-			//Line 3: #N
+
+			// Line 3: #N
 			br.readLine();
-			
-			//Line 4: M
-			if ((strLine = br.readLine()) != null){
+
+			// Line 4: M
+			if ((strLine = br.readLine()) != null) {
 				N = Integer.parseInt(strLine);
 			}
-			
-			//Line 5: #I
+
+			// Line 5: #I
 			br.readLine();
-			
-			//Line 6: I
-			if ((strLine = br.readLine()) != null){
+
+			// Line 6: I
+			if ((strLine = br.readLine()) != null) {
 				I = Integer.parseInt(strLine);
 			}
-			
-			//Line 7: #N
+
+			// Line 7: #N
 			br.readLine();
-			
-			//Line 8: J
-			if ((strLine = br.readLine()) != null){
+
+			// Line 8: J
+			if ((strLine = br.readLine()) != null) {
 				J = Integer.parseInt(strLine);
 			}
-			
-			//Line 9: #w
+
+			// Line 9: #w
 			br.readLine();
-			
-			//Line 10 -- 9 + M
+
+			// Line 10 -- 9 + M
 			w = new int[M][N];
-			for(int i = 0; i < M; i++){
-				if ((strLine = br.readLine()) != null){
+			for (int i = 0; i < M; i++) {
+				if ((strLine = br.readLine()) != null) {
 					String[] elements = strLine.split("\\s");
-					for(int j = 0; j < N; j++){
+					for (int j = 0; j < N; j++) {
 						w[i][j] = Integer.parseInt(elements[j]);
 					}
-					//System.out.println("Size of strings : " + elements.length);
+					// System.out.println("Size of strings : " +
+					// elements.length);
 				}
 			}
-			
-			//Line 9 + M : #d
+
+			// Line 9 + M : #d
 			br.readLine();
-			
-			//Line 10 + M + 1 -- 10 + M + I
+
+			// Line 10 + M + 1 -- 10 + M + I
 			d = new int[I][J];
-			for(int i = 0; i < I; i++){
-				if ((strLine = br.readLine()) != null){
+			for (int i = 0; i < I; i++) {
+				if ((strLine = br.readLine()) != null) {
 					String[] elements = strLine.split("\\s");
-					for(int j = 0; j < J; j++){
+					for (int j = 0; j < J; j++) {
 						d[i][j] = Integer.parseInt(elements[j]);
 					}
-					//System.out.println("Size of strings : " + elements.length);
+					// System.out.println("Size of strings : " +
+					// elements.length);
 				}
 			}
-			
-			//Line 10 + M + I + 1: #s
+
+			// Line 10 + M + I + 1: #s
 			br.readLine();
-			
-			//Line 10 + M + I + 2 
+
+			// Line 10 + M + I + 2
 			s = new int[M];
-			if ((strLine = br.readLine()) != null){
+			if ((strLine = br.readLine()) != null) {
 				String[] elements = strLine.split("\\s");
-				for(int j = 0; j < M; j++){
+				for (int j = 0; j < M; j++) {
 					s[j] = Integer.parseInt(elements[j]);
 				}
-				//System.out.println("Size of strings : " + elements.length);
+				// System.out.println("Size of strings : " + elements.length);
 			}
-			
-			//Line 10 + M + I + 3: #s
+
+			// Line 10 + M + I + 3: #s
 			br.readLine();
-			
-			//Line 10 + M + I + 4 
+
+			// Line 10 + M + I + 4
 			S = new int[I];
-			if ((strLine = br.readLine()) != null){
+			if ((strLine = br.readLine()) != null) {
 				String[] elements = strLine.split("\\s");
-				for(int j = 0; j < I; j++){
+				for (int j = 0; j < I; j++) {
 					S[j] = Integer.parseInt(elements[j]);
 				}
-				//System.out.println("Size of strings : " + elements.length);
+				// System.out.println("Size of strings : " + elements.length);
 			}
-			
-			//Line 10 + M + I + 5: #s
+
+			// Line 10 + M + I + 5: #s
 			br.readLine();
-			
-			//Line 10 + M + I + 6 
+
+			// Line 10 + M + I + 6
 			r = new int[N];
-			if ((strLine = br.readLine()) != null){
+			if ((strLine = br.readLine()) != null) {
 				String[] elements = strLine.split("\\s");
-				for(int j = 0; j < N; j++){
+				for (int j = 0; j < N; j++) {
 					r[j] = Integer.parseInt(elements[j]);
 				}
-				//System.out.println("Size of strings : " + elements.length);
+				// System.out.println("Size of strings : " + elements.length);
 			}
-			
-			//Line 10 + M + I + 7: #s
+
+			// Line 10 + M + I + 7: #s
 			br.readLine();
-			
-			//Line 10 + M + I + 8 
+
+			// Line 10 + M + I + 8
 			R = new int[J];
-			if ((strLine = br.readLine()) != null){
+			if ((strLine = br.readLine()) != null) {
 				String[] elements = strLine.split("\\s");
-				for(int j = 0; j < J; j++){
+				for (int j = 0; j < J; j++) {
 					R[j] = Integer.parseInt(elements[j]);
 				}
-				//System.out.println("Size of strings : " + elements.length);
+				// System.out.println("Size of strings : " + elements.length);
 			}
-			
-			
-			
-			
-			//Close the input stream
+
+			// Close the input stream
 			br.close();
-		}catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
-		} 
+		}
 	}
-	
-	public void printOriginGoodVolumn(){
+
+	public void printOriginGoodVolumn() {
 		System.out.println("Origin Good Volumn");
-		for(int i = 0; i < M; i++){
+		for (int i = 0; i < M; i++) {
 			System.out.print(s[i] + " ");
 		}
 		System.out.println();
 	}
-	
-	public void printDestinationDemand(){
+
+	public void printDestinationDemand() {
 		System.out.println("Demand of destinations");
-		for(int i = 0; i < N; i++){
+		for (int i = 0; i < N; i++) {
 			System.out.print(r[i] + " ");
 		}
 		System.out.println();
 	}
-	
-	public void printCapacityOfStripDoor(){
+
+	public void printCapacityOfStripDoor() {
 		System.out.println("Capacities of trip doors");
-		for(int i = 0; i < I; i++){
+		for (int i = 0; i < I; i++) {
 			System.out.print(S[i] + " ");
 		}
 		System.out.println();
 	}
-	
-	public void printCapacityOfStackDoor(){
+
+	public void printCapacityOfStackDoor() {
 		System.out.println("Capacities of stack doors");
-		for(int i = 0; i < J; i++){
+		for (int i = 0; i < J; i++) {
 			System.out.print(R[i] + " ");
 		}
 		System.out.println();
 	}
+
 	/*
 	 * Print flow matrix
 	 */
-	public void printFlowMatrix(){
+	public void printFlowMatrix() {
 		System.out.println("Printing the flow matrix");
-		for(int i = 0; i < M; i++){
-			for(int j = 0; j < N; j++){
+		for (int i = 0; i < M; i++) {
+			for (int j = 0; j < N; j++) {
 				System.out.println("[" + i + "," + j + "] = " + w[i][j]);
 			}
 		}
 	};
-	
+
 	/*
 	 * Generate randomly a solution
 	 */
-	void generateRandomlySolution(int[] x, int[] y){
+	void generateRandomlySolution(int[] x, int[] y) {
 		Random rn = new Random();
-		
-		//Assigning each origin to a strip door
-		int[] stpCpctRemain = new int[I]; //Capacity remain of the strip doors
-		for(int i = 0; i < I; i++){
+
+		// Assigning each origin to a strip door
+		int[] stpCpctRemain = new int[I]; // Capacity remain of the strip doors
+		for (int i = 0; i < I; i++) {
 			stpCpctRemain[i] = S[i];
 		}
-		
-		for(int i = 0; i < M; i++){
-			//System.out.println("Assigning the origin " + i);
+
+		for (int i = 0; i < M; i++) {
+			// System.out.println("Assigning the origin " + i);
 			boolean assigned = false;
 			int counter = 0;
-			while(!assigned && counter <= 10 * I){
+			while (!assigned && counter <= 10 * I) {
 				counter++;
-				
+
 				int stripDoor = rn.nextInt(I);
-				//System.out.println("Taking strip door " + stripDoor);
-				if(stpCpctRemain[stripDoor] >= s[i]){
-					//Assign this origin to the that strip door
+				// System.out.println("Taking strip door " + stripDoor);
+				if (stpCpctRemain[stripDoor] >= s[i]) {
+					// Assign this origin to the that strip door
 					x[i] = stripDoor;
 					assigned = true;
 					stpCpctRemain[stripDoor] -= s[i];
 				}
 			}
-			
-			//If it can not find a strip door for an origin, restarting whole the assignment 
-			if(!assigned){
+
+			// If it can not find a strip door for an origin, restarting whole
+			// the assignment
+			if (!assigned) {
 				i = -1;
-				for(int j = 0; j < I; j++){
+				for (int j = 0; j < I; j++) {
 					stpCpctRemain[j] = S[j];
 				}
 			}
 		}
-		
-		
-		//Assigning each destination to a stack door
-		int[] stkCpctRemain = new int[J]; //Capacity remain of the strip doors
-		for(int i = 0; i < J; i++){
+
+		// Assigning each destination to a stack door
+		int[] stkCpctRemain = new int[J]; // Capacity remain of the strip doors
+		for (int i = 0; i < J; i++) {
 			stkCpctRemain[i] = R[i];
 		}
-		
-		for(int i = 0; i < N; i++){
-			//System.out.println("Assigning the destination " + i);
+
+		for (int i = 0; i < N; i++) {
+			// System.out.println("Assigning the destination " + i);
 			boolean assigned = false;
 			int counter = 0;
-			while(!assigned && counter <= 10 * J){
+			while (!assigned && counter <= 10 * J) {
 				counter++;
-				
+
 				int stackDoor = rn.nextInt(J);
-				if(stkCpctRemain[stackDoor] >= r[i]){
-					//Assign this origin to the that strip door
-					y[i]= stackDoor;
+				if (stkCpctRemain[stackDoor] >= r[i]) {
+					// Assign this origin to the that strip door
+					y[i] = stackDoor;
 					assigned = true;
 					stkCpctRemain[stackDoor] -= r[i];
 				}
 			}
-			
-			//If it can not find a stack door for a destination, restarting whole the assignment 
-			if(!assigned){
+
+			// If it can not find a stack door for a destination, restarting
+			// whole the assignment
+			if (!assigned) {
 				i = -1;
-				for(int j = 0; j < J; j++){
+				for (int j = 0; j < J; j++) {
 					stkCpctRemain[j] = R[j];
 				}
 			}
-		}	
+		}
 	}
-	
+
 	/*
 	 * Printing a solution
 	 */
-	public  void printSolution(int[] x,  int[] y, int val){
-		for(int i = 0; i < M; i++){
-			System.out.println("Origin " + i + " assigned to strip door " + x[i]);
-			
+	public void printSolution(int[] x, int[] y, int val) {
+		for (int i = 0; i < M; i++) {
+			System.out.println("Origin " + i + " assigned to strip door "
+					+ x[i]);
+
 		}
-		
-		for(int i = 0; i < N; i++){
-			System.out.println("Destination " + i + " assigned to stack door " + y[i]);
+
+		for (int i = 0; i < N; i++) {
+			System.out.println("Destination " + i + " assigned to stack door "
+					+ y[i]);
 		}
-		
+
 		System.out.println("Solution value : " + val);
 	}
-	
+
 	/*
 	 * Copy solution: solution2 = solutions1
 	 */
-	public void copySolution(int[] x1, int[] y1, int[] rmStpCap1, int[] rmStkCap1, 
-		int[] x2, int[] y2,  int[] rmStpCap2, int[] rmStkCap2){
-		for(int i = 0; i < M; i++){
+	public void copySolution(int[] x1, int[] y1, int[] rmStpCap1,
+			int[] rmStkCap1, int[] x2, int[] y2, int[] rmStpCap2,
+			int[] rmStkCap2) {
+		for (int i = 0; i < M; i++) {
 			x2[i] = x1[i];
 		}
-		
-		for(int i = 0; i < N; i++){
+
+		for (int i = 0; i < N; i++) {
 			y2[i] = y1[i];
 		}
-		
-		
-		for(int i = 0; i < I; i++){
+
+		for (int i = 0; i < I; i++) {
 			rmStpCap2[i] = rmStpCap1[i];
 		}
-		
-		for(int i = 0; i < J; i++){
+
+		for (int i = 0; i < J; i++) {
 			rmStkCap2[i] = rmStkCap1[i];
 		}
 	}
-	
+
 	/*
 	 * Compute value of a solution
 	 */
-	public int computeSolValue(int[] x, int[] y){
+	public int computeSolValue(int[] x, int[] y) {
 		int solValue = 0;
-		for(int i = 0; i < M; i++){
-			for(int j = 0; j < N; j++){
-				if(w[i][j] > 0){
+		for (int i = 0; i < M; i++) {
+			for (int j = 0; j < N; j++) {
+				if (w[i][j] > 0) {
 					solValue += d[x[i]][y[j]] * w[i][j];
 				}
 			}
 		}
-		
+
 		return solValue;
 	}
-	
-	public void computeRemainingCapacities(int[] x, int[] y, int[] stp, int[] stk){
-		for(int i = 0; i < I; i++){
+
+	public void computeRemainingCapacities(int[] x, int[] y, int[] stp,
+			int[] stk) {
+		for (int i = 0; i < I; i++) {
 			stp[i] = S[i];
 		}
-		
-		for(int j = 0; j < J; j++){
+
+		for (int j = 0; j < J; j++) {
 			stk[j] = R[j];
 		}
-		
-		for(int i = 0; i < M; i++){
+
+		for (int i = 0; i < M; i++) {
 			stp[x[i]] -= s[i];
 		}
-		
-		for(int i = 0; i < N; i++){
+
+		for (int i = 0; i < N; i++) {
 			stk[y[i]] -= r[i];
 		}
 	}
-	
+
 	/*
-	 * Tabu and constraint-based local Search 
+	 * Tabu and constraint-based local Search
 	 */
 	public void TabuConstraintBasedLocalSearch(){
 		// Algorithm parameters
@@ -641,7 +644,7 @@ public class CrossDockingProblemSolver {
 				//finding in the second neighborhood (swapping)
 				if(maxReduce >= 0){
 					for(int i  = 0; i < N; i++){
-						if(ytabu[i] == 0){
+						if(ytabu[i] == 0){				
 							for(int j = 0; j < N; j++){
 								if(ytabu[j] == 0 && i != j){
 									if(rmStkCap[y[i]] + r[i] - r[j] >= 0 &&
@@ -758,20 +761,18 @@ public class CrossDockingProblemSolver {
 		}
 		System.out.println();
 	}
-	
-	
-	
+
 	/*
 	 * Main function
-	 */	
+	 */
 	public static void main(String[] args) {
-		
-		
-		CrossDockingProblemSolver crossDocking = new CrossDockingProblemSolver("D:/kde-solution/Logistics/code/Logistic/src/main/java/vn/webapp/modules/crossdockingsystem/algorithms/test.txt");
+
+		CrossDockingProblemSolver crossDocking = new CrossDockingProblemSolver(
+				"D:/kde-solution/Logistics/code/Logistic/src/main/java/vn/webapp/modules/crossdockingsystem/algorithms/test.txt");
 		crossDocking.readProblemInstanceFromFile();
-		//crossDocking.printFlowMatrix();
+		// crossDocking.printFlowMatrix();
 		crossDocking.TabuConstraintBasedLocalSearch();
-		
+
 	}
-	
+
 }
