@@ -515,7 +515,7 @@ public class CrossDockingProblemSolver {
 					for(int i  = 0; i < M; i++){
 						if(xtabu[i] == 0){
 							for(int j = 0; j < M; j++){
-								if(ytabu[j] == 0 && i != j){
+								if(xtabu[j] == 0 && i != j){
 									if(rmStpCap[x[i]] + s[i] - s[j] >= 0 &&
 											rmStpCap[x[j]] + s[j] - s[i] >= 0 ){
 										int delta = 0;
@@ -640,8 +640,8 @@ public class CrossDockingProblemSolver {
 				//If there does not exist better solution in the first neighborhood, 
 				//finding in the second neighborhood (swapping)
 				if(maxReduce >= 0){
-					for(int i  = 0; i < M; i++){
-						if(xtabu[i] == 0){
+					for(int i  = 0; i < N; i++){
+						if(ytabu[i] == 0){
 							for(int j = 0; j < N; j++){
 								if(ytabu[j] == 0 && i != j){
 									if(rmStkCap[y[i]] + r[i] - r[j] >= 0 &&

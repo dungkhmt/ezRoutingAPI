@@ -196,6 +196,21 @@ public class GoogleMapsQuery {
 		return null;
 	}
 
+	public double getDistance(String latlng1, String latlng2){
+		double distance = 0;
+		String[] elements1 =latlng1.split(",");
+	
+		double lat1 = Double.parseDouble(elements1[0]);
+		double lng1 = Double.parseDouble(elements1[1]);
+		
+		String[] elements2 =latlng2.split(",");
+		double lat2 = Double.parseDouble(elements2[0]);
+		double lng2 = Double.parseDouble(elements2[1]);
+		
+		distance = getDistance(lat1, lng1, lat2, lng2);
+		
+		return distance;
+	}
 	public double getDistance(double lat1, double lng1, double lat2, double lng2) {
 		URL url = null;
 		try {

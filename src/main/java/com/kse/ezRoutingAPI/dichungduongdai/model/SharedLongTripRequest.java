@@ -1,6 +1,6 @@
 package com.kse.ezRoutingAPI.dichungduongdai.model;
 
-public class Request {
+public class SharedLongTripRequest {
 	private String ticketCode;
 	private String pickupAddress;
 	private String pickupLatLng;
@@ -10,16 +10,30 @@ public class Request {
 	private int nbPassengers;
 	private boolean sharing;
 	private boolean oneway;
+	private int price;
+	
 	private String Itinerary;// chunkName 
 	
-	public Request() {
+	public SharedLongTripRequest() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	public Request(String ticketCode, String pickupAddress,
+	
+	
+	public int getPrice() {
+		return price;
+	}
+
+
+	public void setPrice(int price) {
+		this.price = price;
+	}
+
+
+	public SharedLongTripRequest(String ticketCode, String pickupAddress,
 			String pickupLatLng, String deliveryAddress, String deliveryLatLng,
 			String departDateTime, int nbPassengers, boolean sharing,
-			boolean oneway, String itinerary) {
+			boolean oneway, int price, String itinerary) {
 		super();
 		this.ticketCode = ticketCode;
 		this.pickupAddress = pickupAddress;
@@ -30,9 +44,21 @@ public class Request {
 		this.nbPassengers = nbPassengers;
 		this.sharing = sharing;
 		this.oneway = oneway;
-		this.Itinerary = itinerary;
+		this.price = price;
+		Itinerary = itinerary;
 	}
-	
+
+	public void print(){
+		System.out.println("Information of a request ");
+		System.out.println("Ticket code: " + ticketCode);
+		System.out.println("Itinerary: ");
+		System.out.println("Pickup address: " + pickupAddress);
+		System.out.println("Delivery address: " + deliveryAddress);
+		System.out.println("Departure time: " + departDateTime);
+		System.out.println("Number of passengers: " + nbPassengers);
+		System.out.println("Price: " + price);
+	}
+
 	public String getItinerary() {
 		return Itinerary;
 	}
