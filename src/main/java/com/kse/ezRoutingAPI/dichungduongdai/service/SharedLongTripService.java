@@ -151,8 +151,8 @@ public class SharedLongTripService {
 	    		if(IC[i].size() == 1){ //Single
 	    			SharedLongTripRequest req = requestLst[IC[i].elementAt(0)];
 	    			SharedLongTripElement[] elementLst = new SharedLongTripElement[2];
-	    			elementLst[0] = new SharedLongTripElement(req.getTicketCode(), "", req.getPickupAddress(), req.getPickupLatLng(), "", "");
-	    			elementLst[1] = new SharedLongTripElement(req.getTicketCode(), "", "", "", req.getDeliveryAddress(), req.getDeliveryLatLng());
+	    			elementLst[0] = new SharedLongTripElement(req.getTicketCode(), req.getDepartDateTime(), req.getPickupAddress(), req.getPickupLatLng(), "-", "-");
+	    			elementLst[1] = new SharedLongTripElement(req.getTicketCode(), "", "-", "-", req.getDeliveryAddress(), req.getDeliveryLatLng());
 	    			
 	    			int nbPeople = req.getNbPassengers();
 	    			String taxiType = "";
@@ -171,22 +171,22 @@ public class SharedLongTripService {
 	    			SharedLongTripElement[] elementLst = new SharedLongTripElement[4];
 	    			
 	    			if(DateTimeUtils.distance(req1.getDepartDateTime(), req2.getDepartDateTime()) < 0){
-	    				elementLst[0] = new SharedLongTripElement(req1.getTicketCode(), "", req1.getPickupAddress(), req1.getPickupLatLng(), "", "");
-	    				elementLst[1] = new SharedLongTripElement(req2.getTicketCode(), "", req2.getPickupAddress(), req2.getPickupLatLng(), "", "");
+	    				elementLst[0] = new SharedLongTripElement(req1.getTicketCode(), req1.getDepartDateTime(), req1.getPickupAddress(), req1.getPickupLatLng(), "-", "-");
+	    				elementLst[1] = new SharedLongTripElement(req2.getTicketCode(), req2.getDepartDateTime(), req2.getPickupAddress(), req2.getPickupLatLng(), "-", "-");
 	    			}else{
-	    				elementLst[0] = new SharedLongTripElement(req2.getTicketCode(), "", req2.getPickupAddress(), req2.getPickupLatLng(), "", "");
-	    				elementLst[1] = new SharedLongTripElement(req1.getTicketCode(), "", req1.getPickupAddress(), req1.getPickupLatLng(), "", "");	    				
+	    				elementLst[0] = new SharedLongTripElement(req2.getTicketCode(), req2.getDepartDateTime(), req2.getPickupAddress(), req2.getPickupLatLng(), "-", "-");
+	    				elementLst[1] = new SharedLongTripElement(req1.getTicketCode(), req1.getDepartDateTime(), req1.getPickupAddress(), req1.getPickupLatLng(), "-", "-");	    				
 	    			}
 	    			
 	    			double distance1 = G.getDistance(elementLst[1].getPickupPosition(), req1.getDeliveryLatLng());
 	    			double distance2 = G.getDistance(elementLst[1].getPickupPosition(), req2.getDeliveryLatLng());
 	    			
 	    			if(distance1 < distance2){
-	    				elementLst[2] = new SharedLongTripElement(req1.getTicketCode(), "", "", "", req1.getDeliveryAddress(), req1.getDeliveryLatLng());
-	    				elementLst[3] = new SharedLongTripElement(req2.getTicketCode(), "", "", "", req2.getDeliveryAddress(), req2.getDeliveryLatLng());
+	    				elementLst[2] = new SharedLongTripElement(req1.getTicketCode(), "-", "-", "-", req1.getDeliveryAddress(), req1.getDeliveryLatLng());
+	    				elementLst[3] = new SharedLongTripElement(req2.getTicketCode(), "-", "-", "-", req2.getDeliveryAddress(), req2.getDeliveryLatLng());
 	    			}else{
-	    				elementLst[2] = new SharedLongTripElement(req2.getTicketCode(), "", "", "", req2.getDeliveryAddress(), req2.getDeliveryLatLng());
-	    				elementLst[3] = new SharedLongTripElement(req1.getTicketCode(), "", "", "", req1.getDeliveryAddress(), req1.getDeliveryLatLng());
+	    				elementLst[2] = new SharedLongTripElement(req2.getTicketCode(), "-", "-", "-", req2.getDeliveryAddress(), req2.getDeliveryLatLng());
+	    				elementLst[3] = new SharedLongTripElement(req1.getTicketCode(), "-", "-", "-", req1.getDeliveryAddress(), req1.getDeliveryLatLng());
 	    			}
 	    			
 	    			int nbPeople = req1.getNbPassengers() + req2.getNbPassengers();
@@ -343,7 +343,8 @@ public class SharedLongTripService {
 	    			
 	    			SharedLongTripElement[] elementLst = new SharedLongTripElement[2*k];
 	    			for(int j = 0; j < k; j++){
-	    				elementLst[j] = new SharedLongTripElement(temRequestLst.elementAt(j).getTicketCode(), "", temRequestLst.elementAt(j).getPickupAddress(), temRequestLst.elementAt(j).getPickupLatLng(), "", "");
+	    				elementLst[j] = new SharedLongTripElement(temRequestLst.elementAt(j).getTicketCode(), temRequestLst.elementAt(j).getDepartDateTime(),
+	    						temRequestLst.elementAt(j).getPickupAddress(), temRequestLst.elementAt(j).getPickupLatLng(), "-", "-");
 	    			}
 	    			
 	    			int [] visited = new int[k];
@@ -365,7 +366,7 @@ public class SharedLongTripService {
 	    				visited[index] = 1;
 	    				lastLatLng = temRequestLst.elementAt(index).getDeliveryLatLng();	    				
 	    				
-	    				elementLst[k+j] = new SharedLongTripElement(temRequestLst.elementAt(index).getTicketCode(), "", "", "", 
+	    				elementLst[k+j] = new SharedLongTripElement(temRequestLst.elementAt(index).getTicketCode(), "-", "-", "-", 
 	    						temRequestLst.elementAt(index).getDeliveryAddress(), temRequestLst.elementAt(index).getDeliveryLatLng());
 	    				
 	    			}
