@@ -13,7 +13,7 @@ import com.kse.utils.DateTimeUtils;
 import localsearch.domainspecific.vehiclerouting.vrp.utils.googlemaps.GoogleMapsQuery;
 
 public class SharedLongTripService {
-	
+	private static double MAX_VALUE = 10000000;
 	public String name(){
 		return "DichungDuongDaiService";
 	}
@@ -230,8 +230,8 @@ public class SharedLongTripService {
 	    			curSol[r] = IC[i].elementAt(r);
 	    		}
 	    		
-	    		int curObj = computeRoutes(input, m, pickupTime, d1, curSol, routeCurSol, csTimeLB, csTimeUB);
-	    		int bestObj = curObj;
+	    		double curObj = computeRoutes(input, m, pickupTime, d1, curSol, routeCurSol, csTimeLB, csTimeUB);
+	    		double bestObj = curObj;
 	    		
 	    		while(it < maxIt){	    			
 	    			it++;
@@ -263,7 +263,7 @@ public class SharedLongTripService {
 		    			}
 	    				
 	    			}else{
-	    				int tempBestObj = m;		    			
+	    				double tempBestObj = m * MAX_VALUE;		    			
 		    			
 		    			for(int r1 = 0; r1 < m-1; r1++){
 		    				for(int r2 = r1+1; r2 < m; r2++){		    					
@@ -275,7 +275,7 @@ public class SharedLongTripService {
 			    					tempSol[r2] = curSol[r1];
 			    					
 			    					//Compute routes for the temporary sequence
-			    					int tempObj = computeRoutes(input, m, pickupTime, d1, tempSol, routeTempSol, tsTimeLB, tsTimeUB);
+			    					double tempObj = computeRoutes(input, m, pickupTime, d1, tempSol, routeTempSol, tsTimeLB, tsTimeUB);
 			    					if(tempObj < tempBestObj){
 			    						tempBestObj = tempObj;
 			    						req1 = r1;
@@ -409,7 +409,7 @@ public class SharedLongTripService {
 	}
 	
 	//Compute routes for a sequence
-	public int computeRoutes(SharedLongTripInput input, int m, double[] pickupTime, double[][] d1, 
+	public double computeRoutes(SharedLongTripInput input, int m, double[] pickupTime, double[][] d1, 
 			int [] curSol, int [] routeCurSol, double [] csTimeLB, double [] csTimeUB){
 		
 		
@@ -462,6 +462,13 @@ public class SharedLongTripService {
 		}System.out.println();
 		*/
 		
-		return routeCurSol[m-1];
+		double result = routeCurSol[m-1] * MAX_VALUE;
+		for(int i = 0; i < m-1; i++){
+			if(routeCurSol[i] == routeCurSol[i+1]){
+				result += d1[curSol[i]][curSol[i+1]];
+			}
+		}
+
+		return result;
 	}
 }
