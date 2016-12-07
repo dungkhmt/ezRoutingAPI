@@ -10,6 +10,7 @@ public class LatLng {
 	public LatLng(double lat, double lng){ this.lat = lat; this.lng = lng;}
 	public LatLng(String latlng){
 		String[] s = latlng.split(",");
+		
 		lat = Double.valueOf(s[0].trim());
 		lng = Double.valueOf(s[1].trim());
 	}

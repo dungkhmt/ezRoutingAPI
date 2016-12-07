@@ -95,8 +95,14 @@ public class PickupDeliveryContainerService {
 		int id = -1;
 		for(int k= 0; k < trucks.length; k++){
 			id++;
-			LatLng ll = new LatLng(trucks[k].getCurrentLatLng());
+			LatLng ll = null;
+			if(trucks[k].getCurrentLatLng().equals("-"))
+					ll = new LatLng(unknownLatLng,unknownLatLng);
+			else
+				ll = new LatLng(trucks[k].getCurrentLatLng());	
+			
 			Point startPoint = new Point(id,ll.lat,ll.lng);
+			
 			allPoints.add(startPoint);
 			startPoints.add(startPoint);
 			mPoint2Truck.put(startPoint, trucks[k]);
@@ -136,7 +142,7 @@ public class PickupDeliveryContainerService {
 		ArcWeightsManager distances = new ArcWeightsManager(allPoints);
 		ArcWeightsManager travelTimes = new ArcWeightsManager(allPoints);
 
-		int maxTravelTime = -1;
+		int maxTravelTime = 0;
 		for(Point p1: clientPoints){
 			for(Point p2: clientPoints){
 				//double d = G.estimateDistanceMeter(p1.getX(), p1.getY(), p2.getX(), p2.getY());
@@ -156,6 +162,7 @@ public class PickupDeliveryContainerService {
 		
 		for(Point s: startPoints){
 			for(Point p: clientPoints){
+				/*
 				double d = G.estimateDistanceMeter(s.getX(), s.getY(), p.getX(), p.getY());
 				int t = G.estimateTravelTime(s.getX(), s.getY(), p.getX(), p.getY(), "driving", SPEED, APPX);
 				distances.setWeight(s, p, d);
@@ -168,8 +175,10 @@ public class PickupDeliveryContainerService {
 				distances.setWeight(p, s, d);
 				travelTimes.setWeight(p, s,  t);
 				if(maxTravelTime < t) maxTravelTime = t;
+				*/
 				
-				
+				distances.setWeight(p, s, 0);
+				travelTimes.setWeight(p, s,  0);
 				
 			}
 		}
@@ -177,6 +186,7 @@ public class PickupDeliveryContainerService {
 		
 		for(Point e: endPoints){
 			for(Point p: clientPoints){
+				/*
 				double d = INFTY;
 				if(e.getX() < unknownLatLng)
 					d = G.estimateDistanceMeter(e.getX(), e.getY(), p.getX(), p.getY());
@@ -192,6 +202,11 @@ public class PickupDeliveryContainerService {
 				}
 				distances.setWeight(p, e, d);
 				travelTimes.setWeight(p, e,  t);
+				*/
+				
+				distances.setWeight(p, e, 0);
+				travelTimes.setWeight(p, e,  0);
+				
 			}
 		}
 		
