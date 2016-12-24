@@ -54,11 +54,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kse.ezRoutingAPI.dichung.model.GlobalSharedTaxiInput;
 import com.kse.ezRoutingAPI.dichung.model.SharedTaxiInput;
 import com.kse.ezRoutingAPI.dichung.model.SharedTaxiRequest;
 import com.kse.ezRoutingAPI.dichung.model.SharedTaxiRoute;
+import com.kse.ezRoutingAPI.dichung.model.SharedTaxiRouteElement;
 import com.kse.ezRoutingAPI.dichung.model.SharedTaxiSolution;
 import com.kse.ezRoutingAPI.dichung.service.DichungService;
+import com.kse.ezRoutingAPI.dichungduongdai.model.SharedLongTripElement;
+import com.kse.ezRoutingAPI.dichungduongdai.model.SharedLongTripInput;
+import com.kse.ezRoutingAPI.dichungduongdai.model.SharedLongTripRoute;
+import com.kse.ezRoutingAPI.dichungduongdai.model.SharedLongTripSolution;
+import com.kse.ezRoutingAPI.dichungduongdai.service.SharedLongTripService;
 import com.kse.utils.DateTimeUtils;
 
 import java.io.File;
@@ -123,6 +130,99 @@ public class DichungAPIController {
 			ex.printStackTrace();
 		}
 	}
+
+	public void writeGlobalRequest(GlobalSharedTaxiInput input){
+		try{
+			DateFormat dateFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss");
+			Date date = new Date();
+			
+			//System.out.println(dateFormat.format(date)); //2014/08/06 15:59:48
+			String dt = dateFormat.format(date);
+			String[] s  = dt.split(":"); 
+			
+			String dir = ROOT_DIR + "/" + DateTimeUtils.currentDate();
+			File f = new File(dir);
+			if(!f.exists()){
+				f.mkdir();
+			}
+			
+			//String fn = ROOT_DIR + "dichungairport-requests-" + s[0] + s[1] + s[2] + "-" + s[3] + s[4] + s[5] + ".txt";
+			String fn = dir + "/dichung-global-requests-" + s[0] + s[1] + s[2] + "-" + s[3] + s[4] + s[5] + ".txt";
+			System.out.println(name() + "::writeRequest to file " + fn);
+			PrintWriter out = new PrintWriter(fn);
+			
+			ObjectMapper mapper = new ObjectMapper();
+			String jsoninput = mapper.writeValueAsString(input);
+			
+			//out.println("input: JSON");
+			out.println(jsoninput);
+			
+	
+			out.close();
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+	}
+
+	@RequestMapping(value = "/shared-a-ride-plan", method = RequestMethod.POST)
+	public SharedTaxiSolution[] computeSharedTaxiSolution(HttpServletRequest request,
+			@RequestBody GlobalSharedTaxiInput input) {
+		String path = request.getServletContext().getRealPath("ezRoutingAPIROOT");
+		System.out.println(name() + "::computeSharedTaxiSolution, path = " + path);
+		
+		writeGlobalRequest(input);
+		
+		// compute solution for air port requests
+		SharedTaxiInput[] requestAirports = input.getAirportInput();
+		SharedTaxiSolution[] sa = new SharedTaxiSolution[requestAirports.length];
+		DichungService dichungService = new DichungService();
+		for(int i = 0; i < requestAirports.length; i++){
+			sa[i] = dichungService.computeSharedTaxiHanoiNoiBaiSolution(requestAirports[i]);
+		}
+		
+		// compute solution for long trip requests
+		SharedLongTripInput[] requestLongTrips = input.getLongtripInput();
+		SharedLongTripSolution[] sl = new SharedLongTripSolution[requestLongTrips.length];
+		SharedLongTripService dichungDuongdaiService = new SharedLongTripService();
+		for(int i = 0; i < requestLongTrips.length; i++){
+			sl[i] = dichungDuongdaiService.computeSharedLongTrip(requestLongTrips[i]);
+		}
+		
+		// convert long trip solutions into unique format of shared a ride solution
+		SharedTaxiSolution[] tmp = new SharedTaxiSolution[sl.length];
+		for(int i = 0; i < sl.length; i++){
+			SharedLongTripRoute[] r = sl[i].getRoutes();
+			SharedTaxiRoute[] tr = new SharedTaxiRoute[r.length];
+			for(int j = 0; j < r.length; j++){
+				SharedLongTripElement[] re = r[j].getRouteElements();
+				SharedTaxiRouteElement[] te = new SharedTaxiRouteElement[re.length];
+				for(int k = 0; k < re.length; k++){
+					te[k] = new SharedTaxiRouteElement(re[k].getTicketCode(),
+							re[k].getPickupAddress(),
+							re[k].getDeliveryAddress(),
+							"-",
+							re[k].getDepartTime(),
+							"-",
+							"-",
+							"-",
+							"-",
+							"-"
+							);
+				}
+				tr[j] = new SharedTaxiRoute(te, r[j].getTaxiType(), r[j].getNbPeople(), "-");
+			}
+			tmp[i] = new SharedTaxiSolution(-1, -1, requestLongTrips[i].getRequests().length, tr);
+		}
+		
+		SharedTaxiSolution[] sol  = new SharedTaxiSolution[sa.length+tmp.length];
+		for(int i = 0; i < sa.length; i++)
+			sol[i] = sa[i];
+		for(int i = 0; i < tmp.length; i++)
+			sol[i + sa.length] = tmp[i];
+		return sol;
+	}
+	
+	
 	@RequestMapping(value = "/shared-taxi-plan-dichung-airport", method = RequestMethod.POST)
 	public SharedTaxiSolution computeSharedTaxiSolution(HttpServletRequest request,
 			@RequestBody SharedTaxiInput input) {

@@ -5,6 +5,7 @@ public class CrossDockingSystemSolution {
 	private int objective;
 	private int[] inVehicleAssignments;
 	private int[] outVehicleAssignments;
+	
 	public int getConstraintViolations() {
 		return constraintViolations;
 	}
