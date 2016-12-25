@@ -96,6 +96,11 @@ public class PickupDeliveryContainerService {
 		
 		PickupDeliveryGreedyAssgimentSolver greedyAssigner = new PickupDeliveryGreedyAssgimentSolver(req,trucks);
 		greedyAssigner.assignTrucks(maxDistance, maxWaitTime);
+		
+		if(!greedyAssigner.feasibleSolution()){
+			return new PickupDeliverySolution(false,-1,-1,null);
+		}
+		
 		HashMap<MatchedSequenceRequests, Truck> sol2Assigner = greedyAssigner.getTruckOf();
 		
 		HashSet<Truck> sel_trucks = new HashSet<Truck>();
@@ -406,7 +411,7 @@ public class PickupDeliveryContainerService {
 		
 		double violations = solver.F.getValues().get(0);
 		double traveldistance = solver.F.getValues().get(1);
-		return new PickupDeliverySolution(violations, traveldistance,arrRoutes);
+		return new PickupDeliverySolution(true,violations, traveldistance,arrRoutes);
 		
 	}
 	
