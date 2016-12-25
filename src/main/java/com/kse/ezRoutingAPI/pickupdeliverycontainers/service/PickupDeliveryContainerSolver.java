@@ -55,10 +55,13 @@ import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.INe
 import localsearch.domainspecific.vehiclerouting.vrp.search.GenericLocalSearch;
 import localsearch.domainspecific.vehiclerouting.vrp.search.ISearch;
 import localsearch.domainspecific.vehiclerouting.vrp.search.Neighborhood;
+import localsearch.domainspecific.vehiclerouting.vrp.utils.googlemaps.GoogleMapsQuery;
 
+import com.kse.ezRoutingAPI.pickupdeliverycontainers.model.MatchedSequenceRequests;
 import com.kse.ezRoutingAPI.pickupdeliverycontainers.model.PickupDeliveryRequest;
 import com.kse.ezRoutingAPI.pickupdeliverycontainers.model.PickupDeliverySolution;
 import com.kse.ezRoutingAPI.pickupdeliverycontainers.model.Truck;
+import com.kse.utils.DateTimeUtils;
 
 class PickupDeliveryExplorer implements INeighborhoodExplorer {
 	private VRManager mgr;
@@ -67,12 +70,14 @@ class PickupDeliveryExplorer implements INeighborhoodExplorer {
 	private LexMultiFunctions F;
 	private LexMultiValues bestValue;
 	private boolean firstImprovement = true;
-	
+
 	private PickupDeliveryRequest[] req;
 	private HashMap<PickupDeliveryRequest, Point> mReq2Pickup;
 	private HashMap<PickupDeliveryRequest, Point> mReq2Delivery;
-	
-	public PickupDeliveryExplorer(VarRoutesVR XR, LexMultiFunctions F, PickupDeliveryRequest[] req, HashMap<PickupDeliveryRequest, Point> mReq2Pickup, 
+
+	public PickupDeliveryExplorer(VarRoutesVR XR, LexMultiFunctions F,
+			PickupDeliveryRequest[] req,
+			HashMap<PickupDeliveryRequest, Point> mReq2Pickup,
 			HashMap<PickupDeliveryRequest, Point> mReq2Delivery) {
 		this.XR = XR;
 		this.F = F;
@@ -81,179 +86,178 @@ class PickupDeliveryExplorer implements INeighborhoodExplorer {
 		this.mReq2Delivery = mReq2Delivery;
 		this.mReq2Pickup = mReq2Pickup;
 	}
-	public PickupDeliveryExplorer(VarRoutesVR XR, LexMultiFunctions F, boolean firstImprovement) {
+
+	public PickupDeliveryExplorer(VarRoutesVR XR, LexMultiFunctions F,
+			boolean firstImprovement) {
 		this.XR = XR;
 		this.F = F;
 		this.mgr = XR.getVRManager();
 		this.firstImprovement = firstImprovement;
 	}
-	
-	public PickupDeliveryExplorer(ISearch search, VRManager mgr, LexMultiFunctions F){
+
+	public PickupDeliveryExplorer(ISearch search, VRManager mgr,
+			LexMultiFunctions F) {
 		this.search = search;
 		this.mgr = mgr;
 		this.XR = mgr.getVarRoutesVR();
 		this.F = F;
 		this.bestValue = search.getIncumbentValue();
 	}
-	public String name(){
+
+	public String name() {
 		return "PickupDeliveryExplorer";
 	}
+
 	public void exploreNeighborhood(Neighborhood N, LexMultiValues bestEval) {
-		// TODO Auto-generated method stub 
-		
-		
-		if(firstImprovement && N.hasImprovement()){
-			System.out.println(name() + "::exploreNeighborhood, has improvement --> RETURN");
+		// TODO Auto-generated method stub
+
+		if (firstImprovement && N.hasImprovement()) {
+			System.out.println(name()
+					+ "::exploreNeighborhood, has improvement --> RETURN");
 			return;
 		}
 		ArrayList<Point> P = new ArrayList<Point>();
-		for(int i = 0; i < req.length; i++){
+		for (int i = 0; i < req.length; i++) {
 			Point d = mReq2Delivery.get(req[i]);
 			P.add(d);
 		}
-		for(int k = 1; k <= XR.getNbRoutes(); k++){
+		for (int k = 1; k <= XR.getNbRoutes(); k++) {
 			P.add(XR.startPoint(k));
 		}
-		
-		for(int i = 0; i < req.length; i++){
+
+		for (int i = 0; i < req.length; i++) {
 			Point p = mReq2Pickup.get(req[i]);
 			Point d = mReq2Delivery.get(req[i]);
 			ArrayList<Point> X = new ArrayList<Point>();
 			X.add(p);
 			X.add(d);
-			
-			//for(int k = 1; k <= XR.getNbRoutes(); k++){
-			//	for(Point x = XR.startPoint(k); x != XR.endPoint(k); x = XR.next(x)){
-			//		for(Point y = XR.next(x); y != XR.endPoint(k); y = XR.next(y)){
-			for(Point x: P){
+
+			// for(int k = 1; k <= XR.getNbRoutes(); k++){
+			// for(Point x = XR.startPoint(k); x != XR.endPoint(k); x =
+			// XR.next(x)){
+			// for(Point y = XR.next(x); y != XR.endPoint(k); y = XR.next(y)){
+			for (Point x : P) {
 				Point y = p;
-						if(x == d) continue;
-						//if(x == p || y == d) continue;
-						//if(XR.next(x) == p || XR.next(y) == d) continue;
-						ArrayList<Point> Y = new ArrayList<Point>();
-						Y.add(x);
-						Y.add(y);
-						
-						LexMultiValues eval = F.evaluateKPointsMove(X, Y);
-						//System.out.println("PickupDeliveryExplorer::exploreNeighborhood, eval = " + eval.toString());
-						if (eval.lt(bestEval)){
-							N.clear();
-							N.add(new KPointsMove(mgr, eval, X, Y));
-							bestEval.set(eval);
-						} else if (eval.eq(bestEval)) {
-							N.add(new KPointsMove(mgr, eval, X, Y));
-						}
-					}
-				//}
-			//}
+				if (x == d)
+					continue;
+				// if(x == p || y == d) continue;
+				// if(XR.next(x) == p || XR.next(y) == d) continue;
+				ArrayList<Point> Y = new ArrayList<Point>();
+				Y.add(x);
+				Y.add(y);
+
+				LexMultiValues eval = F.evaluateKPointsMove(X, Y);
+				// System.out.println("PickupDeliveryExplorer::exploreNeighborhood, eval = "
+				// + eval.toString());
+				if (eval.lt(bestEval)) {
+					N.clear();
+					N.add(new KPointsMove(mgr, eval, X, Y));
+					bestEval.set(eval);
+				} else if (eval.eq(bestEval)) {
+					N.add(new KPointsMove(mgr, eval, X, Y));
+				}
+			}
+			// }
+			// }
 		}
 	}
-	
-	public void performMove(IVRMove m){
-		//DO NOTHING
+
+	public void performMove(IVRMove m) {
+		// DO NOTHING
 	}
 }
 
-class ContainerSearch extends GenericLocalSearch{
+class ContainerSearch extends GenericLocalSearch {
 	private PickupDeliveryRequest[] req;
+	private Truck[] trucks;
 	private HashMap<PickupDeliveryRequest, Point> mReq2Pickup;
 	private HashMap<PickupDeliveryRequest, Point> mReq2Delivery;
+	private boolean feasible;
 	
-	public ContainerSearch(VRManager mgr, PickupDeliveryRequest[] req, HashMap<PickupDeliveryRequest, Point> mReq2Pickup, 
-			HashMap<PickupDeliveryRequest, Point> mReq2Delivery){
+	public ContainerSearch(VRManager mgr, PickupDeliveryRequest[] req, Truck[] trucks,
+			HashMap<PickupDeliveryRequest, Point> mReq2Pickup,
+			HashMap<PickupDeliveryRequest, Point> mReq2Delivery) {
 		super(mgr);
 		this.req = req;
 		this.mReq2Pickup = mReq2Pickup;
 		this.mReq2Delivery = mReq2Delivery;
+
+	}
+
+	public void createSolutionGreedy(){
+		mgr.performRemoveAllClientPoints();
 		
 	}
-	
-	public void generateInitialSolution(){
+	public void generateInitialSolution() {
 		int k = 0;
-		//for(Point p: XR.getClientPoints()){
-			mgr.performRemoveAllClientPoints();
-		//}
-		for(int i = 0; i < req.length; i++){
-			k = k+1;
-			if(k > XR.getNbRoutes()) k= 1;
+		// for(Point p: XR.getClientPoints()){
+		mgr.performRemoveAllClientPoints();
+		// }
+		for (int i = 0; i < req.length; i++) {
+			k = k + 1;
+			if (k > XR.getNbRoutes())
+				k = 1;
 			Point s = XR.startPoint(k);
 			Point pickup = mReq2Pickup.get(req[i]);
 			Point delivery = mReq2Delivery.get(req[i]);
 			mgr.performAddOnePoint(pickup, s);
 			mgr.performAddOnePoint(delivery, pickup);
-			System.out.println(name() + "::generateInitialSolution, add pickup " + pickup.ID + 
-					", delivery " + delivery.ID + " to route " + k + ", XR = " + XR.toString());
+			System.out.println(name()
+					+ "::generateInitialSolution, add pickup " + pickup.ID
+					+ ", delivery " + delivery.ID + " to route " + k
+					+ ", XR = " + XR.toString());
 		}
 	}
-	public void restart(){
-		
-		//XR.setRandom();
-		//generateInitialSolution();
+
+	public void restart() {
+
+		// XR.setRandom();
+		// generateInitialSolution();
 		generateInitialSolution();
-		System.out.println(name() + "::restart............, XR = " + XR.toString());
-		if(F.getValues().lt(bestValue)){
+		System.out.println(name() + "::restart............, XR = "
+				+ XR.toString());
+		if (F.getValues().lt(bestValue)) {
 			updateBest();
 		}
 		nic = 0;
 	}
 	/*
-	public void search(int maxIter, int maxTime){
-		generateInitialSolution();
-		double t0 = System.currentTimeMillis();
-		for(int it = 1; it <= maxIter; it++){
-			double t= System.currentTimeMillis();
-			t = t-t0;
-			t = t*0.001;
-			if(t > maxTime) break;
-			
-			// explore neighborhood
-			Point sel_pickup = null;
-			Point sel_delivery = null;
-			LexMultiValues bestEval = new LexMultiValues();
-			//bestEval.fill(F.size(), CBLSVR.MAX_INT);
-			bestEval.fill(F.size(), 0);
-			
-			Neighborhood N = new Neighborhood(mgr);
-			
-			for(int i = 0; i < req.length; i++){
-				Point p = mReq2Pickup.get(req[i]);
-				Point d = mReq2Delivery.get(req[i]);
-				ArrayList<Point> X = new ArrayList<Point>();
-				X.add(p);
-				X.add(d);
-				
-				for(int k = 1; k <= XR.getNbRoutes(); k++){
-					for(Point x = XR.startPoint(k); x != XR.endPoint(k); x = XR.next(x)){
-						for(Point y = XR.next(x); y != XR.endPoint(k); y = XR.next(y)){
-							if(x == p || x == d || y == p || y == d) continue;
-							ArrayList<Point> Y = new ArrayList<Point>();
-							Y.add(x);
-							Y.add(y);
-							
-							LexMultiValues eval = F.evaluateKPointsMove(X, Y);
-							if (eval.lt(bestEval)){
-								N.clear();
-								N.add(new KPointsMove(mgr, eval, X, Y));
-								bestEval.set(eval);
-							} else if (eval.eq(bestEval)) {
-								N.add(new KPointsMove(mgr, eval, X, Y));
-							}
-						}
-					}
-				}
-			}
-			
-			if(N.hasMove()){
-				IVRMove m = N.getAMove();
-				
-			}
-			
-		}
-	}
-	*/
+	 * public void search(int maxIter, int maxTime){ generateInitialSolution();
+	 * double t0 = System.currentTimeMillis(); for(int it = 1; it <= maxIter;
+	 * it++){ double t= System.currentTimeMillis(); t = t-t0; t = t*0.001; if(t
+	 * > maxTime) break;
+	 * 
+	 * // explore neighborhood Point sel_pickup = null; Point sel_delivery =
+	 * null; LexMultiValues bestEval = new LexMultiValues();
+	 * //bestEval.fill(F.size(), CBLSVR.MAX_INT); bestEval.fill(F.size(), 0);
+	 * 
+	 * Neighborhood N = new Neighborhood(mgr);
+	 * 
+	 * for(int i = 0; i < req.length; i++){ Point p = mReq2Pickup.get(req[i]);
+	 * Point d = mReq2Delivery.get(req[i]); ArrayList<Point> X = new
+	 * ArrayList<Point>(); X.add(p); X.add(d);
+	 * 
+	 * for(int k = 1; k <= XR.getNbRoutes(); k++){ for(Point x =
+	 * XR.startPoint(k); x != XR.endPoint(k); x = XR.next(x)){ for(Point y =
+	 * XR.next(x); y != XR.endPoint(k); y = XR.next(y)){ if(x == p || x == d ||
+	 * y == p || y == d) continue; ArrayList<Point> Y = new ArrayList<Point>();
+	 * Y.add(x); Y.add(y);
+	 * 
+	 * LexMultiValues eval = F.evaluateKPointsMove(X, Y); if
+	 * (eval.lt(bestEval)){ N.clear(); N.add(new KPointsMove(mgr, eval, X, Y));
+	 * bestEval.set(eval); } else if (eval.eq(bestEval)) { N.add(new
+	 * KPointsMove(mgr, eval, X, Y)); } } } } }
+	 * 
+	 * if(N.hasMove()){ IVRMove m = N.getAMove();
+	 * 
+	 * }
+	 * 
+	 * } }
+	 */
 }
+
 public class PickupDeliveryContainerSolver {
-	
+
 	PickupDeliveryRequest[] req;// = input.getRequests();
 	Truck[] trucks;// = input.getTrucks();
 
@@ -263,39 +267,80 @@ public class PickupDeliveryContainerSolver {
 	ArrayList<Point> deliveryPoints;// = new ArrayList<Point>();
 	ArrayList<Point> allPoints;// = new ArrayList<Point>();
 	ArrayList<Point> clientPoints;// = new ArrayList<Point>();
-	
-	HashMap<Point, PickupDeliveryRequest> mPoint2Request;// = new HashMap<Point, PickupDeliveryRequest>();
-	HashMap<PickupDeliveryRequest, Point> mReq2Pickup;// = new HashMap<PickupDeliveryRequest, Point>();
-	HashMap<PickupDeliveryRequest, Point> mReq2Delivery;// = new HashMap<PickupDeliveryRequest, Point>();
-	HashMap<Point, Truck> mPoint2Truck;// = new HashMap<Point, Truck>();
 
+	HashMap<Point, PickupDeliveryRequest> mPoint2Request;// = new HashMap<Point,
+															// PickupDeliveryRequest>();
+	HashMap<PickupDeliveryRequest, Point> mReq2Pickup;// = new
+														// HashMap<PickupDeliveryRequest,
+														// Point>();
+	HashMap<PickupDeliveryRequest, Point> mReq2Delivery;// = new
+														// HashMap<PickupDeliveryRequest,
+														// Point>();
+	HashMap<Point, Truck> mPoint2Truck;// = new HashMap<Point, Truck>();
+	HashMap<Truck, Integer> mTruck2Index;
+	
 	ArcWeightsManager distances;// = new ArcWeightsManager(allPoints);
 	ArcWeightsManager travelTimes;// = new ArcWeightsManager(allPoints);
 	NodeWeightsManager demand;// = new NodeWeightsManager(allPoints);
 
-	HashMap<Point, Integer> earliestAllowedArrivalTime;// = new HashMap<Point, Integer>();
+	HashMap<Point, Integer> earliestAllowedArrivalTime;// = new HashMap<Point,
+														// Integer>();
 	HashMap<Point, Integer> serviceDuration;// = new HashMap<Point, Integer>();
-	HashMap<Point, Integer> latestAllowedArrivalTime;// = new HashMap<Point, Integer>();
+	HashMap<Point, Integer> latestAllowedArrivalTime;// = new HashMap<Point,
+														// Integer>();
 
 	// modelling
 	VRManager mgr;// = new VRManager();
 	VarRoutesVR XR;// = new VarRoutesVR(mgr);
 	ConstraintSystemVR CS;// = new ConstraintSystemVR(mgr);
-	AccumulatedWeightEdgesVR awe;// = new AccumulatedWeightEdgesVR(XR, distances);
+	AccumulatedWeightEdgesVR awe;// = new AccumulatedWeightEdgesVR(XR,
+									// distances);
 	AccumulatedWeightNodesVR awn;// = new AccumulatedWeightNodesVR(XR, demand);
-	AccumulatedWeightEdgesVR arrivalTime;// = new AccumulatedWeightEdgesVR(XR,	travelTimes);
+	AccumulatedWeightEdgesVR arrivalTime;// = new AccumulatedWeightEdgesVR(XR,
+											// travelTimes);
 
-	HashMap<Point, IFunctionVR> accDemand;// = new HashMap<Point, IFunctionVR>();
-	HashMap<Point, IFunctionVR> accDistance;// = new HashMap<Point, IFunctionVR>();
-	HashMap<Point, IFunctionVR> routeOfPoint;// = new HashMap<Point, IFunctionVR>();
-	HashMap<Point, IFunctionVR> indexOfPointOnRoute;// = new HashMap<Point, IFunctionVR>();
-
+	HashMap<Point, IFunctionVR> accDemand;// = new HashMap<Point,
+											// IFunctionVR>();
+	HashMap<Point, IFunctionVR> accDistance;// = new HashMap<Point,
+											// IFunctionVR>();
+	HashMap<Point, IFunctionVR> routeOfPoint;// = new HashMap<Point,
+												// IFunctionVR>();
+	HashMap<Point, IFunctionVR> indexOfPointOnRoute;// = new HashMap<Point,
+													// IFunctionVR>();
 
 	EarliestArrivalTimeVR eat;
 	IFunctionVR obj;// = new TotalCostVR(XR, distances);
 	LexMultiFunctions F;// = new LexMultiFunctions();
 
-	public void computeSolution(){
+	// init solution transfered from outside
+	HashMap<MatchedSequenceRequests, Truck> mMatchedRequest2Truck;
+	
+	public String name(){
+		return "PickupDeliveryContainerSolver";
+	}
+	public void computeGreedySolution(){
+		stateModel();
+		
+		mTruck2Index = new HashMap<Truck, Integer>();
+		for(int i = 0; i < trucks.length; i++)
+			mTruck2Index.put(trucks[i], i);
+		
+		for(MatchedSequenceRequests msr: mMatchedRequest2Truck.keySet()){
+			Truck trk = mMatchedRequest2Truck.get(msr);
+			int k = mTruck2Index.get(trk) + 1;// index of vehicles are 1, 2, 3...
+			System.out.println(name() + "::computeGreedySolution, trucks " + trk.getCode() + ", k = " + k);
+			Point s = XR.startPoint(k);
+			for(int i = 0; i < msr.getSeq().size(); i++){
+				PickupDeliveryRequest r = msr.getSeq().get(i);
+				Point p = mReq2Pickup.get(r);
+				Point d = mReq2Delivery.get(r);
+				mgr.performAddOnePoint(p, s);
+				mgr.performAddOnePoint(d, p);
+				s = d;
+			}
+		}
+	}
+	private void stateModel(){
 		// model
 		mgr = new VRManager();
 		XR = new VarRoutesVR(mgr);
@@ -314,12 +359,12 @@ public class PickupDeliveryContainerSolver {
 
 		awe = new AccumulatedWeightEdgesVR(XR, distances);
 		awn = new AccumulatedWeightNodesVR(XR, demand);
-		arrivalTime = new AccumulatedWeightEdgesVR(XR,
-				travelTimes);
+		arrivalTime = new AccumulatedWeightEdgesVR(XR, travelTimes);
 
 		for (int k = 1; k <= XR.getNbRoutes(); k++) {
 			awe.setAccumulatedWeightStartPoint(k, 0);
-			arrivalTime.setAccumulatedWeightStartPoint(k, 0);// start time point of vehicle k
+			arrivalTime.setAccumulatedWeightStartPoint(k, 0);// start time point
+																// of vehicle k
 			awn.setAccumulatedWeightStartPoint(k, 0);
 		}
 		accDemand = new HashMap<Point, IFunctionVR>();
@@ -335,8 +380,7 @@ public class PickupDeliveryContainerSolver {
 			for (int k = 1; k <= K; k++) {
 
 				IConstraintVR c1 = new Eq(idR, k);
-				IConstraintVR c2 = new Leq(dv,
-						trucks[k - 1].getCapacity());
+				IConstraintVR c2 = new Leq(dv, trucks[k - 1].getCapacity());
 				CS.post(new Implicate(c1, c2));
 			}
 		}
@@ -362,8 +406,6 @@ public class PickupDeliveryContainerSolver {
 
 		}
 
-	
-		
 		eat = new EarliestArrivalTimeVR(XR, travelTimes,
 				earliestAllowedArrivalTime, serviceDuration);
 
@@ -377,36 +419,28 @@ public class PickupDeliveryContainerSolver {
 		F.add(obj);
 
 		mgr.close();
-
+		
+	}
+	public void computeSolution() {
+		stateModel();
 		/*
-		Point last = XR.startPoint(1);
-		int I = req.length/2;
-		for(int i = 0; i < I; i++){
-			Point p = mReq2Pickup.get(req[i]);
-			Point d = mReq2Delivery.get(req[i]);
-			mgr.performAddOnePoint(p, last);
-			last = p;
-			mgr.performAddOnePoint(d, last);
-			last = d;
-		}
-		last = XR.startPoint(2);
-		for(int i = I; i < req.length; i++){
-			Point p = mReq2Pickup.get(req[i]);
-			Point d = mReq2Delivery.get(req[i]);
-			mgr.performAddOnePoint(p, last);
-			last = p;
-			mgr.performAddOnePoint(d, last);
-			last = d;
-		}
-		System.out.println("XR = " + XR.toString() + ", F = " + F.getValues().toString());
-		//for(Point p: allPoints){
-		//	System.out.println("earliestArrivalTime = " + eat.getEarliestArrivalTime(p) + ", latestAllowed = " + latestAllowedArrivalTime.get(p));
-		//}
-		
-		
-		if(true)return;
-		*/
-		
+		 * Point last = XR.startPoint(1); int I = req.length/2; for(int i = 0; i
+		 * < I; i++){ Point p = mReq2Pickup.get(req[i]); Point d =
+		 * mReq2Delivery.get(req[i]); mgr.performAddOnePoint(p, last); last = p;
+		 * mgr.performAddOnePoint(d, last); last = d; } last = XR.startPoint(2);
+		 * for(int i = I; i < req.length; i++){ Point p =
+		 * mReq2Pickup.get(req[i]); Point d = mReq2Delivery.get(req[i]);
+		 * mgr.performAddOnePoint(p, last); last = p; mgr.performAddOnePoint(d,
+		 * last); last = d; } System.out.println("XR = " + XR.toString() +
+		 * ", F = " + F.getValues().toString()); //for(Point p: allPoints){ //
+		 * System.out.println("earliestArrivalTime = " +
+		 * eat.getEarliestArrivalTime(p) + ", latestAllowed = " +
+		 * latestAllowedArrivalTime.get(p)); //}
+		 * 
+		 * 
+		 * if(true)return;
+		 */
+
 		/*
 		 * XR.setRandom(); for(Point p: requestPoints){
 		 * System.out.println("routeOfPoint " + p.ID + " = " +
@@ -417,73 +451,91 @@ public class PickupDeliveryContainerSolver {
 
 		ArrayList<INeighborhoodExplorer> NE = new ArrayList<INeighborhoodExplorer>();
 
-		NE.add(new PickupDeliveryExplorer(XR, F, req,mReq2Pickup,mReq2Delivery));
-		
+		NE.add(new PickupDeliveryExplorer(XR, F, req, mReq2Pickup,
+				mReq2Delivery));
+
 		/*
-		NE.add(new GreedyOnePointMoveExplorer(XR, F));
-		NE.add(new GreedyOrOptMove1Explorer(XR, F));
-		NE.add(new GreedyOrOptMove2Explorer(XR, F));
-		NE.add(new GreedyThreeOptMove1Explorer(XR, F));
-		NE.add(new GreedyThreeOptMove2Explorer(XR, F));
-		NE.add(new GreedyThreeOptMove3Explorer(XR, F));
-		NE.add(new GreedyThreeOptMove4Explorer(XR, F));
-		NE.add(new GreedyThreeOptMove5Explorer(XR, F));
-		NE.add(new GreedyThreeOptMove6Explorer(XR, F));
-		NE.add(new GreedyThreeOptMove7Explorer(XR, F));
-		NE.add(new GreedyThreeOptMove8Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove1Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove2Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove3Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove4Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove5Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove6Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove7Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove8Explorer(XR, F));
-		// NE.add(new GreedyTwoPointsMoveExplorer(XR, F));
-		NE.add(new GreedyCrossExchangeMoveExplorer(XR, F));
-		// NE.add(new GreedyAddOnePointMoveExplorer(XR, F));
-		*/
-		
+		 * NE.add(new GreedyOnePointMoveExplorer(XR, F)); NE.add(new
+		 * GreedyOrOptMove1Explorer(XR, F)); NE.add(new
+		 * GreedyOrOptMove2Explorer(XR, F)); NE.add(new
+		 * GreedyThreeOptMove1Explorer(XR, F)); NE.add(new
+		 * GreedyThreeOptMove2Explorer(XR, F)); NE.add(new
+		 * GreedyThreeOptMove3Explorer(XR, F)); NE.add(new
+		 * GreedyThreeOptMove4Explorer(XR, F)); NE.add(new
+		 * GreedyThreeOptMove5Explorer(XR, F)); NE.add(new
+		 * GreedyThreeOptMove6Explorer(XR, F)); NE.add(new
+		 * GreedyThreeOptMove7Explorer(XR, F)); NE.add(new
+		 * GreedyThreeOptMove8Explorer(XR, F)); NE.add(new
+		 * GreedyTwoOptMove1Explorer(XR, F)); NE.add(new
+		 * GreedyTwoOptMove2Explorer(XR, F)); NE.add(new
+		 * GreedyTwoOptMove3Explorer(XR, F)); NE.add(new
+		 * GreedyTwoOptMove4Explorer(XR, F)); NE.add(new
+		 * GreedyTwoOptMove5Explorer(XR, F)); NE.add(new
+		 * GreedyTwoOptMove6Explorer(XR, F)); NE.add(new
+		 * GreedyTwoOptMove7Explorer(XR, F)); NE.add(new
+		 * GreedyTwoOptMove8Explorer(XR, F)); // NE.add(new
+		 * GreedyTwoPointsMoveExplorer(XR, F)); NE.add(new
+		 * GreedyCrossExchangeMoveExplorer(XR, F)); // NE.add(new
+		 * GreedyAddOnePointMoveExplorer(XR, F));
+		 */
+
 		/*
-		HashSet<Point> mandatory = new HashSet<Point>();
-		for(Point p: clientPoints) mandatory.add(p);
-		NE.add(new GreedyKPointsMoveExplorer(XR, F, 2, mandatory));
-		*/
-		
-		//GenericLocalSearch se = new GenericLocalSearch(mgr);
-		ContainerSearch se = new ContainerSearch(mgr, req, mReq2Pickup, mReq2Delivery);
+		 * HashSet<Point> mandatory = new HashSet<Point>(); for(Point p:
+		 * clientPoints) mandatory.add(p); NE.add(new
+		 * GreedyKPointsMoveExplorer(XR, F, 2, mandatory));
+		 */
+
+		// GenericLocalSearch se = new GenericLocalSearch(mgr);
+		ContainerSearch se = new ContainerSearch(mgr, req, trucks, mReq2Pickup,
+				mReq2Delivery);
 		se.setNeighborhoodExplorer(NE);
 		se.setObjectiveFunction(F);
-		
+
 		se.setMaxStable(50);
 
 		se.search(1000, 10);
-		//se.generateInitialSolution();
-		
+		// se.generateInitialSolution();
 
-		for(int k = 1; k <= XR.getNbRoutes(); k++){
-			Point s=XR.startPoint(k);
-			Point t=XR.endPoint(k);
-			System.out.println("truck[" + k + "] early start = " + earliestAllowedArrivalTime.get(s) + ", late start = " + latestAllowedArrivalTime.get(s)
-					+ ", early end = " + earliestAllowedArrivalTime.get(t) + ", late end = " + latestAllowedArrivalTime.get(t));
-			
+		for (int k = 1; k <= XR.getNbRoutes(); k++) {
+			Point s = XR.startPoint(k);
+			Point t = XR.endPoint(k);
+			System.out.println("truck[" + k + "] early start = "
+					+ earliestAllowedArrivalTime.get(s) + ", late start = "
+					+ latestAllowedArrivalTime.get(s) + ", early end = "
+					+ earliestAllowedArrivalTime.get(t) + ", late end = "
+					+ latestAllowedArrivalTime.get(t));
+
 		}
-		for(int i = 0; i < req.length; i++){
+		for (int i = 0; i < req.length; i++) {
 			Point pickup = mReq2Pickup.get(req[i]);
 			Point delivery = mReq2Delivery.get(req[i]);
-			System.out.println("Req[" + i + "] = pickup " + req[i].getPickupAddress() + "," + req[i].getPickupDateTime() + " time windows = " + earliestAllowedArrivalTime.get(pickup) + " --> " + latestAllowedArrivalTime.get(pickup));
-			System.out.println("Req[" + i + "] = delivery " + req[i].getDeliveryAddress() + "," + req[i].getDeliveryDateTime() + " time windows = " + earliestAllowedArrivalTime.get(delivery) + " --> " + latestAllowedArrivalTime.get(delivery));
-			System.out.println("Req[" + i + "] traveltime = " + travelTimes.getDistance(pickup, delivery));
+			System.out.println("Req[" + i + "] = pickup "
+					+ req[i].getPickupAddress() + ","
+					+ req[i].getPickupDateTime() + " time windows = "
+					+ earliestAllowedArrivalTime.get(pickup) + " --> "
+					+ latestAllowedArrivalTime.get(pickup));
+			System.out.println("Req[" + i + "] = delivery "
+					+ req[i].getDeliveryAddress() + ","
+					+ req[i].getDeliveryDateTime() + " time windows = "
+					+ earliestAllowedArrivalTime.get(delivery) + " --> "
+					+ latestAllowedArrivalTime.get(delivery));
+			System.out.println("Req[" + i + "] traveltime = "
+					+ travelTimes.getDistance(pickup, delivery));
 		}
-		
-		for(int k = 1; k <= XR.getNbRoutes(); k++){
+
+		for (int k = 1; k <= XR.getNbRoutes(); k++) {
 			System.out.println("Route[" + k + "]:");
 			Point p;
-			for(p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)){
-				System.out.println("Point " + p.ID + ": earliestArrivalTime = " + eat.getEarliestArrivalTime(p) + ", latestAllowed = " + latestAllowedArrivalTime.get(p) + ", travel time = " + travelTimes.getDistance(p, XR.next(p)));
+			for (p = XR.startPoint(k); p != XR.endPoint(k); p = XR.next(p)) {
+				System.out.println("Point " + p.ID + ": earliestArrivalTime = "
+						+ eat.getEarliestArrivalTime(p) + ", latestAllowed = "
+						+ latestAllowedArrivalTime.get(p) + ", travel time = "
+						+ travelTimes.getDistance(p, XR.next(p)));
 			}
-			System.out.println("Point " + p.ID + ": earliestArrivalTime = " + eat.getEarliestArrivalTime(p) + ", latestAllowed = " + latestAllowedArrivalTime.get(p));
+			System.out.println("Point " + p.ID + ": earliestArrivalTime = "
+					+ eat.getEarliestArrivalTime(p) + ", latestAllowed = "
+					+ latestAllowedArrivalTime.get(p));
 		}
-		
+
 	}
 }
