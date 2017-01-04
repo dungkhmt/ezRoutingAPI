@@ -1,5 +1,6 @@
 package com.kse.ezRoutingAPI.dichungduongdai.model;
 
+
 public class SharedLongTripRequest {
 	private String ticketCode;
 	private String pickupAddress;
@@ -14,6 +15,13 @@ public class SharedLongTripRequest {
 	
 	private String Itinerary;// chunkName 
 	
+	private Direction[] directItineraries;
+	
+	
+
+
+
+
 	public SharedLongTripRequest() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -30,10 +38,19 @@ public class SharedLongTripRequest {
 	}
 
 
-	public SharedLongTripRequest(String ticketCode, String pickupAddress,
-			String pickupLatLng, String deliveryAddress, String deliveryLatLng,
-			String departDateTime, int nbPassengers, boolean sharing,
-			boolean oneway, int price, String itinerary) {
+	public SharedLongTripRequest(
+			String ticketCode,
+			String pickupAddress,
+			String pickupLatLng,
+			String deliveryAddress,
+			String deliveryLatLng,
+			String departDateTime,
+			int nbPassengers,
+			boolean sharing,
+			boolean oneway,
+			int price,
+			String itinerary,
+			Direction[] directItineraries) {
 		super();
 		this.ticketCode = ticketCode;
 		this.pickupAddress = pickupAddress;
@@ -46,7 +63,9 @@ public class SharedLongTripRequest {
 		this.oneway = oneway;
 		this.price = price;
 		Itinerary = itinerary;
+		this.directItineraries = directItineraries;
 	}
+
 
 	public void print(){
 		System.out.println("Information of a request ");
