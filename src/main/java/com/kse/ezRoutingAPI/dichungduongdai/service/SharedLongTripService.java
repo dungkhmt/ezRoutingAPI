@@ -73,12 +73,12 @@ public class SharedLongTripService {
 		//Calculate the matrix C, d and the array of neighbor lists
 		int earlestRequestIndex = 0;
 		for(int i = 1; i < n; i++){
-			if(DateTimeUtils.distance(requestLst[i].getDepartDateTime(), requestLst[earlestRequestIndex].getDepartDateTime()) < 0){
+			if(DateTimeUtils.distance(requestLst[i].getDepartTime(), requestLst[earlestRequestIndex].getDepartTime()) < 0){
 				earlestRequestIndex = i;
 			}
 		}
 		for(int i = 0; i < n; i++){
-			pickupTime[i] = DateTimeUtils.distance(requestLst[i].getDepartDateTime(), requestLst[earlestRequestIndex].getDepartDateTime());
+			pickupTime[i] = DateTimeUtils.distance(requestLst[i].getDepartTime(), requestLst[earlestRequestIndex].getDepartTime());
 		}
 				
 		for(int i = 0; i < n-1; i++){			
@@ -193,7 +193,7 @@ public class SharedLongTripService {
 	    		if(IC[i].size() == 1){ //Single
 	    			SharedLongTripRequest req = requestLst[IC[i].elementAt(0)];
 	    			SharedLongTripElement[] elementLst = new SharedLongTripElement[2];
-	    			elementLst[0] = new SharedLongTripElement(req.getTicketCode(), req.getDepartDateTime(), req.getPickupAddress(), req.getPickupLatLng(), "-", "-");
+	    			elementLst[0] = new SharedLongTripElement(req.getTicketCode(), req.getDepartTime(), req.getPickupAddress(), req.getPickupLatLng(), "-", "-");
 	    			elementLst[1] = new SharedLongTripElement(req.getTicketCode(), "", "-", "-", req.getDeliveryAddress(), req.getDeliveryLatLng());
 	    			
 	    			int nbPeople = req.getNumberPassengers();
@@ -212,12 +212,12 @@ public class SharedLongTripService {
 	    			SharedLongTripRequest req2 =  requestLst[IC[i].elementAt(1)];
 	    			SharedLongTripElement[] elementLst = new SharedLongTripElement[4];
 	    			
-	    			if(DateTimeUtils.distance(req1.getDepartDateTime(), req2.getDepartDateTime()) < 0){
-	    				elementLst[0] = new SharedLongTripElement(req1.getTicketCode(), req1.getDepartDateTime(), req1.getPickupAddress(), req1.getPickupLatLng(), "-", "-");
-	    				elementLst[1] = new SharedLongTripElement(req2.getTicketCode(), req2.getDepartDateTime(), req2.getPickupAddress(), req2.getPickupLatLng(), "-", "-");
+	    			if(DateTimeUtils.distance(req1.getDepartTime(), req2.getDepartTime()) < 0){
+	    				elementLst[0] = new SharedLongTripElement(req1.getTicketCode(), req1.getDepartTime(), req1.getPickupAddress(), req1.getPickupLatLng(), "-", "-");
+	    				elementLst[1] = new SharedLongTripElement(req2.getTicketCode(), req2.getDepartTime(), req2.getPickupAddress(), req2.getPickupLatLng(), "-", "-");
 	    			}else{
-	    				elementLst[0] = new SharedLongTripElement(req2.getTicketCode(), req2.getDepartDateTime(), req2.getPickupAddress(), req2.getPickupLatLng(), "-", "-");
-	    				elementLst[1] = new SharedLongTripElement(req1.getTicketCode(), req1.getDepartDateTime(), req1.getPickupAddress(), req1.getPickupLatLng(), "-", "-");	    				
+	    				elementLst[0] = new SharedLongTripElement(req2.getTicketCode(), req2.getDepartTime(), req2.getPickupAddress(), req2.getPickupLatLng(), "-", "-");
+	    				elementLst[1] = new SharedLongTripElement(req1.getTicketCode(), req1.getDepartTime(), req1.getPickupAddress(), req1.getPickupLatLng(), "-", "-");	    				
 	    			}
 	    			
 	    			double distance1 = G.getDistance(elementLst[1].getPickupPosition(), req1.getDeliveryLatLng());
@@ -279,7 +279,7 @@ public class SharedLongTripService {
 	    			//Pickup
 	    			SharedLongTripElement[] elementLst = new SharedLongTripElement[2*k];
 	    			for(int j = 0; j < k; j++){
-	    				elementLst[j] = new SharedLongTripElement(temRequestLst.elementAt(j).getTicketCode(), temRequestLst.elementAt(j).getDepartDateTime(),
+	    				elementLst[j] = new SharedLongTripElement(temRequestLst.elementAt(j).getTicketCode(), temRequestLst.elementAt(j).getDepartTime(),
 	    						temRequestLst.elementAt(j).getPickupAddress(), temRequestLst.elementAt(j).getPickupLatLng(), "-", "-");
 	    			}
 	    			
@@ -661,7 +661,7 @@ public class SharedLongTripService {
 						boolean secondMerge = false;
 						
 						//Check for a possible first merge
-						double timeDelta = Math.abs(DateTimeUtils.distance(input.getRequests()[i].getDepartDateTime(), input.getRequests()[j].getDepartDateTime()));
+						double timeDelta = Math.abs(DateTimeUtils.distance(input.getRequests()[i].getDepartTime(), input.getRequests()[j].getDepartTime()));
 						
 						//case 1: pickup 1 -> pickup 2 
 						double cumulativeDistace = 0.0;
@@ -780,7 +780,7 @@ public class SharedLongTripService {
 								elementLst[p] = editRoute.getRouteElements()[p];
 							}
 							SharedLongTripElement newElement = new SharedLongTripElement(requestLst[i].getTicketCode(), 
-									requestLst[j].getDepartDateTime(), requestLst[j].getPickupAddress(), requestLst[j].getPickupLatLng(), "-", "-");
+									requestLst[j].getDepartTime(), requestLst[j].getPickupAddress(), requestLst[j].getPickupLatLng(), "-", "-");
 							elementLst[editRoute.getNbRequests()] = newElement;		
 		
 							//Sorting in order of depart time
