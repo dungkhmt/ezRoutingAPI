@@ -98,7 +98,7 @@ public class SharedLongTripService {
 				//For connected matrix
 				C[i][j] = 0;
 				C[j][i] = 0;				
-				if(requestLst[i].isSharing() && requestLst[j].isSharing()){//Already for sharing
+				if(requestLst[i].isShared() && requestLst[j].isShared()){//Already for sharing
 					if(requestLst[i].getItinerary() == requestLst[j].getItinerary()){ //Same itinerary					
 						if(d1[i][j] <= input.getForbidenStraightDistance()){ // Two pickup points are not too far to each other						
 							if(d2[i][j] <= 2.0 * input.getForbidenStraightDistance()){ // Two delivery points are not too far to each other							
@@ -196,7 +196,7 @@ public class SharedLongTripService {
 	    			elementLst[0] = new SharedLongTripElement(req.getTicketCode(), req.getDepartDateTime(), req.getPickupAddress(), req.getPickupLatLng(), "-", "-");
 	    			elementLst[1] = new SharedLongTripElement(req.getTicketCode(), "", "-", "-", req.getDeliveryAddress(), req.getDeliveryLatLng());
 	    			
-	    			int nbPeople = req.getNbPassengers();
+	    			int nbPeople = req.getNumberPassengers();
 	    			String taxiType = "";
 	    			for(int j = 1; j < vhcCapacities.length; j++){
 	    				if(nbPeople <= vhcCapacities[j]){
@@ -231,7 +231,7 @@ public class SharedLongTripService {
 	    				elementLst[3] = new SharedLongTripElement(req1.getTicketCode(), "-", "-", "-", req1.getDeliveryAddress(), req1.getDeliveryLatLng());
 	    			}
 	    			
-	    			int nbPeople = req1.getNbPassengers() + req2.getNbPassengers();
+	    			int nbPeople = req1.getNumberPassengers() + req2.getNumberPassengers();
 	    			String taxiType = "";
 	    			for(int j = 1; j < vhcCapacities.length; j++){
 	    				if(nbPeople <= vhcCapacities[j]){
@@ -319,7 +319,7 @@ public class SharedLongTripService {
 	    			}
 	    			int nbPeople = 0;
 	    			for(int j = 0; j < k; j++){
-	    				nbPeople += temRequestLst.elementAt(j).getNbPassengers();
+	    				nbPeople += temRequestLst.elementAt(j).getNumberPassengers();
 	    			}
 	    			String taxiType = "";
 	    			for(int j = 1; j < vhcCapacities.length; j++){
@@ -819,7 +819,7 @@ public class SharedLongTripService {
 								}
 							}
 							
-							int peopleNb = editRoute.getNbPeople() + requestLst[i].getNbPassengers();
+							int peopleNb = editRoute.getNbPeople() + requestLst[i].getNumberPassengers();
 							String taxiType = "";
 			    			for(int p = 1; p < vhcCapacities.length; p++){
 			    				if(peopleNb <= vhcCapacities[p]){

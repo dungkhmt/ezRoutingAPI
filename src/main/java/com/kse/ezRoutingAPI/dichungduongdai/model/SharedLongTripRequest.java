@@ -8,8 +8,8 @@ public class SharedLongTripRequest {
 	private String deliveryAddress;
 	private String deliveryLatLng;
 	private String departDateTime;
-	private int nbPassengers;
-	private boolean sharing;
+	private int numberPassengers;
+	private boolean shared;
 	private boolean oneway;
 	private int price;
 	
@@ -38,34 +38,6 @@ public class SharedLongTripRequest {
 	}
 
 
-	public SharedLongTripRequest(
-			String ticketCode,
-			String pickupAddress,
-			String pickupLatLng,
-			String deliveryAddress,
-			String deliveryLatLng,
-			String departDateTime,
-			int nbPassengers,
-			boolean sharing,
-			boolean oneway,
-			int price,
-			String itinerary,
-			String[] directItineraries
-			) {
-		super();
-		this.ticketCode = ticketCode;
-		this.pickupAddress = pickupAddress;
-		this.pickupLatLng = pickupLatLng;
-		this.deliveryAddress = deliveryAddress;
-		this.deliveryLatLng = deliveryLatLng;
-		this.departDateTime = departDateTime;
-		this.nbPassengers = nbPassengers;
-		this.sharing = sharing;
-		this.oneway = oneway;
-		this.price = price;
-		Itinerary = itinerary;
-		this.directItineraries = directItineraries;
-	}
 
 
 	
@@ -78,7 +50,7 @@ public class SharedLongTripRequest {
 		System.out.println("Pickup address: " + pickupAddress);
 		System.out.println("Delivery address: " + deliveryAddress);
 		System.out.println("Departure time: " + departDateTime);
-		System.out.println("Number of passengers: " + nbPassengers);
+		System.out.println("Number of passengers: " + numberPassengers);
 		System.out.println("Price: " + price);
 	}
 
@@ -124,18 +96,47 @@ public class SharedLongTripRequest {
 	public void setDepartDateTime(String departDateTime) {
 		this.departDateTime = departDateTime;
 	}
-	public int getNbPassengers() {
-		return nbPassengers;
+	public int getNumberPassengers() {
+		return numberPassengers;
 	}
-	public void setNbPassengers(int nbPassengers) {
-		this.nbPassengers = nbPassengers;
+
+
+	public SharedLongTripRequest(String ticketCode, String pickupAddress,
+			String pickupLatLng, String deliveryAddress, String deliveryLatLng,
+			String departDateTime, int numberbPassengers, boolean shared,
+			boolean oneway, int price, String itinerary,
+			String[] directItineraries) {
+		super();
+		this.ticketCode = ticketCode;
+		this.pickupAddress = pickupAddress;
+		this.pickupLatLng = pickupLatLng;
+		this.deliveryAddress = deliveryAddress;
+		this.deliveryLatLng = deliveryLatLng;
+		this.departDateTime = departDateTime;
+		this.numberPassengers = numberPassengers;
+		this.shared = shared;
+		this.oneway = oneway;
+		this.price = price;
+		Itinerary = itinerary;
+		this.directItineraries = directItineraries;
 	}
-	public boolean isSharing() {
-		return sharing;
+
+
+	public void setNumberPassengers(int numberPassengers) {
+		this.numberPassengers = numberPassengers;
 	}
-	public void setSharing(boolean sharing) {
-		this.sharing = sharing;
+
+
+	public boolean isShared() {
+		return shared;
 	}
+
+
+	public void setShared(boolean shared) {
+		this.shared = shared;
+	}
+
+
 	public boolean isOneway() {
 		return oneway;
 	}
