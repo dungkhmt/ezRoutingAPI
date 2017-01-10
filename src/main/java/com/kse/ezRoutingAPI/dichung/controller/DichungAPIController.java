@@ -182,10 +182,10 @@ public class DichungAPIController {
 		
 		// compute solution for long trip requests
 		SharedLongTripInput[] requestLongTrips = input.getLongtripInput();
-		SharedLongTripSolution[] sl = new SharedLongTripSolution[requestLongTrips.length];
-		SharedLongTripService dichungDuongdaiService = new SharedLongTripService();
+		SharedLongTripSolution[] sl = new SharedLongTripSolution[requestLongTrips.length];		
 		for(int i = 0; i < requestLongTrips.length; i++){
-			sl[i] = dichungDuongdaiService.computeSharedLongTrip(requestLongTrips[i]);
+			SharedLongTripService dichungDuongdaiService = new SharedLongTripService(requestLongTrips[i]);
+			sl[i] = dichungDuongdaiService.computeSharedLongTrip();
 		}
 		
 		// convert long trip solutions into unique format of shared a ride solution

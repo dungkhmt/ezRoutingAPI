@@ -1,5 +1,6 @@
 package localsearch.domainspecific.vehiclerouting.vrp.utils.googlemaps;
 
+
 import java.io.DataInputStream;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
@@ -34,6 +35,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+
+
 
 
 
@@ -207,11 +211,15 @@ public class GoogleMapsQuery {
 		double lat2 = Double.parseDouble(elements2[0]);
 		double lng2 = Double.parseDouble(elements2[1]);
 		
+		
 		distance = getDistance(lat1, lng1, lat2, lng2);
+		//System.out.println("[" + lat1 + "," + lng1 + "] ->[" + lat2 + "," + lng2 + "] = " + distance );
 		
 		return distance;
 	}
+	
 	public double getDistance(double lat1, double lng1, double lat2, double lng2) {
+		System.out.println("[" + lat1 + ", " + lng1 + "] -> [" + lat2 + ", " + lng2 + "]");
 		URL url = null;
 		try {
 			url = new URL(
@@ -221,7 +229,8 @@ public class GoogleMapsQuery {
 		} catch (MalformedURLException ex) {
 			ex.printStackTrace();
 		}
-
+		//System.out.println("URL: " + url);
+		
 		HttpURLConnection urlConn = null;
 		try {
 			// URL connection channel.
@@ -261,7 +270,7 @@ public class GoogleMapsQuery {
 		}
 
 		// Get response data.
-		String str = null;
+		
 		double d = -1;
 		try {
 			PrintWriter out = new PrintWriter(new FileWriter(
@@ -274,24 +283,41 @@ public class GoogleMapsQuery {
 				doc.getDocumentElement().normalize();
 
 				NodeList nl = doc.getElementsByTagName("leg");
+//				System.out.println("length: " + nl.getLength());
+//				System.out.println("nl: " + nl.toString());
+//				System.out.println("nl.item(0): " + nl.item(0).toString());
 				Node nod = nl.item(0);
+//				
+//				
 				Element e = (Element) nod;
+//								
 				if (e == null) {
+					System.out.println("e is null");
 					return -1;
 				}
-				nl = e.getElementsByTagName("step");
+//				System.out.println("e: " + e.toString());
+//				
+//				//nl = e.getElementsByTagName("step");
 				nl = e.getElementsByTagName("distance");
+//				System.out.println("nl: " + nl.toString());
 				nod = nl.item(nl.getLength() - 1);
+//				System.out.println("nod: " + nod.toString());
 				
 				e = (Element) nod;
+//				System.out.println("e: " + e.toString());
+				
 				nl = e.getElementsByTagName("text");
+//				System.out.println("nl: " + nl.toString());
 				nod = nl.item(0);
+//				System.out.println("nod: " + nod.toString());
 
 				String d_s = nod.getChildNodes().item(0).getNodeValue();
+//				System.out.println("d_s: " + d_s);
 				int idx = d_s.indexOf("km");
 				if (idx < 0) {
 					idx = d_s.indexOf("m");
 					if (idx == -1) {
+						System.out.println("idx is null");
 						return -1;
 					}
 					d_s = d_s.substring(0, idx);
@@ -323,6 +349,7 @@ public class GoogleMapsQuery {
 		
 		//return d*1000;
 	}
+	
 	// speed is measured in m/s
 	public int estimateTravelTime(double lat1, double lng1, double lat2,
 			double lng2, String mode, int speed, double APPX) {
@@ -334,6 +361,7 @@ public class GoogleMapsQuery {
 		return appxt;
 	}
 	// speeds are measured in m/s
+	
 	public int estimateTravelTimeWithTimeFrame(double lat1, double lng1, double lat2,
 			double lng2, String mode, String startDateTime, double stdSpeed, double denseTrafficSpeed) {
 		double d = computeDistanceHaversine(lat1,lng1,lat2,lng2);
@@ -368,6 +396,7 @@ public class GoogleMapsQuery {
 
 		return t;
 	}
+	
 	public int getTravelTime(String originAddr, String destinationAddr, String mode) {
 		// try to probe maximum 20 times
 		int t = -1;
@@ -488,6 +517,7 @@ public class GoogleMapsQuery {
 	public String name(){
 		return "GoogleMapsQuery";
 	}
+	
 	private int getTravelTimeOnePost(String originAddr, String destinationAddr, String mode) {
 		String stdOriginAddr = standardizeAddr(originAddr);
 		String stdDestinationAddr = standardizeAddr(destinationAddr);
@@ -592,6 +622,7 @@ public class GoogleMapsQuery {
 		}
 		return latlng;
 	}
+	
 	public String getLatLngFromAddressOnePost(String addr) {
 		String stdAddr = standardizeAddr(addr);
 		
@@ -836,9 +867,11 @@ public class GoogleMapsQuery {
 					e = (Element) nlEndAdd.item(0);
 					if (e != null) {
 						endAdd = e.getChildNodes().item(0).getNodeValue();
+		
 					}
 				}
 				
+				System.out.println(name() + "::getDirection, distances = " + distances);
 				direction = new Direction(steps, startAdd, endAdd, lat1, lng1,
 						lat2, lng2, durations, distances, mode);
 			} catch (Exception e) {
@@ -861,19 +894,53 @@ public class GoogleMapsQuery {
 		//G.getDirection(21, 105, 21.01, 105, "driving");
 		//int t = G.getTravelTime("135 Nguyen Van Cu, Gia Lam, hanoi, vietnam", "45 Nguyen Van Cu, Gia Lam, hanoi, vietnam", "driving");
 		
-		String src = "1 Tran Hung Dao, Hoan Kiem, Hanoi, Vietnam";
-		String dest = "36 Tran Hung Dao, Hoan Kiem, Hanoi, Vietnam";
+		String src = "An Trach, Cat Linh, Dong Da, Ha Noi, Viet Nam";
+		String dest = "My Trung, Nam Dinh, Viet Nam";
 		LatLng lls = G.getCoordinate(src);
-		LatLng lld = G.getCoordinate(dest);
+		LatLng lld = G.getCoordinate(dest);		
+				
+		lls = new LatLng(21.027708,105.829839);
+		lld = new LatLng(20.381863, 106.536314);		
 		
+		System.out.println("Lat1: " + lls.lat + ", Lon1: " + lls.lng);
+		System.out.println("Lat2: " + lld.lat + ", Lon2: " + lld.lng);
 		int t = G.getTravelTime(src, dest, "driving");
-		int te = G.estimateTravelTimeWithTimeFrame(lls.lat, lls.lng, lld.lat, lld.lng, "driving", "2016-02-02 12:12:00", 10, 3);
+		
+		//int te = G.estimateTravelTimeWithTimeFrame(lls.lat, lls.lng, lld.lat, lld.lng, "driving", "2016-02-02 12:12:00", 10, 3);
 		double de = G.estimateDistanceMeter(lls.lat, lls.lng, lld.lat, lld.lng);
 		double d = G.getDistance(lls.lat, lls.lng, lld.lat, lld.lng)*1000;
-		System.out.println("t = " + t + ", te = " + te + ", d = " + d + ", de = " + de);
 		
+		//Direction drt = G.getDirection(lls.lat, lls.lng,  lld.lat, lld.lng, "driving");
+		Direction drt = G.getDirection(21.027708, 105.829839, 20.381863, 106.536314, "driving");
 		
-		//String latlng = G.getLatLngFromAddress("1 Dai Co Viet, Hai Ba Trung, Hanoi, Vietnam");
-		//System.out.println("Location = " + latlng);
+		System.out.println("Distance: " + drt.getDistances());
+		
+		System.out.print("\"directItineraries\"" + ":\"");
+		ArrayList<StepDirection> lst = drt.getStepsDirection();
+		
+		System.out.print(lls.lat + "," + lls.lng + ";");
+		
+		System.out.print("},");
+		for(StepDirection sd: lst){
+		
+			System.out.print(sd.getStartLat() + ",");
+			System.out.print(sd.getStartLng() + ";");
+			
+			
+			
+		}
+		System.out.print(lld.lat + "," + lld.lng + "\"");
+		
+		//Cung doan lenh do: O day no chay duoc
+		GoogleMapsQuery G2 = new GoogleMapsQuery();
+		Direction drt2 = G2.getDirection(21.027708, 105.829839, 20.381863, 106.536314, "driving");
+		System.out.println("Dis: " + drt2.getDistances());
+		
+		for(int i = 0; i < 100; i++){
+			System.out.println("------------------");
+			System.out.println("test: " + G.getDistance("20.6608254,106.3276864", "20.4204865,106.3905338"));	
+		}
+		
 	}
+	
 }

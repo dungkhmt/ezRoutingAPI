@@ -26,7 +26,7 @@ public class SharedLongTripElement {
 		this.deliveryPosition = deliveryPosition;
 	}
 
-
+	
 	public String getTicketCode() {
 		return ticketCode;
 	}

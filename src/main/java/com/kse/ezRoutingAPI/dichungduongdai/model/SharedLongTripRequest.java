@@ -1,5 +1,5 @@
 package com.kse.ezRoutingAPI.dichungduongdai.model;
-
+import localsearch.domainspecific.vehiclerouting.vrp.utils.googlemaps.*; 
 
 public class SharedLongTripRequest {
 	private String ticketCode;
@@ -15,7 +15,7 @@ public class SharedLongTripRequest {
 	
 	private String Itinerary;// chunkName 
 	
-	private Direction[] directItineraries;
+	private String directItineraries;
 	
 	
 
@@ -50,7 +50,8 @@ public class SharedLongTripRequest {
 			boolean oneway,
 			int price,
 			String itinerary,
-			Direction[] directItineraries) {
+			String directItineraries
+			) {
 		super();
 		this.ticketCode = ticketCode;
 		this.pickupAddress = pickupAddress;
@@ -65,6 +66,9 @@ public class SharedLongTripRequest {
 		Itinerary = itinerary;
 		this.directItineraries = directItineraries;
 	}
+
+
+	
 
 
 	public void print(){
@@ -137,6 +141,16 @@ public class SharedLongTripRequest {
 	}
 	public void setOneway(boolean oneway) {
 		this.oneway = oneway;
+	}
+
+
+	public String getDirectItineraries() {
+		return directItineraries;
+	}
+
+
+	public void setDirectItineraries(String directItineraries) {
+		this.directItineraries = directItineraries;
 	}
 	
 	

@@ -12,6 +12,8 @@ import com.kse.ezRoutingAPI.dichungduongdai.model.SharedLongTripSolution;
 import com.kse.ezRoutingAPI.dichungduongdai.service.SharedLongTripService;
 
 
+
+
 @RestController
 public class SharedLongTripAPIController {
 	String ROOT_DIR = "C:/ezRoutingAPIRoot/";
@@ -28,9 +30,14 @@ public class SharedLongTripAPIController {
 	public SharedLongTripSolution computeSharedTaxiSolution(HttpServletRequest request,
 			@RequestBody SharedLongTripInput input) {
 		System.out.println("Enter the method in the controller");
-		SharedLongTripService dichungDuongdaiService = new SharedLongTripService();
+		SharedLongTripService dichungDuongdaiService = new SharedLongTripService(input);
 		System.out.println("Create a service");
-		SharedLongTripSolution sol = dichungDuongdaiService.computeSharedLongTrip(input);
+		
+		
+		//System.out.println(input.getRequests()[0].getDirectItineraries()[0].lat);
+		
+		
+		SharedLongTripSolution sol = dichungDuongdaiService.computeSharedLongTrip();
 		System.out.println("Solved a service");
 		
 		//writeDichungDuongDaiRequest(input, sol);

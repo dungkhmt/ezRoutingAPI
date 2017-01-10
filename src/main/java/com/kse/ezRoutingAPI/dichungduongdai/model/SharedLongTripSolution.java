@@ -14,19 +14,28 @@ public class SharedLongTripSolution {
 		this.nbRequests = nbRequests;
 		this.routes = routes;
 	}
+	
 	public int getNbRequests() {
 		return nbRequests;
 	}
+	
 	public void setNbRequests(int nbRequests) {
 		this.nbRequests = nbRequests;
 	}
+	
 	public SharedLongTripRoute[] getRoutes() {
 		return routes;
 	}
+	
 	public void setRoutes(SharedLongTripRoute[] routes) {
 		this.routes = routes;
 	}
 	
-	
+	public void print(){
+		System.out.println("Number of requests: " + nbRequests);
+		for(SharedLongTripRoute str : routes){
+			str.print();
+		}
+	}
 	
 }

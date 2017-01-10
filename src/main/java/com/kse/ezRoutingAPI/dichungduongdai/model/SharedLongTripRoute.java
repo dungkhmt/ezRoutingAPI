@@ -13,12 +13,6 @@ public class SharedLongTripRoute {
 		// TODO Auto-generated constructor stub
 	}
 
-
-
-	
-
-
-
 	public SharedLongTripRoute(SharedLongTripElement[] routeElements,
 			String taxiType, int nbPeople, int nbRequests) {
 		super();
@@ -27,7 +21,18 @@ public class SharedLongTripRoute {
 		this.nbPeople = nbPeople;
 		this.nbRequests = nbRequests;
 	}
-
+	
+	public void print(){
+		System.out.print("Shared Route of " + nbRequests + " requests up to " + nbPeople + " people: ");
+		
+		for(SharedLongTripElement slte : routeElements){
+			System.out.print(slte.getTicketCode() + "(" + slte.getDepartTime() + ")" + "->");
+		}
+	
+		System.out.println();
+		
+		
+	}
 
 	public SharedLongTripElement[] getRouteElements() {
 		return routeElements;
