@@ -50,7 +50,7 @@ public class SharedLongTripRequest {
 			boolean oneway,
 			int price,
 			String itinerary,
-			String directItineraries
+			String[] directItineraries
 			) {
 		super();
 		this.ticketCode = ticketCode;
@@ -144,12 +144,12 @@ public class SharedLongTripRequest {
 	}
 
 
-	public String getDirectItineraries() {
+	public String[] getDirectItineraries() {
 		return directItineraries;
 	}
 
 
-	public void setDirectItineraries(String directItineraries) {
+	public void setDirectItineraries(String[] directItineraries) {
 		this.directItineraries = directItineraries;
 	}
 	

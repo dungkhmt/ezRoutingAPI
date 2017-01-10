@@ -631,7 +631,7 @@ public class SharedLongTripService {
 			if(singleRequest[i]){
 				consideredList[i] = true;
 				
-				String itinerary1 = input.getRequests()[i].getDirectItineraries();
+				String itinerary1 = input.getRequests()[i].getDirectItineraries()[0];
 				String[] iti1 = itinerary1.split(";");
 				Vector<Double> latLst1 = new Vector<Double>();
 				Vector<Double> lonLst1 = new Vector<Double>();				
@@ -644,7 +644,7 @@ public class SharedLongTripService {
 				for(int j = 0; j < n; j++){
 					if(consideredList[j] == false){
 						
-						String itinerary2 = input.getRequests()[j].getDirectItineraries();					
+						String itinerary2 = input.getRequests()[j].getDirectItineraries()[0];					
 						String[] iti2 = itinerary2.split(";");
 						Vector<Double> latLst2 = new Vector<Double>();
 						Vector<Double> lonLst2 = new Vector<Double>();
