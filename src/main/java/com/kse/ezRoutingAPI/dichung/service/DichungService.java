@@ -1545,7 +1545,7 @@ public class DichungService {
 			SharedTaxiRouteElement e = routesToAirport[i].getTicketCodes()[routesToAirport[i]
 					.getTicketCodes().length - 1];
 			for (int j = 0; j < routesFromAirport.length; j++) {
-				SharedTaxiRouteElement ej = routesToAirport[j].getTicketCodes()[routesToAirport[j]
+				SharedTaxiRouteElement ej = routesFromAirport[j].getTicketCodes()[routesFromAirport[j]
 						.getTicketCodes().length - 1];
 
 				long ti = DateTimeUtils.dateTime2Int(e
