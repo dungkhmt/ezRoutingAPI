@@ -15,7 +15,7 @@ public class SharedLongTripRequest {
 	
 	private String Itinerary;// chunkName 
 	
-	private String directItineraries;
+	private String[] directItineraries;
 	
 	
 
