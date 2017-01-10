@@ -4,9 +4,9 @@ import localsearch.domainspecific.vehiclerouting.vrp.utils.googlemaps.*;
 public class SharedLongTripRequest {
 	private String ticketCode;
 	private String pickupAddress;
-	private String pickupLatLng;
+	private String pickupPos;
 	private String deliveryAddress;
-	private String deliveryLatLng;
+	private String deliveryPos;
 	private String departTime;
 	private int numberPassengers;
 	private boolean shared;
@@ -72,23 +72,11 @@ public class SharedLongTripRequest {
 	public void setPickupAddress(String pickupAddress) {
 		this.pickupAddress = pickupAddress;
 	}
-	public String getPickupLatLng() {
-		return pickupLatLng;
-	}
-	public void setPickupLatLng(String pickupLatLng) {
-		this.pickupLatLng = pickupLatLng;
-	}
 	public String getDeliveryAddress() {
 		return deliveryAddress;
 	}
 	public void setDeliveryAddress(String deliveryAddress) {
 		this.deliveryAddress = deliveryAddress;
-	}
-	public String getDeliveryLatLng() {
-		return deliveryLatLng;
-	}
-	public void setDeliveryLatLng(String deliveryLatLng) {
-		this.deliveryLatLng = deliveryLatLng;
 	}
 	public String getDepartTime() {
 		return departTime;
@@ -101,17 +89,33 @@ public class SharedLongTripRequest {
 	}
 
 
+
+	public String getPickupPos() {
+		return pickupPos;
+	}
+
+
+	public void setPickupPos(String pickupPos) {
+		this.pickupPos = pickupPos;
+	}
+
+
+	public String getDeliveryPos() {
+		return deliveryPos;
+	}
+
+
 	public SharedLongTripRequest(String ticketCode, String pickupAddress,
-			String pickupLatLng, String deliveryAddress, String deliveryLatLng,
+			String pickupPos, String deliveryAddress, String deliveryPos,
 			String departTime, int numberPassengers, boolean shared,
 			boolean oneway, int price, String itinerary,
 			String[] directItineraries) {
 		super();
 		this.ticketCode = ticketCode;
 		this.pickupAddress = pickupAddress;
-		this.pickupLatLng = pickupLatLng;
+		this.pickupPos = pickupPos;
 		this.deliveryAddress = deliveryAddress;
-		this.deliveryLatLng = deliveryLatLng;
+		this.deliveryPos = deliveryPos;
 		this.departTime = departTime;
 		this.numberPassengers = numberPassengers;
 		this.shared = shared;
@@ -119,6 +123,11 @@ public class SharedLongTripRequest {
 		this.price = price;
 		Itinerary = itinerary;
 		this.directItineraries = directItineraries;
+	}
+
+
+	public void setDeliveryPos(String deliveryPos) {
+		this.deliveryPos = deliveryPos;
 	}
 
 
