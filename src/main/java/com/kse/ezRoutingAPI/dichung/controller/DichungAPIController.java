@@ -208,6 +208,7 @@ public class DichungAPIController {
 							"-",
 							"-"
 							);
+					te[k].setType(re[k].getType());
 				}
 				tr[j] = new SharedTaxiRoute(te, r[j].getTaxiType(), r[j].getNbPeople(), "-");
 			}

@@ -11,10 +11,21 @@ public class SharedTaxiRouteElement {
 	private String travelTimeToNext;
 	private String distanceToNext;
 	private String maxTravelTimeToDestinationAllowed; 
+	private String type = "-";// PICKUP / DELIVERY
 	
 	public SharedTaxiRouteElement() {
 		super();
 		// TODO Auto-generated constructor stub
+	}
+
+
+	public String getType() {
+		return type;
+	}
+
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 

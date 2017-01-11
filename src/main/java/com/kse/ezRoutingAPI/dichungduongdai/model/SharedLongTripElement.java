@@ -1,12 +1,16 @@
 package com.kse.ezRoutingAPI.dichungduongdai.model;
 
 public class SharedLongTripElement {
+	public static final String PICKUP = "PICKUP";
+	public static final String DELIVERY = "DELIVERY";
+	
 	private String ticketCode;
 	private String departTime;
 	private String pickupAddress;
 	private String pickupPosition;// lat-lng
 	private String deliveryAddress;
 	private String deliveryPosition;// lat-lng
+	private String type;// PICKUP / DELIVERY
 	
 	public SharedLongTripElement() {
 		super();
@@ -16,7 +20,7 @@ public class SharedLongTripElement {
 	
 	public SharedLongTripElement(String ticketCode, String departTime,
 			String pickupAddress, String pickupPosition,
-			String deliveryAddress, String deliveryPosition) {
+			String deliveryAddress, String deliveryPosition, String type) {
 		super();
 		this.ticketCode = ticketCode;
 		this.departTime = departTime;
@@ -24,9 +28,20 @@ public class SharedLongTripElement {
 		this.pickupPosition = pickupPosition;
 		this.deliveryAddress = deliveryAddress;
 		this.deliveryPosition = deliveryPosition;
+		this.type = type;
 	}
 
 	
+	public String getType() {
+		return type;
+	}
+
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+
 	public String getTicketCode() {
 		return ticketCode;
 	}
