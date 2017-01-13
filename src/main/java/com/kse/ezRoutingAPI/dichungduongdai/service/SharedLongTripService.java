@@ -341,8 +341,9 @@ public class SharedLongTripService {
 	    }
 	    
 	    System.out.println("Number of vehicles before posprocessing " + routeLst.size());
+	    
 	    //Post-processing
-	    postprocessing(routeLst);
+	    postprocessing2(routeLst);
 	    
 	    System.out.println("Number of vehicles after posprocessing " + routeLst.size());
 	    
@@ -353,7 +354,7 @@ public class SharedLongTripService {
 	    SharedLongTripSolution solution = new SharedLongTripSolution(n, routeArray);
 	    
 	    //Printing solutions
-	    solution.print();
+	    solution.print();	  
 	    
 		return solution;
 	}
@@ -667,7 +668,7 @@ public class SharedLongTripService {
 						boolean firstMerge = false;
 						boolean secondMerge = false;
 						
-						//Check for a possible first merge
+						//Check for a possible first merge											
 						double timeDelta = Math.abs(DateTimeUtils.distance(input.getRequests()[i].getDepartTime(), input.getRequests()[j].getDepartTime()));
 						
 						//case 1: pickup 1 -> pickup 2 
@@ -737,6 +738,314 @@ public class SharedLongTripService {
 						if(firstMerge && secondMerge){
 							possibleMerge[i][j] = true;
 							System.out.println("There is a merge between " + input.getRequests()[i].getTicketCode() + " and " + input.getRequests()[j].getTicketCode());
+						}
+					}
+				}
+			}
+		}
+		
+		
+		
+		//Do Merging
+		for(int i = 0; i < n; i++){
+			for(int j = 0; j < n; j++){
+				if(possibleMerge[i][j]){
+					
+					//Checking request[j] is in route with more than 3 requests or not
+					boolean insertable = true;
+					for(SharedLongTripRoute sltr : routeLst){	
+						if(sltr.getRouteElements().length >= 6){
+							for(SharedLongTripElement slte : sltr.getRouteElements()){
+								if(input.getRequests()[j].getTicketCode().equals(slte.getTicketCode() )){
+									insertable = false;
+									break;
+								}	
+							}										
+						}			
+					}
+					
+					if(insertable){
+																		
+						//Copy and delete route containing request j
+						int index = -1;
+						SharedLongTripRoute editRoute = new SharedLongTripRoute();
+						for(int k = 0; k < routeLst.size(); k++){
+							for(SharedLongTripElement slte : routeLst.elementAt(k).getRouteElements()){
+								if(input.getRequests()[j].getTicketCode().equals( slte.getTicketCode() )){
+									index = k;
+									break;
+								}
+							}
+						}
+						
+						if(index >= 0){
+							editRoute = routeLst.elementAt(index);								
+							routeLst.remove(index);											
+							
+							//Insert pickup elements							
+							SharedLongTripElement[] elementLst = new SharedLongTripElement[editRoute.getNbRequests() * 2 + 2];
+							for(int p = 0; p < editRoute.getNbRequests(); p++){
+								elementLst[p] = editRoute.getRouteElements()[p];
+							}
+							SharedLongTripElement newElement = new SharedLongTripElement(requestLst[i].getTicketCode(), 
+									requestLst[j].getDepartTime(), requestLst[j].getPickupAddress(), requestLst[j].getPickupPos(), "-", "-",SharedLongTripElement.PICKUP);
+							elementLst[editRoute.getNbRequests()] = newElement;		
+		
+							//Sorting in order of depart time
+							SharedLongTripElement tempElement = new SharedLongTripElement();
+							for(int p = 0; p < editRoute.getNbRequests(); p++){
+								for(int q = p + 1; q < editRoute.getNbRequests() + 1; q++){
+									double t1 = DateTimeUtils.dateTime2Int(elementLst[p].getDepartTime());
+									double t2 = DateTimeUtils.dateTime2Int(elementLst[q].getDepartTime());
+									if(t1 > t2){
+										tempElement = elementLst[p];
+										elementLst[p] = elementLst[q];
+										elementLst[q] = tempElement;												
+									}
+								}
+							}
+							
+							//insert delivery elements
+							for(int p = editRoute.getNbRequests()+1; p < 2*editRoute.getNbRequests()+1; p++){
+								elementLst[p] = editRoute.getRouteElements()[p-1];
+							}
+							SharedLongTripElement newElement2 = new SharedLongTripElement(requestLst[i].getTicketCode(), 
+									"-", "-", "-", requestLst[i].getDeliveryAddress(), requestLst[i].getDeliveryPos(), SharedLongTripElement.DELIVERY);
+							elementLst[2 * editRoute.getNbRequests() + 1] = newElement2;
+							
+							//Sorting						
+							for(int p = editRoute.getNbRequests() +1; p < 2* editRoute.getNbRequests()+1; p++){
+								for(int q = p + 1; q < 2*editRoute.getNbRequests() + 2; q++){
+									
+									double d1 = G.computeDistanceHaversine(elementLst[editRoute.getNbRequests()].getPickupPosition(), elementLst[p].getDeliveryPosition());
+									double d2 = G.computeDistanceHaversine(elementLst[editRoute.getNbRequests()].getPickupPosition(), elementLst[q].getDeliveryPosition());
+									if(d1 > d2){
+										tempElement = elementLst[p];
+										elementLst[p] = elementLst[q];
+										elementLst[q] = tempElement;												
+									}
+								}
+							}
+							
+							int peopleNb = editRoute.getNbPeople() + requestLst[i].getNumberPassengers();
+							String taxiType = "";
+			    			for(int p = 1; p < vhcCapacities.length; p++){
+			    				if(peopleNb <= vhcCapacities[p]){
+			    					taxiType = Integer.toString(vhcCapacities[p]);
+			    					break;
+			    				}
+			    			} 
+			
+			    			SharedLongTripRoute route = new SharedLongTripRoute(elementLst, taxiType, peopleNb, editRoute.getNbRequests() + 1);
+			    			
+			    		
+			    			
+			    			routeLst.add(route);
+			    			
+			    			
+			    			
+			    			//Delete route containing request i
+							index = -1;						
+							for(int k = 0; k < routeLst.size(); k++){
+								if(routeLst.elementAt(k).getRouteElements().length == 2){
+									for(SharedLongTripElement slte : routeLst.elementAt(k).getRouteElements()){
+										if(input.getRequests()[i].getTicketCode().equals( slte.getTicketCode() )){
+											index = k;
+											break;
+										}
+									}
+								}								
+							}
+							if(index >= 0){
+								routeLst.remove(index);	
+								
+								
+							}else{
+								System.out.println("Error1");
+							}
+							
+							
+						}else{
+							System.out.println("Error2");
+						}
+					}
+				}
+			}
+		}
+		
+	}
+	
+	/**
+	 * Post-processing with hope of merging some routes
+	 * @param routeLst
+	 */
+	public void postprocessing2(Vector<SharedLongTripRoute> routeLst){
+		System.out.println("n: " + n);
+		//Finding possible merge
+		boolean[][] possibleMerge = new boolean[n][n];
+		for(int i = 0; i < n; i++){
+			for(int j = 0; j < n; j++){
+				possibleMerge[i][j] = false;
+			}
+		}
+
+		
+		boolean [] singleRequest = new boolean[n];
+		String[] ticketCodeLst = new String[n];
+		for(int i = 0; i < n; i++){
+			singleRequest[i] = false;
+		}
+		
+		for(int i = 0; i < n; i++){	
+			ticketCodeLst[i] = input.getRequests()[i].getTicketCode();
+		}
+		
+		for(int i = 0; i < n; i++){
+			for(SharedLongTripRoute sltr : routeLst){	
+				if(sltr.getRouteElements().length == 2){
+					if(ticketCodeLst[i].equals(sltr.getRouteElements()[0].getTicketCode() )){
+						//Check for a shared request
+						for(int j = 0; j < input.getRequests().length; j++){
+							if(ticketCodeLst[i].equals(input.getRequests()[j].getTicketCode())){
+								if(input.getRequests()[j].isShared()){
+									singleRequest[i] = true;
+									break;
+								}
+							}
+						}
+						
+						if(singleRequest[i]){
+							break;
+						}
+					}				
+				}			
+			}
+		}
+		
+		System.out.println("List of single request");
+		for(int i = 0; i < n; i++){
+			if(singleRequest[i]){
+				System.out.println(ticketCodeLst[i]);
+			}
+		}
+		
+		boolean[] consideredList = new boolean[n];
+		for(int i = 0; i < n; i++){
+			consideredList[i] = false;
+		}
+		for(int i = 0; i < n; i++){
+			if(singleRequest[i]){
+				consideredList[i] = true;
+				if(input.getRequests()[i].getDirectItineraries() == null || input.getRequests()[i].getDirectItineraries().length == 0)
+					continue;
+								
+ 				
+				for(int j = 0; j < n; j++){
+					if(consideredList[j] == false){
+				
+						if(input.getRequests()[j].getDirectItineraries() == null || input.getRequests()[j].getDirectItineraries().length == 0)
+							continue;
+						
+						for(int ind1 = 0; ind1 < input.getRequests()[i].getDirectItineraries().length; ind1++){
+							for(int ind2 = 0; ind2 < input.getRequests()[j].getDirectItineraries().length; ind2++){
+								String itinerary1 = input.getRequests()[i].getDirectItineraries()[ind1];
+								String[] iti1 = itinerary1.split(";");
+								Vector<Double> latLst1 = new Vector<Double>();
+								Vector<Double> lonLst1 = new Vector<Double>();				
+								for(int k = 0; k < iti1.length; k++){
+									String[] elements1 = iti1[k].split(",");
+									latLst1.add(Double.parseDouble(elements1[0]));
+									lonLst1.add(Double.parseDouble(elements1[1]));
+								}
+								
+								String itinerary2 = input.getRequests()[j].getDirectItineraries()[ind2];					
+								String[] iti2 = itinerary2.split(";");
+								Vector<Double> latLst2 = new Vector<Double>();
+								Vector<Double> lonLst2 = new Vector<Double>();
+								
+								for(int k = 0; k < iti2.length; k++){
+									String[] elements2 = iti2[k].split(",");
+									latLst2.add(Double.parseDouble(elements2[0]));
+									lonLst2.add(Double.parseDouble(elements2[1]));
+								}
+								
+								
+								//A merge is acceptable since we have two merges:						
+								boolean firstMerge = false;
+								boolean secondMerge = false;
+								
+								//Check for a possible first merge
+								double timeDelta = Math.abs(DateTimeUtils.distance(input.getRequests()[i].getDepartTime(), input.getRequests()[j].getDepartTime()));
+								
+								//case 1: pickup 1 -> pickup 2 
+								double cumulativeDistace = 0.0;
+								for(int k = 0; k < latLst2.size(); k++){
+									double dis = G.computeDistanceHaversine(latLst1.firstElement(), lonLst1.firstElement(), latLst2.elementAt(k), lonLst2.elementAt(k));
+
+									if(dis < MERGE_MAX_DIS){ //Check for distance condition
+										
+																		
+										if(timeDelta - cumulativeDistace * 1000.0/input.getStableSpeed() < MERGE_MAX_TIME &&
+												timeDelta - cumulativeDistace * 1000.0/input.getStableSpeed() > -MERGE_MAX_TIME){ //Check for pickup time condition
+											firstMerge = true;
+											
+											break;
+										}								
+									}
+									
+									if(k < latLst2.size() - 1){
+										cumulativeDistace += G.computeDistanceHaversine(latLst2.elementAt(k), lonLst2.elementAt(k), latLst2.elementAt(k+1), lonLst2.elementAt(k+1));
+									}
+								}
+								
+								//Case 2: pickup 2 -> pickup 1
+								if(firstMerge == false){
+									cumulativeDistace = 0.0;
+									for(int k = 0; k < latLst1.size(); k++){
+										double dis = G.computeDistanceHaversine(latLst2.firstElement(), lonLst2.firstElement(), latLst1.elementAt(k), lonLst1.elementAt(k));
+
+										if(dis < MERGE_MAX_DIS){									
+											if(timeDelta - cumulativeDistace * 1000.0/input.getStableSpeed() < MERGE_MAX_TIME &&
+													timeDelta - cumulativeDistace * 1000.0/input.getStableSpeed() > -MERGE_MAX_TIME){
+												firstMerge = true;
+												break;
+											}								
+										}
+										
+										if(k < latLst1.size() - 1){
+											cumulativeDistace += G.computeDistanceHaversine(latLst1.elementAt(k), lonLst1.elementAt(k), latLst1.elementAt(k+1), lonLst1.elementAt(k+1));
+										}
+									}
+								}
+								
+								//Check for the second merge if needed
+								if(firstMerge){									
+									//Case 1: Delivery 1 -> Delivery 2
+									for(int k = 0; k < latLst2.size(); k++){
+										double dis = G.computeDistanceHaversine(latLst1.lastElement(), lonLst1.lastElement(), latLst2.elementAt(k), lonLst2.elementAt(k));
+										if(dis < MERGE_MAX_DIS){
+											secondMerge = true;
+											break;
+										}
+									}
+									if(secondMerge == false){
+										//Case 2: Delivery 2 -> Delivery 1
+										for(int k = 0; k < latLst1.size(); k++){
+											double dis = G.computeDistanceHaversine(latLst2.lastElement(), lonLst2.lastElement(), latLst1.elementAt(k), lonLst1.elementAt(k));
+											if(dis < MERGE_MAX_DIS){
+												secondMerge = true;
+												break;
+											}
+										}
+									}
+								}
+								
+								//Check a possible merge
+								if(firstMerge && secondMerge){
+									possibleMerge[i][j] = true;
+									System.out.println("There is a merge between " + input.getRequests()[i].getTicketCode() + " and " + input.getRequests()[j].getTicketCode());
+								}
+							}
 						}
 					}
 				}

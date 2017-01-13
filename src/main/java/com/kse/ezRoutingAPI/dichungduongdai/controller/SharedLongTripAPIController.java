@@ -34,14 +34,11 @@ public class SharedLongTripAPIController {
 		System.out.println("Create a service");
 		
 		
-		//System.out.println(input.getRequests()[0].getDirectItineraries()[0].lat);
-		
-		
 		SharedLongTripSolution sol = dichungDuongdaiService.computeSharedLongTrip();
-		System.out.println("Solved a service");
 		
-		//writeDichungDuongDaiRequest(input, sol);
+		writeDichungDuongDaiRequest(input, sol);
 		
 		return sol;
+		
 	}
 }
