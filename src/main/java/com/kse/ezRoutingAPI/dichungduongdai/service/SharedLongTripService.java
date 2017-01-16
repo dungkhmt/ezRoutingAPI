@@ -20,8 +20,8 @@ public class SharedLongTripService {
 	
 	//Parameter variable
 	private static double MAX_VALUE = 10000000;
-	private static double MERGE_MAX_DIS = 10.0; //km
-	private static double MERGE_MAX_TIME = 900.0; //seconds
+	private static double MERGE_MAX_DIS = 15.0; //km
+	private static double MERGE_MAX_TIME = 2700.0; //seconds (45minute)
 	
 	//Google map object
 	GoogleMapsQuery G;
@@ -968,7 +968,9 @@ public class SharedLongTripService {
 									latLst2.add(Double.parseDouble(elements2[0]));
 									lonLst2.add(Double.parseDouble(elements2[1]));
 								}
-								
+								System.out.println("----------------------------------------");
+								System.out.println("itinerary1: " + itinerary1);
+								System.out.println("itinerary2: " + itinerary2);
 								
 								//A merge is acceptable since we have two merges:						
 								boolean firstMerge = false;
@@ -981,14 +983,19 @@ public class SharedLongTripService {
 								double cumulativeDistace = 0.0;
 								for(int k = 0; k < latLst2.size(); k++){
 									double dis = G.computeDistanceHaversine(latLst1.firstElement(), lonLst1.firstElement(), latLst2.elementAt(k), lonLst2.elementAt(k));
-
+									System.out.println("Distance delta = " + dis);
+									System.out.println("Time delta = " + (timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed()));
 									if(dis < MERGE_MAX_DIS){ //Check for distance condition
 										
+										System.out.println("Distance delta ok " );
+										
+										
 																		
-										if(timeDelta - cumulativeDistace * 1000.0/input.getStableSpeed() < MERGE_MAX_TIME &&
-												timeDelta - cumulativeDistace * 1000.0/input.getStableSpeed() > -MERGE_MAX_TIME){ //Check for pickup time condition
+										if(timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed() < MERGE_MAX_TIME &&
+												timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed() > -MERGE_MAX_TIME){ //Check for pickup time condition
 											firstMerge = true;
 											
+											System.out.println("Time delta ok");
 											break;
 										}								
 									}
@@ -1005,8 +1012,8 @@ public class SharedLongTripService {
 										double dis = G.computeDistanceHaversine(latLst2.firstElement(), lonLst2.firstElement(), latLst1.elementAt(k), lonLst1.elementAt(k));
 
 										if(dis < MERGE_MAX_DIS){									
-											if(timeDelta - cumulativeDistace * 1000.0/input.getStableSpeed() < MERGE_MAX_TIME &&
-													timeDelta - cumulativeDistace * 1000.0/input.getStableSpeed() > -MERGE_MAX_TIME){
+											if(timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed() < MERGE_MAX_TIME &&
+													timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed() > -MERGE_MAX_TIME){
 												firstMerge = true;
 												break;
 											}								
