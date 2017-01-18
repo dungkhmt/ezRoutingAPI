@@ -80,6 +80,10 @@ public class PickupDeliveryContainerService {
 		PickupDeliveryRequest[] req = input.getRequests();
 		Truck[] trucks = input.getTrucks();
 		
+		if(req == null || trucks == null){
+			return new PickupDeliverySolution(false,-1,-1,null);
+		}
+		
 		ArrayList<Point> startPoints = new ArrayList<Point>();
 		ArrayList<Point> endPoints = new ArrayList<Point>();
 		ArrayList<Point> pickupPoints = new ArrayList<Point>();
