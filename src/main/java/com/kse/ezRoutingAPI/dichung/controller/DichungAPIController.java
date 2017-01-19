@@ -63,6 +63,7 @@ import com.kse.ezRoutingAPI.dichung.model.SharedTaxiSolution;
 import com.kse.ezRoutingAPI.dichung.service.DichungService;
 import com.kse.ezRoutingAPI.dichungduongdai.model.SharedLongTripElement;
 import com.kse.ezRoutingAPI.dichungduongdai.model.SharedLongTripInput;
+import com.kse.ezRoutingAPI.dichungduongdai.model.SharedLongTripRequest;
 import com.kse.ezRoutingAPI.dichungduongdai.model.SharedLongTripRoute;
 import com.kse.ezRoutingAPI.dichungduongdai.model.SharedLongTripSolution;
 import com.kse.ezRoutingAPI.dichungduongdai.service.SharedLongTripService;
@@ -181,12 +182,54 @@ public class DichungAPIController {
 		}
 		
 		// compute solution for long trip requests
+		/* Su Phu's code
 		SharedLongTripInput[] requestLongTrips = input.getLongtripInput();
 		SharedLongTripSolution[] sl = new SharedLongTripSolution[requestLongTrips.length];		
 		for(int i = 0; i < requestLongTrips.length; i++){
 			SharedLongTripService dichungDuongdaiService = new SharedLongTripService(requestLongTrips[i]);
 			sl[i] = dichungDuongdaiService.computeSharedLongTrip();
 		}
+		*/
+		// Trung's code
+		SharedLongTripInput[] requestLongTrips = input.getLongtripInput();
+		
+		Vector<SharedLongTripRequest> requestLst = new Vector<SharedLongTripRequest>();
+		for(int i = 0; i < requestLongTrips.length; i++){
+			for(int j = 0; j < requestLongTrips[i].getRequests().length; j++){
+				requestLst.add(requestLongTrips[i].getRequests()[j]);
+			}
+		}		
+		SharedLongTripRequest[] requests = new SharedLongTripRequest[requestLst.size()];
+		for(int i = 0; i < requests.length; i++){
+			requests[i] = requestLst.elementAt(i);
+		}
+		
+		int minimumSharedPrice = requestLongTrips[0].getMinimumSharedPrice();
+		int[] vehicleCapacities = requestLongTrips[0].getVehicleCapacities();
+		int maxWaitTime = requestLongTrips[0].getMaxWaitTime();
+		int forbidenStraightDistance = requestLongTrips[0].getForbidenStraightDistance();
+		int forbidenTimeDistance = requestLongTrips[0].getForbidenTimeDistance();
+		int maxStandardSharingDistance = requestLongTrips[0].getMaxStandardSharingDistance();
+		int maxHighTrafficSharingDistance = requestLongTrips[0].getMaxHighTrafficSharingDistance();
+		int algorithmMaxTime = requestLongTrips[0].getAlgorithmMaxTime();
+		double approximationDistanceFactor = requestLongTrips[0].getApproximationDistanceFactor();
+		double eps = requestLongTrips[0].getEps();
+		double stdSpeed = requestLongTrips[0].getStdSpeed();
+		double highTrafficSpeed = requestLongTrips[0].getHighTrafficSpeed();
+		double stableSpeed = requestLongTrips[0].getStableSpeed();
+		int deltaRequestTime = requestLongTrips[0].getDeltaRequestTime();
+		SharedLongTripInput sharedLongTripInput = new SharedLongTripInput(requests,
+				 minimumSharedPrice,  vehicleCapacities, maxWaitTime,
+				 forbidenStraightDistance,  forbidenTimeDistance,
+				 maxStandardSharingDistance,  maxHighTrafficSharingDistance,
+				 algorithmMaxTime,  approximationDistanceFactor,
+				 eps,  stdSpeed,  highTrafficSpeed,
+				 stableSpeed,  deltaRequestTime);
+		
+		System.out.println("Number of requests: " + requests.length);
+		SharedLongTripSolution[] sl = new SharedLongTripSolution[1];
+		SharedLongTripService dichungDuongdaiService = new SharedLongTripService(sharedLongTripInput);
+		sl[0] = dichungDuongdaiService.computeSharedLongTrip();
 		
 		// convert long trip solutions into unique format of shared a ride solution
 		SharedTaxiSolution[] tmp = new SharedTaxiSolution[sl.length];

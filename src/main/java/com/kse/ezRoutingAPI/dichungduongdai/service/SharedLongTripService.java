@@ -19,9 +19,9 @@ public class SharedLongTripService {
 	private SharedLongTripInput input;
 	
 	//Parameter variable
-	private static double MAX_VALUE = 10000000;
-	private static double MERGE_MAX_DIS = 20.0; //km
-	private static double MERGE_MAX_TIME = 3600.0; //seconds (60 minute)
+	private double MAX_VALUE = 10000000;
+	private double MERGE_MAX_DIS = 20.0; //km
+	private double MERGE_MAX_TIME = 3600.0; //seconds (60 minute)
 	
 	//Google map object
 	GoogleMapsQuery G;
@@ -46,6 +46,10 @@ public class SharedLongTripService {
 	
 	public SharedLongTripService(SharedLongTripInput input){
 		this.input = input;
+		
+		MERGE_MAX_DIS = input.getForbidenStraightDistance();
+		
+		MERGE_MAX_TIME = input.getMaxWaitTime();
 		
 		//Google map object
 		G = new GoogleMapsQuery();
