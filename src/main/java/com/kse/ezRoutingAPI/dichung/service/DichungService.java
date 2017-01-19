@@ -314,16 +314,17 @@ public class DichungService {
 
 				// if(ri.getTicketCode().equals("TK0016") &&
 				// rj.getTicketCode().equals("TK0017")){
-				// System.out.println("mj - mi = " + mij + ", maxSharedTime = "
-				// + maxSharedTime + ", maxSharedDistance = " +
-				// maxSharedDistance
-				// + ", distance[i-j] = " + estimated_distances[i][j] +
-				// ", ri.pickupDateTime = " + ri.getEarlyPickupDateTime() +
-				// ", ok = " + ok);
-				// }
-
+				 
 				ok = ok & (0 <= mij && mij <= maxSharedTime);// the30 minutes
 
+				System.out.println("mj - mi = " + mij + ", maxSharedTime = "
+						 + maxSharedTime + ", maxSharedDistance = " +
+						 maxSharedDistance
+						 + ", distance[i-j] = " + estimated_distances[i][j] +
+						 //", ri.pickupDateTime = " + ri.getEarlyPickupDateTime() +
+						 ", ok = " + ok);
+						
+				
 				ok = ok
 						& (ri.getPrice() + rj.getPrice() >= input
 								.getMinimumSharedPrice());
