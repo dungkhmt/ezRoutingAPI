@@ -20,8 +20,8 @@ public class SharedLongTripService {
 	
 	//Parameter variable
 	private static double MAX_VALUE = 10000000;
-	private static double MERGE_MAX_DIS = 15.0; //km
-	private static double MERGE_MAX_TIME = 2700.0; //seconds (45minute)
+	private static double MERGE_MAX_DIS = 20.0; //km
+	private static double MERGE_MAX_TIME = 3600.0; //seconds (60 minute)
 	
 	//Google map object
 	GoogleMapsQuery G;
@@ -104,7 +104,7 @@ public class SharedLongTripService {
 					if(requestLst[i].getItinerary() == requestLst[j].getItinerary()){ //Same itinerary					
 						if(d1[i][j] <= input.getForbidenStraightDistance()){ // Two pickup points are not too far to each other						
 							if(d2[i][j] <= 2.0 * input.getForbidenStraightDistance()){ // Two delivery points are not too far to each other							
-								if(td[i][j] <= input.getForbidenTimeDistance()){//Pickup times of two requests are not too far 
+								if(td[i][j] <= input.getMaxWaitTime()){//Pickup times of two requests are not too far 
 									
 									C[i][j] = 1;
 									C[j][i] = 1;
