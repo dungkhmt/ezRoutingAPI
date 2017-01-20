@@ -19,9 +19,9 @@ public class SharedLongTripService {
 	private SharedLongTripInput input;
 	
 	//Parameter variable
-	private static double MAX_VALUE = 10000000;
-	private static double MERGE_MAX_DIS = 15.0; //km
-	private static double MERGE_MAX_TIME = 2700.0; //seconds (45minute)
+	private double MAX_VALUE = 10000000;
+	private double MERGE_MAX_DIS = 20.0; //km
+	private double MERGE_MAX_TIME = 3600.0; //seconds (60 minute)
 	
 	//Google map object
 	GoogleMapsQuery G;
@@ -46,6 +46,10 @@ public class SharedLongTripService {
 	
 	public SharedLongTripService(SharedLongTripInput input){
 		this.input = input;
+		
+		MERGE_MAX_DIS = 0.001 * input.getForbidenStraightDistance();
+		
+		MERGE_MAX_TIME = input.getMaxWaitTime();
 		
 		//Google map object
 		G = new GoogleMapsQuery();
@@ -104,7 +108,7 @@ public class SharedLongTripService {
 					if(requestLst[i].getItinerary() == requestLst[j].getItinerary()){ //Same itinerary					
 						if(d1[i][j] <= input.getForbidenStraightDistance()){ // Two pickup points are not too far to each other						
 							if(d2[i][j] <= 2.0 * input.getForbidenStraightDistance()){ // Two delivery points are not too far to each other							
-								if(td[i][j] <= input.getForbidenTimeDistance()){//Pickup times of two requests are not too far 
+								if(td[i][j] <= input.getMaxWaitTime()){//Pickup times of two requests are not too far 
 									
 									C[i][j] = 1;
 									C[j][i] = 1;
@@ -223,7 +227,13 @@ public class SharedLongTripService {
 	    			}
 	    			
 	    			double distance1 = G.getDistance(elementLst[1].getPickupPosition(), req1.getDeliveryPos());
+	    			if(distance1 <= 0){
+	    				distance1 = input.getApproximationDistanceFactor() * G.computeDistanceHaversine(elementLst[1].getPickupPosition(), req1.getDeliveryPos());
+	    			}
 	    			double distance2 = G.getDistance(elementLst[1].getPickupPosition(), req2.getDeliveryPos());
+	    			if(distance2 <= 0){
+	    				distance2 = input.getApproximationDistanceFactor() * G.computeDistanceHaversine(elementLst[1].getPickupPosition(), req2.getDeliveryPos());
+	    			}
 	    			
 	    			if(distance1 < distance2){
 	    				elementLst[2] = new SharedLongTripElement(req1.getTicketCode(), "-", "-", "-", req1.getDeliveryAddress(), req1.getDeliveryPos(),SharedLongTripElement.DELIVERY);
@@ -300,7 +310,7 @@ public class SharedLongTripService {
 	    					if(visited[p] == 0){
 	    						//double d = G.getDistance(lastLatLng, temRequestLst.elementAt(p).getDeliveryPos()); 
 	    						double d = G.computeDistanceHaversine(lastLatLng, temRequestLst.elementAt(p).getDeliveryPos());
-	    						System.out.println("lastLatLng: " + lastLatLng + " to " + temRequestLst.elementAt(p).getDeliveryPos() + " => d:  " + d);
+	    						//System.out.println("lastLatLng: " + lastLatLng + " to " + temRequestLst.elementAt(p).getDeliveryPos() + " => d:  " + d);
 	    						if(d < dist){
 	    							dist = d;
 	    							index = p; 
@@ -315,7 +325,7 @@ public class SharedLongTripService {
 		    				elementLst[k+j] = new SharedLongTripElement(temRequestLst.elementAt(index).getTicketCode(), "-", "-", "-", 
 		    						temRequestLst.elementAt(index).getDeliveryAddress(), temRequestLst.elementAt(index).getDeliveryPos(),SharedLongTripElement.DELIVERY);
 		    				
-		    				System.out.println("test: " + G.getDistance("20.6608254,106.3276864", "20.4204865,106.3905338"));
+		    				
 	    				}
 	    				
 	    			}
@@ -934,12 +944,13 @@ public class SharedLongTripService {
 			consideredList[i] = false;
 		}
 		for(int i = 0; i < n; i++){
-			if(singleRequest[i]){
+			outerloop:
+			if(singleRequest[i] && consideredList[i] == false){
 				consideredList[i] = true;
 				if(input.getRequests()[i].getDirectItineraries() == null || input.getRequests()[i].getDirectItineraries().length == 0)
 					continue;
 								
- 				
+				
 				for(int j = 0; j < n; j++){
 					if(consideredList[j] == false){
 				
@@ -968,9 +979,9 @@ public class SharedLongTripService {
 									latLst2.add(Double.parseDouble(elements2[0]));
 									lonLst2.add(Double.parseDouble(elements2[1]));
 								}
-								System.out.println("----------------------------------------");
-								System.out.println("itinerary1: " + itinerary1);
-								System.out.println("itinerary2: " + itinerary2);
+								//System.out.println("----------------------------------------");
+								//System.out.println("itinerary1: " + itinerary1);
+								//System.out.println("itinerary2: " + itinerary2);
 								
 								//A merge is acceptable since we have two merges:						
 								boolean firstMerge = false;
@@ -978,16 +989,17 @@ public class SharedLongTripService {
 								
 								//Check for a possible first merge
 								double timeDelta = Math.abs(DateTimeUtils.distance(input.getRequests()[i].getDepartTime(), input.getRequests()[j].getDepartTime()));
+								System.out.println("timeDelta: " + timeDelta);
 								
 								//case 1: pickup 1 -> pickup 2 
 								double cumulativeDistace = 0.0;
 								for(int k = 0; k < latLst2.size(); k++){
 									double dis = G.computeDistanceHaversine(latLst1.firstElement(), lonLst1.firstElement(), latLst2.elementAt(k), lonLst2.elementAt(k));
-									System.out.println("Distance delta = " + dis);
-									System.out.println("Time delta = " + (timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed()));
-									if(dis < MERGE_MAX_DIS){ //Check for distance condition
+									//System.out.println("Distance delta = " + dis);
+									//System.out.println("Time delta = " + (timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed()));
+									if(dis < MERGE_MAX_DIS ){ //Check for distance condition
 										
-										System.out.println("Distance delta ok " );
+										
 										
 										
 																		
@@ -995,7 +1007,11 @@ public class SharedLongTripService {
 												timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed() > -MERGE_MAX_TIME){ //Check for pickup time condition
 											firstMerge = true;
 											
-											System.out.println("Time delta ok");
+											//System.out.println("Time delta ok");
+											System.out.println("Distance delta ok " + dis + ", MERGE_MAX_DIS: " + MERGE_MAX_DIS);
+											System.out.println("Case1: " + (timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed()));
+											System.out.println("cumulativeDistace: " + cumulativeDistace + ", " + cumulativeDistace * 1000.0/input.getStdSpeed());
+											System.out.println("Case1: " + MERGE_MAX_TIME );
 											break;
 										}								
 									}
@@ -1011,10 +1027,13 @@ public class SharedLongTripService {
 									for(int k = 0; k < latLst1.size(); k++){
 										double dis = G.computeDistanceHaversine(latLst2.firstElement(), lonLst2.firstElement(), latLst1.elementAt(k), lonLst1.elementAt(k));
 
-										if(dis < MERGE_MAX_DIS){									
+										if(dis < MERGE_MAX_DIS){	
+											
 											if(timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed() < MERGE_MAX_TIME &&
 													timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed() > -MERGE_MAX_TIME){
 												firstMerge = true;
+												System.out.println("Case2: " + (timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed()));
+												
 												break;
 											}								
 										}
@@ -1051,12 +1070,20 @@ public class SharedLongTripService {
 								if(firstMerge && secondMerge){
 									possibleMerge[i][j] = true;
 									System.out.println("There is a merge between " + input.getRequests()[i].getTicketCode() + " and " + input.getRequests()[j].getTicketCode());
+									
+									if(singleRequest[j]){
+										System.out.println("Considered already : " + input.getRequests()[j].getTicketCode());
+										consideredList[j] = true;
+									}
+									//break
+									break outerloop;
 								}
 							}
 						}
 					}
 				}
 			}
+			
 		}
 		
 		
@@ -1183,7 +1210,10 @@ public class SharedLongTripService {
 						}else{
 							System.out.println("Error2");
 						}
+						
+						
 					}
+					
 				}
 			}
 		}
