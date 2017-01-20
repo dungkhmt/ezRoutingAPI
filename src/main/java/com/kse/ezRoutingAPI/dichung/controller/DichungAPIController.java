@@ -193,6 +193,10 @@ public class DichungAPIController {
 		// Trung's code
 		SharedLongTripInput[] requestLongTrips = input.getLongtripInput();
 		
+		if(requestLongTrips.length == 0){
+			return null;
+		}
+		
 		Vector<SharedLongTripRequest> requestLst = new Vector<SharedLongTripRequest>();
 		for(int i = 0; i < requestLongTrips.length; i++){
 			for(int j = 0; j < requestLongTrips[i].getRequests().length; j++){
