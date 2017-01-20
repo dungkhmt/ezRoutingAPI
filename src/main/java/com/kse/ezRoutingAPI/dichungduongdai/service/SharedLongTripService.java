@@ -47,7 +47,7 @@ public class SharedLongTripService {
 	public SharedLongTripService(SharedLongTripInput input){
 		this.input = input;
 		
-		MERGE_MAX_DIS = input.getForbidenStraightDistance();
+		MERGE_MAX_DIS = 0.001 * input.getForbidenStraightDistance();
 		
 		MERGE_MAX_TIME = input.getMaxWaitTime();
 		
@@ -989,6 +989,7 @@ public class SharedLongTripService {
 								
 								//Check for a possible first merge
 								double timeDelta = Math.abs(DateTimeUtils.distance(input.getRequests()[i].getDepartTime(), input.getRequests()[j].getDepartTime()));
+								System.out.println("timeDelta: " + timeDelta);
 								
 								//case 1: pickup 1 -> pickup 2 
 								double cumulativeDistace = 0.0;
@@ -996,9 +997,9 @@ public class SharedLongTripService {
 									double dis = G.computeDistanceHaversine(latLst1.firstElement(), lonLst1.firstElement(), latLst2.elementAt(k), lonLst2.elementAt(k));
 									//System.out.println("Distance delta = " + dis);
 									//System.out.println("Time delta = " + (timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed()));
-									if(dis < MERGE_MAX_DIS){ //Check for distance condition
+									if(dis < MERGE_MAX_DIS ){ //Check for distance condition
 										
-										//System.out.println("Distance delta ok " );
+										
 										
 										
 																		
@@ -1007,6 +1008,10 @@ public class SharedLongTripService {
 											firstMerge = true;
 											
 											//System.out.println("Time delta ok");
+											System.out.println("Distance delta ok " + dis + ", MERGE_MAX_DIS: " + MERGE_MAX_DIS);
+											System.out.println("Case1: " + (timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed()));
+											System.out.println("cumulativeDistace: " + cumulativeDistace + ", " + cumulativeDistace * 1000.0/input.getStdSpeed());
+											System.out.println("Case1: " + MERGE_MAX_TIME );
 											break;
 										}								
 									}
@@ -1022,10 +1027,13 @@ public class SharedLongTripService {
 									for(int k = 0; k < latLst1.size(); k++){
 										double dis = G.computeDistanceHaversine(latLst2.firstElement(), lonLst2.firstElement(), latLst1.elementAt(k), lonLst1.elementAt(k));
 
-										if(dis < MERGE_MAX_DIS){									
+										if(dis < MERGE_MAX_DIS){	
+											
 											if(timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed() < MERGE_MAX_TIME &&
 													timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed() > -MERGE_MAX_TIME){
 												firstMerge = true;
+												System.out.println("Case2: " + (timeDelta - cumulativeDistace * 1000.0/input.getStdSpeed()));
+												
 												break;
 											}								
 										}
