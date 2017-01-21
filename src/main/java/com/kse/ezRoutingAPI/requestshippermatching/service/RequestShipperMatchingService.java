@@ -123,7 +123,7 @@ public class RequestShipperMatchingService {
  		for(int i=0;i<shiperPoint.size();i++) {
  			lr.add(new ArrayList<RequestShipperMatchingRouteElement>());
  			
- 			lr.get(i).add(new RequestShipperMatchingRouteElement(p2shiper.get(shiperPoint.get(i)).getCode(),"PICKUP"));
+ 			lr.get(i).add(new RequestShipperMatchingRouteElement(p2shiper.get(shiperPoint.get(i)).getCode(),p2shiper.get(shiperPoint.get(i)).getLocation(),"PICKUP"));
  		}
  		
  		while(itRe<pickupPoints.size()){
@@ -142,10 +142,9 @@ public class RequestShipperMatchingService {
  			}
  			if(xd==0) break;
  			lr.get(itShp).add(
- 					new RequestShipperMatchingRouteElement(p2ShipRePi.get(pickupPoints.get(vtmin)).getCode(), "PICKUP"));
+ 					new RequestShipperMatchingRouteElement(p2ShipRePi.get(pickupPoints.get(vtmin)).getCode(),p2ShipRePi.get(pickupPoints.get(vtmin)).getPickupLocation(), "PICKUP"));
  			lr.get(itShp).add(
- 					new RequestShipperMatchingRouteElement(p2ShipReDe.get(deliveryPoints.get(vtmin)).getCode(), "DELIVERY"));
- 					
+ 					new RequestShipperMatchingRouteElement(p2ShipReDe.get(deliveryPoints.get(vtmin)).getCode(),p2ShipReDe.get(deliveryPoints.get(vtmin)).getDeliveryLocation(), "DELIVERY"));
  			shiperPoint.set(itShp, deliveryPoints.get(vtmin));
  			itShp=(itShp+1) % shiperPoint.size();
  			d[vtmin]=1;
@@ -298,6 +297,7 @@ public class RequestShipperMatchingService {
 		return null;
 	}
 	
+
 	public void stateModel(){
 		mgr = new VRManager();
 		XR = new VarRoutesVR(mgr);
