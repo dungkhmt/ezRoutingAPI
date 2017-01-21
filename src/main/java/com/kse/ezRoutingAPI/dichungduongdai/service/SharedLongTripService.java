@@ -945,14 +945,14 @@ public class SharedLongTripService {
 		}
 		for(int i = 0; i < n; i++){
 			outerloop:
-			if(singleRequest[i] && consideredList[i] == false){
+			if(input.getRequests()[i].isShared() == true && singleRequest[i] && consideredList[i] == false){
 				consideredList[i] = true;
 				if(input.getRequests()[i].getDirectItineraries() == null || input.getRequests()[i].getDirectItineraries().length == 0)
 					continue;
 								
 				
 				for(int j = 0; j < n; j++){
-					if(consideredList[j] == false){
+					if(input.getRequests()[j].isShared() == true && consideredList[j] == false){
 				
 						if(input.getRequests()[j].getDirectItineraries() == null || input.getRequests()[j].getDirectItineraries().length == 0)
 							continue;
