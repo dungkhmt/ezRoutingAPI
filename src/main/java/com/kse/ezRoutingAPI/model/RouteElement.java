@@ -41,6 +41,12 @@ public class RouteElement {
 		this.departureTime = departureTime;
 		this.accumulatedDistance = accumulatedDistance;
 	}
+	@Override
+	public String toString() {
+		return "RouteElement [point=" + point + ", arivalTime=" + arivalTime
+				+ ", departureTime=" + departureTime + ", accumulatedDistance="
+				+ accumulatedDistance + "]";
+	}
 	
 	
 }

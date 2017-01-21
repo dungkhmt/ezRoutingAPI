@@ -1,5 +1,7 @@
 package com.kse.ezRoutingAPI.requestshippermatching.model;
 
+import java.util.Arrays;
+
 public class RequestShipperInput {
 	private ShipRequest[] requests;
 	private Shipper[] shippers;
@@ -23,6 +25,11 @@ public class RequestShipperInput {
 	public RequestShipperInput() {
 		super();
 		// TODO Auto-generated constructor stub
+	}
+	@Override
+	public String toString() {
+		return "RequestShipperInput [requests=" + Arrays.toString(requests)
+				+ ", shippers=" + Arrays.toString(shippers) + "]";
 	}
 	
 	
