@@ -24,6 +24,10 @@ public class Shipper {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+	@Override
+	public String toString() {
+		return "Shipper [code=" + code + ", location=" + location + "]";
+	}
 	
 	
 }

@@ -74,6 +74,15 @@ public class ShipRequest {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+
+
+	@Override
+	public String toString() {
+		return "ShipRequest [code=" + code + ", pickupAddress=" + pickupAddress
+				+ ", pickupLocation=" + pickupLocation + ", deliveryAddress="
+				+ deliveryAddress + ", deliveryLocation=" + deliveryLocation
+				+ "]";
+	}
 	
 	
 	
