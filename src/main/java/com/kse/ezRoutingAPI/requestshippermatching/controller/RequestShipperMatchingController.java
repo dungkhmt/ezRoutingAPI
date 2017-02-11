@@ -24,7 +24,7 @@ public class RequestShipperMatchingController {
 		System.out.println(input);
 		RequestShipperMatchingService service = new RequestShipperMatchingService();
 		
-		RequestShipperMatchingSolution sol = service.computeRequestShipperMatchingSolution(input);
+		RequestShipperMatchingSolution sol = service.computeRequestShipperMatchingSolutionGreedy(input);
 		
 		return sol;
 		
