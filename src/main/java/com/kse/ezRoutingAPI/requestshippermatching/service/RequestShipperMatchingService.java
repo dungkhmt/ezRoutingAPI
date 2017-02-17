@@ -1,6 +1,8 @@
 package com.kse.ezRoutingAPI.requestshippermatching.service;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -118,7 +120,7 @@ public class RequestShipperMatchingService {
  		for(int i=0;i<allPoints.size();i++) dis[i][i]=100000000;
  		for(int i=0;i<allPoints.size();i++)
  			for(int j=i+1;j<allPoints.size();j++){
- 				dis[i][j]=G.computeDistanceHaversine(allPoints.get(i).getX(), allPoints.get(i).getY(), allPoints.get(j).getX(), allPoints.get(j).getY());
+ 				dis[i][j]=G.getApproximateDistanceMeter(allPoints.get(i).getX(), allPoints.get(i).getY(), allPoints.get(j).getX(), allPoints.get(j).getY());
  				dis[j][i]=dis[i][j];
  			}
  		
@@ -131,7 +133,7 @@ public class RequestShipperMatchingService {
  		for(int i=0;i<shiperPoint.size();i++) {
  			lr.add(new ArrayList<RequestShipperMatchingRouteElement>());
  			lrmi.add(0.0);
- 			lr.get(i).add(new RequestShipperMatchingRouteElement(p2shiper.get(shiperPoint.get(i)).getCode(),p2shiper.get(shiperPoint.get(i)).getLocation(),"PICKUP"));
+ 			lr.get(i).add(new RequestShipperMatchingRouteElement(p2shiper.get(shiperPoint.get(i)).getCode(),p2shiper.get(shiperPoint.get(i)).getLocation(),"PICKUP","-",0));
  		}
  		//code not capacity
  		/*while(itRe<pickupPoints.size()){
@@ -186,7 +188,7 @@ public class RequestShipperMatchingService {
  			if(cLBShipper!=null){
  				for(int i=0;i<cLBShipper.size();i++){
  						if(dis[point2Index.get(poSh)]
- 								[point2Index.get(cLBShipper.get(i))]<min){
+ 								[point2Index.get(cLBShipper.get(i))]<min2){
  							min2=dis[point2Index.get(poSh)][point2Index.get(cLBShipper.get(i))];
  							vtmin2=i;
  							xd2=1;
@@ -195,13 +197,14 @@ public class RequestShipperMatchingService {
  			}
  			int maxCap=3;
  			int sl=-1;
- 			double slmin=-1;
+ 			BigDecimal slmin;
+ 			//value.setScale(4);
  			String tmp="PICKUP";
  			ShipRequest shpR=null;
  			if(xd==0 && xd2==0) break;
  			if (xd==1 && xd2==0) {
  				shpR=p2ShipRePi.get(pickupPoints.get(vtmin));
-				slmin=min;
+				slmin=new BigDecimal(min);
 				d[vtmin]=1;
 				cLBShipper.add(p2pRePiDe.get(pickupPoints.get(vtmin)));
 				bagShipper.set(itShp, cLBShipper);
@@ -209,7 +212,7 @@ public class RequestShipperMatchingService {
  			} else
  			if(xd==1&&xd2==1&&cLBShipper.size()<shps[itShp].getCapacity() && min<min2 ){
  					shpR=p2ShipRePi.get(pickupPoints.get(vtmin));
- 					slmin=min;
+ 					slmin=new BigDecimal(min);
  					d[vtmin]=1;
  					cLBShipper.add(p2pRePiDe.get(pickupPoints.get(vtmin)));
  					bagShipper.set(itShp, cLBShipper);
@@ -218,22 +221,24 @@ public class RequestShipperMatchingService {
  			} 
  			else {
  				shpR= p2ShipReDe.get(cLBShipper.get(vtmin2));
- 				slmin=min2;
+ 				slmin=new BigDecimal(min2);
  				shiperPoint.set(itShp, cLBShipper.get(vtmin2));
  				cLBShipper.remove(vtmin2);
  				bagShipper.set(itShp, cLBShipper);
  				tmp="DELIVERY";
  			}
- 			
- 			lrmi.set(itShp, lrmi.get(itShp)+slmin);
+ 			//System.out.println(name()+slmin);
+ 			slmin=slmin.setScale(2, RoundingMode.HALF_UP);
+ 			//System.out.println(name()+slmin.setScale(2, RoundingMode.HALF_UP));
+ 			lrmi.set(itShp, lrmi.get(itShp)+slmin.doubleValue());
  			
  			
  			if(tmp.equals("PICKUP"))
  			lr.get(itShp).add(
- 					new RequestShipperMatchingRouteElement(shpR.getCode(),shpR.getPickupLocation(), tmp));
+ 					new RequestShipperMatchingRouteElement(shpR.getCode(),shpR.getPickupLocation(), tmp,shpR.getPickupAddress(),slmin.doubleValue()));
  			else 
  				lr.get(itShp).add(
- 	 					new RequestShipperMatchingRouteElement(shpR.getCode(),shpR.getDeliveryLocation(), tmp));
+ 	 					new RequestShipperMatchingRouteElement(shpR.getCode(),shpR.getDeliveryLocation(), tmp,shpR.getDeliveryAddress(),slmin.doubleValue()));
  			//shiperPoint.set(itShp, deliveryPoints.get(vtmin));
  			itShp=(itShp+1) % shiperPoint.size();
  			//System.out.println(name()+"end");
