@@ -380,25 +380,53 @@ public class RequestShipperMatchingService {
 			ArrayList<RequestShipperMatchingRouteElement> sol_ele = new ArrayList<RequestShipperMatchingRouteElement>();
 			Point x = XR.getStartingPointOfRoute(i);
 			Shipper s = mPoint2Shipper.get(x);
-			RequestShipperMatchingRouteElement start_point = new RequestShipperMatchingRouteElement(s.getCode(), s.getLocation(), "PICKUP"); 
+			Point tmp = XR.next(x);
+			RequestShipperMatchingRouteElement start_point = new RequestShipperMatchingRouteElement(s.getCode(), s.getLocation(), "PICKUP","--",gmq.computeDistanceHaversine(x.getX(), x.getY(),tmp.getX(),tmp.getY())); 
+			
 			sol_ele.add(start_point);
 			int n_point = 1;
 //			System.out.println("route["+i+"]: ");
 //			System.out.println("end pont of route["+i+"]: "+XR.getTerminatingPointOfRoute(i));
 			while(true){
 				x = XR.next(x);
+				Point nextX = XR.next(x);
 				//System.out.print(x.ID+", ");
 				if(x == XR.getTerminatingPointOfRoute(i)) break;
+				
 				RequestShipperMatchingRouteElement point;
-				if(pickup_points.contains(x)){
-					ShipRequest sq = mPoint2Request.get(x);
-					point = new RequestShipperMatchingRouteElement(sq.getCode(), sq.getPickupLocation(),"PICKUP");
-					sol_ele.add(point);
+				
+				if(nextX == XR.getTerminatingPointOfRoute(i)){
+					if(pickup_points.contains(x)){
+						ShipRequest sq = mPoint2Request.get(x);
+						point = new RequestShipperMatchingRouteElement(sq.getCode(), sq.getPickupLocation(),"PICKUP",sq.getPickupAddress(),0);
+						sol_ele.add(point);
+					}else{
+						ShipRequest sq = mPoint2Request.get(x);
+						point = new RequestShipperMatchingRouteElement(sq.getCode(), sq.getDeliveryLocation(),"DELIVERY",sq.getDeliveryAddress(),0);
+						sol_ele.add(point);
+					}
 				}else{
-					ShipRequest sq = mPoint2Request.get(x);
-					point = new RequestShipperMatchingRouteElement(sq.getCode(), sq.getDeliveryLocation(),"DELIVERY");
-					sol_ele.add(point);
+					if(pickup_points.contains(x)){
+						ShipRequest sq = mPoint2Request.get(x);
+						ShipRequest nextSq = mPoint2Request.get(nextX);
+						if(pickup_points.contains(nextX)){
+							point = new RequestShipperMatchingRouteElement(sq.getCode(), sq.getPickupLocation(),"PICKUP",sq.getPickupAddress(),gmq.computeDistanceHaversine(sq.getPickupLocation(), nextSq.getPickupLocation()));
+						}else{
+							point = new RequestShipperMatchingRouteElement(sq.getCode(),sq.getPickupLocation(),"PICKUP",sq.getPickupAddress(),gmq.computeDistanceHaversine(sq.getPickupLocation(), nextSq.getDeliveryLocation()));
+						}
+						sol_ele.add(point);
+					}else{
+						ShipRequest sq = mPoint2Request.get(x);
+						ShipRequest nextSq = mPoint2Request.get(nextX);
+						if(pickup_points.contains(nextX)){
+							point = new RequestShipperMatchingRouteElement(sq.getCode(), sq.getDeliveryLocation(),"DELIVERY",sq.getDeliveryAddress(),gmq.computeDistanceHaversine(sq.getDeliveryLocation(), nextSq.getPickupLocation()));
+						}else{
+							point = new RequestShipperMatchingRouteElement(sq.getCode(),sq.getDeliveryLocation(),"DELIVERY",sq.getDeliveryAddress(),gmq.computeDistanceHaversine(sq.getDeliveryLocation(), nextSq.getDeliveryLocation()));
+						}
+						sol_ele.add(point);
+					}
 				}
+				
 				n_point++;
 			}
 			sol_routes[i-1] = new RequestShipperMatchingRoute();
