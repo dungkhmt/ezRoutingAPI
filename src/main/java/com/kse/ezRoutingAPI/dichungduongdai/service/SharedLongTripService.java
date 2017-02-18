@@ -195,7 +195,10 @@ public class SharedLongTripService {
 	    //Considering the isolated components	    
 	    Vector<SharedLongTripRoute> routeLst = new Vector<SharedLongTripRoute>();
 	    for(int i = 0; i < n; i++){
+	    	System.out.println("IC size: " + IC[i].size());
 	    	if(IC[i].size() < 3){
+	    		
+	    		
 	    		if(IC[i].size() == 1){ //Single
 	    			SharedLongTripRequest req = requestLst[IC[i].elementAt(0)];
 	    			SharedLongTripElement[] elementLst = new SharedLongTripElement[2];
@@ -422,15 +425,25 @@ public class SharedLongTripService {
 		int[][] tabuList = new int[m][m];
 		int tabuLength = m;
 		
-		//Generate randomly initial solution	    		
+		//Generate randomly initial solution
+		System.out.println("Random Initial solution: ");
 		for(int r = 0; r < m; r++){
 			curSol[r] = IC[i].elementAt(r);
-		}
+			System.out.print(curSol[r] + " ");
+		}System.out.println();
+		
+
+		
 		
 		double curObj = computeRoutes(input, m, pickupTime, d1, curSol, routeCurSol, csTimeLB, csTimeUB);
 		double bestObj = curObj;
 		
-		while(it < maxIt){	    			
+		//Copy solution
+		copySolution(curSol, routeCurSol, csTimeLB, csTimeUB, 
+				bestSol, routeBestSol, bsTimeLB, bsTimeUB);
+		
+		while(it < maxIt){	
+			System.out.println("it: " + it);
 			it++;
 			stable++;
 			
@@ -485,6 +498,7 @@ public class SharedLongTripService {
 			
 			//Move	& update tabu    		
 			if(req1 > -1 && req2 > -1){
+				
 				//Move
 				int tempVar = curSol[req1];
     			curSol[req1] = curSol[req2];
@@ -511,6 +525,11 @@ public class SharedLongTripService {
 				bestObj = curObj;
 				copySolution(curSol, routeCurSol, csTimeLB, csTimeUB, 
 						bestSol, routeBestSol, bsTimeLB, bsTimeUB);
+				
+				System.out.println("Best solution: ");
+				for(int r = 0; r < m; r++){					
+					System.out.print(bestSol[r] + " ");
+				}System.out.println();
 				
 				stable = 0;
 			}
@@ -945,14 +964,14 @@ public class SharedLongTripService {
 		}
 		for(int i = 0; i < n; i++){
 			outerloop:
-			if(singleRequest[i] && consideredList[i] == false){
+			if(input.getRequests()[i].isShared() == true && singleRequest[i] && consideredList[i] == false){
 				consideredList[i] = true;
 				if(input.getRequests()[i].getDirectItineraries() == null || input.getRequests()[i].getDirectItineraries().length == 0)
 					continue;
 								
 				
 				for(int j = 0; j < n; j++){
-					if(consideredList[j] == false){
+					if(input.getRequests()[j].isShared() == true && consideredList[j] == false){
 				
 						if(input.getRequests()[j].getDirectItineraries() == null || input.getRequests()[j].getDirectItineraries().length == 0)
 							continue;
