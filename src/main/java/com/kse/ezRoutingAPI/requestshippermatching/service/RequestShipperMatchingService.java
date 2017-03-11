@@ -201,7 +201,20 @@ public class RequestShipperMatchingService {
  			//value.setScale(4);
  			String tmp="PICKUP";
  			ShipRequest shpR=null;
- 			if(xd==0 && xd2==0) break;
+ 			if(xd==0 && xd2==0){
+ 				System.out.println(name()+bagShipper+ cLBShipper+" "+itShp);
+ 				int xd3=0;
+ 				for(int i=0;i<bagShipper.size();i++){
+ 					if(bagShipper.get(i).size()>0) xd3=1;
+ 					System.out.println(name()+"size "+bagShipper.get(i).size());
+ 				}
+ 				System.out.println(name()+" "+xd3);
+ 				if (xd3==0) break;
+ 				else{
+ 					itShp=(itShp+1) % shiperPoint.size();
+ 					continue;
+ 				}
+ 			}
  			if (xd==1 && xd2==0) {
  				shpR=p2ShipRePi.get(pickupPoints.get(vtmin));
 				slmin=new BigDecimal(min);
@@ -228,7 +241,7 @@ public class RequestShipperMatchingService {
  				tmp="DELIVERY";
  			}
  			//System.out.println(name()+slmin);
- 			slmin=slmin.setScale(2, RoundingMode.HALF_UP);
+ 			slmin=slmin.setScale(0, RoundingMode.HALF_UP);
  			//System.out.println(name()+slmin.setScale(2, RoundingMode.HALF_UP));
  			lrmi.set(itShp, lrmi.get(itShp)+slmin.doubleValue());
  			
@@ -249,6 +262,13 @@ public class RequestShipperMatchingService {
  		for(int i=0;i<lr.size();i++){
  			RequestShipperMatchingRouteElement lRE[]=new RequestShipperMatchingRouteElement[lr.get(i).size()];
  			lr.get(i).toArray(lRE);
+ 			for(int j=0;j<lRE.length-1;j++){
+ 				double dd=G.getDistance(lRE[j].getLatlng(), lRE[j+1].getLatlng());
+ 				if(dd==-1)
+ 					lRE[j].setDistance2Next(lRE[j+1].getDistance2Next());
+ 				else lRE[j].setDistance2Next(dd*1000);
+ 			}
+ 			lRE[lRE.length-1].setDistance2Next(0);
  			lRSMR[i]= new RequestShipperMatchingRoute();
  			lRSMR[i].setRoute(lRE);
  		}

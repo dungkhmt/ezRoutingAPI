@@ -894,6 +894,13 @@ public class GoogleMapsQuery {
 		//G.getDirection(21, 105, 21.01, 105, "driving");
 		//int t = G.getTravelTime("135 Nguyen Van Cu, Gia Lam, hanoi, vietnam", "45 Nguyen Van Cu, Gia Lam, hanoi, vietnam", "driving");
 		
+		String p1 = "21.020382, 105.856176";
+		String p2 = "21.021849, 105.852131";
+		
+		double d1 = G.getDistance(p1, p2);
+		System.out.print(d1);
+		if(true) return;
+		
 		String src = "An Trach, Cat Linh, Dong Da, Ha Noi, Viet Nam";
 		String dest = "My Trung, Nam Dinh, Viet Nam";
 		LatLng lls = G.getCoordinate(src);
