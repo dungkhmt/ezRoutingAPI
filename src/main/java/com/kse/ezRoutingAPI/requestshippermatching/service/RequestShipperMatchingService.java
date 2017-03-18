@@ -1,7 +1,11 @@
 package com.kse.ezRoutingAPI.requestshippermatching.service;
 
+import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import localsearch.domainspecific.vehiclerouting.vrp.ConstraintSystemVR;
 import localsearch.domainspecific.vehiclerouting.vrp.IFunctionVR;
@@ -10,11 +14,39 @@ import localsearch.domainspecific.vehiclerouting.vrp.VarRoutesVR;
 import localsearch.domainspecific.vehiclerouting.vrp.constraints.eq.Eq;
 import localsearch.domainspecific.vehiclerouting.vrp.constraints.leq.Leq;
 import localsearch.domainspecific.vehiclerouting.vrp.entities.ArcWeightsManager;
+import localsearch.domainspecific.vehiclerouting.vrp.entities.NodeWeightsManager;
 import localsearch.domainspecific.vehiclerouting.vrp.entities.Point;
 import localsearch.domainspecific.vehiclerouting.vrp.functions.AccumulatedEdgeWeightsOnPathVR;
+import localsearch.domainspecific.vehiclerouting.vrp.functions.AccumulatedNodeWeightsOnPathVR;
 import localsearch.domainspecific.vehiclerouting.vrp.functions.IndexOnRoute;
+import localsearch.domainspecific.vehiclerouting.vrp.functions.LexMultiFunctions;
+import localsearch.domainspecific.vehiclerouting.vrp.functions.MaxVR;
 import localsearch.domainspecific.vehiclerouting.vrp.functions.RouteIndex;
 import localsearch.domainspecific.vehiclerouting.vrp.invariants.AccumulatedWeightEdgesVR;
+import localsearch.domainspecific.vehiclerouting.vrp.invariants.AccumulatedWeightNodesVR;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyAddOnePointMoveExplorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyCrossExchangeMoveExplorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyOnePointMoveExplorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyOrOptMove1Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyOrOptMove2Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove1Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove2Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove3Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove4Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove5Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove6Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove7Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove8Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove1Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove2Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove3Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove4Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove5Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove6Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove7Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyTwoOptMove8Explorer;
+import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.INeighborhoodExplorer;
+import localsearch.domainspecific.vehiclerouting.vrp.search.GenericLocalSearch;
 import localsearch.domainspecific.vehiclerouting.vrp.utils.googlemaps.GoogleMapsQuery;
 import localsearch.domainspecific.vehiclerouting.vrp.utils.googlemaps.LatLng;
 
@@ -30,10 +62,14 @@ import com.kse.ezRoutingAPI.requestshippermatching.model.Shipper;
 public class RequestShipperMatchingService {
 	
 	private ArcWeightsManager awm;
+	private NodeWeightsManager nwm;
 	private VRManager mgr;
 	private VarRoutesVR XR;
 	private ConstraintSystemVR CS;
-	private IFunctionVR cost[];
+	private LexMultiFunctions F;
+	private IFunctionVR a_cost[];
+	private IFunctionVR demand[];
+	private IFunctionVR cost;
 	
 	private ArrayList<Point> pickup_points;
 	private ArrayList<Point> delivery_points;
@@ -41,17 +77,20 @@ public class RequestShipperMatchingService {
 	private ArrayList<Point> endPoints;
 	private ArrayList<Point> clientPoints;
 	private ArrayList<Point> allPoints;
-	private HashMap<Integer, Shipper> mID2Shipper;
-	private HashMap<Integer, ShipRequest> mID2Request;
-	private HashMap<ShipRequest, Point> mPickupRe2Point;
-	private HashMap<ShipRequest, Point> mDeliveryRe2Point;
+	private HashMap<Point, Shipper> mPoint2Shipper;
+	private HashMap<Point, ShipRequest> mPoint2Request;
+	private HashMap<Point, Integer> mPoint2RequestID;
+//	private HashMap<ShipRequest, Point> mPickupRe2Point;
+//	private HashMap<ShipRequest, Point> mDeliveryRe2Point;
 	
 	private Shipper[] lst_shippers;
 	private ShipRequest[] lst_shipRequests;
 	private int n_shipper;
 	private int n_request;
 	
-	
+	public String name(){
+		return "RequestShipperMatchingService:: ";
+	}
 	public RequestShipperMatchingSolution computeRequestShipperMatchingSolutionGreedy(RequestShipperInput input){
 		ArrayList<Point> shiperPoint= new ArrayList<Point>();
 		ArrayList<Point> endPoints= new ArrayList<Point>();
@@ -62,6 +101,8 @@ public class RequestShipperMatchingService {
 		HashMap<Point, Shipper> p2shiper= new HashMap<Point, Shipper>();
 		HashMap<Point , ShipRequest> p2ShipReDe= new HashMap<Point, ShipRequest>();
 		HashMap<Point , ShipRequest> p2ShipRePi= new HashMap<Point, ShipRequest>();
+		HashMap<Point,Point > p2pReDePi= new HashMap<Point, Point>();
+		HashMap<Point,Point > p2pRePiDe= new HashMap<Point, Point>();
 		HashMap<Point, Integer> point2Index=new HashMap<Point, Integer>();
 		
 		ShipRequest srs[] =input.getRequests();
@@ -98,12 +139,14 @@ public class RequestShipperMatchingService {
  			if(srs[i].getDeliveryLocation().equals("-")){
  				llng=new LatLng(-100000, -100000);
  			} else llng = new LatLng(srs[i].getDeliveryLocation());
- 			p= new Point(idPoint,llng.lat,llng.lng);
+ 			Point p2= new Point(idPoint,llng.lat,llng.lng);
  			//clientPoints.add(p);
- 			deliveryPoints.add(p);
- 			allPoints.add(p);
- 			p2ShipReDe.put(p, srs[i]);
- 			point2Index.put(p, idPoint);
+ 			deliveryPoints.add(p2);
+ 			allPoints.add(p2);
+ 			p2ShipReDe.put(p2, srs[i]);
+ 			point2Index.put(p2, idPoint);
+ 			p2pReDePi.put(p2, p);
+ 			p2pRePiDe.put(p, p2);
  		}
  		System.out.println("Num of shipper"+shps.length);
  		double dis[][]= new double[allPoints.size()][allPoints.size()];
@@ -111,7 +154,7 @@ public class RequestShipperMatchingService {
  		for(int i=0;i<allPoints.size();i++) dis[i][i]=100000000;
  		for(int i=0;i<allPoints.size();i++)
  			for(int j=i+1;j<allPoints.size();j++){
- 				dis[i][j]=allPoints.get(i).distance(allPoints.get(j));
+ 				dis[i][j]=G.getApproximateDistanceMeter(allPoints.get(i).getX(), allPoints.get(i).getY(), allPoints.get(j).getX(), allPoints.get(j).getY());
  				dis[j][i]=dis[i][j];
  			}
  		
@@ -119,13 +162,45 @@ public class RequestShipperMatchingService {
  		for(int i=0;i<d.length;i++) d[i]=0;
  		int itShp=0;
  		int itRe=0;
+ 		ArrayList<Double> lrmi= new ArrayList<Double>();
  		ArrayList<ArrayList<RequestShipperMatchingRouteElement>> lr = new ArrayList<ArrayList<RequestShipperMatchingRouteElement>>();
  		for(int i=0;i<shiperPoint.size();i++) {
  			lr.add(new ArrayList<RequestShipperMatchingRouteElement>());
- 			
- 			lr.get(i).add(new RequestShipperMatchingRouteElement(p2shiper.get(shiperPoint.get(i)).getCode(),p2shiper.get(shiperPoint.get(i)).getLocation(),"PICKUP"));
+ 			lrmi.add(0.0);
+ 			lr.get(i).add(new RequestShipperMatchingRouteElement(p2shiper.get(shiperPoint.get(i)).getCode(),p2shiper.get(shiperPoint.get(i)).getLocation(),"PICKUP","-",0));
  		}
- 		
+ 		//code not capacity
+ 		/*while(itRe<pickupPoints.size()){
+ 			double min=1000000;
+ 			int vtmin=-1;
+ 			int xd=0;
+ 			Point poSh= shiperPoint.get(itShp);
+ 			for(int i=0;i<pickupPoints.size();i++){
+ 				if(d[i]==0)
+ 				if(dis[point2Index.get(poSh)]
+ 						[point2Index.get(pickupPoints.get(i))]<min){
+ 					min=dis[point2Index.get(poSh)][point2Index.get(pickupPoints.get(i))];
+ 					vtmin=i;
+ 					xd=1;
+ 				}
+ 			}
+ 			lrmi.set(itShp, lrmi.get(itShp)+min);
+ 			if(xd==0) break;
+ 			lr.get(itShp).add(
+ 					new RequestShipperMatchingRouteElement(p2ShipRePi.get(pickupPoints.get(vtmin)).getCode(),p2ShipRePi.get(pickupPoints.get(vtmin)).getPickupLocation(), "PICKUP"));
+ 			lr.get(itShp).add(
+ 					new RequestShipperMatchingRouteElement(p2ShipReDe.get(deliveryPoints.get(vtmin)).getCode(),p2ShipReDe.get(deliveryPoints.get(vtmin)).getDeliveryLocation(), "DELIVERY"));
+ 			shiperPoint.set(itShp, deliveryPoints.get(vtmin));
+ 			itShp=(itShp+1) % shiperPoint.size();
+ 			d[vtmin]=1;
+ 		}*/
+ 		ArrayList<ArrayList<Point>> bagShipper= new ArrayList<ArrayList<Point>>();
+ 		int capShp[]= new int[shiperPoint.size()];
+ 		for(int i=0;i< shiperPoint.size();i++){
+ 			ArrayList<Point> tt= new ArrayList<Point>();
+ 			bagShipper.add(tt);
+ 			capShp[i]=0;
+ 		}
  		while(itRe<pickupPoints.size()){
  			double min=1000000;
  			int vtmin=-1;
@@ -140,17 +215,69 @@ public class RequestShipperMatchingService {
  					xd=1;
  				}
  			}
- 			if(xd==0) break;
+ 			double min2=1000000;
+ 			int vtmin2=-1;
+ 			int xd2=0;
+ 			ArrayList<Point> cLBShipper= bagShipper.get(itShp);
+ 			if(cLBShipper!=null){
+ 				for(int i=0;i<cLBShipper.size();i++){
+ 						if(dis[point2Index.get(poSh)]
+ 								[point2Index.get(cLBShipper.get(i))]<min2){
+ 							min2=dis[point2Index.get(poSh)][point2Index.get(cLBShipper.get(i))];
+ 							vtmin2=i;
+ 							xd2=1;
+ 						}
+ 				}
+ 			}
+ 			int maxCap=3;
+ 			int sl=-1;
+ 			BigDecimal slmin;
+ 			//value.setScale(4);
+ 			String tmp="PICKUP";
+ 			ShipRequest shpR=null;
+ 			if(xd==0 && xd2==0) break;
+ 			if (xd==1 && xd2==0) {
+ 				shpR=p2ShipRePi.get(pickupPoints.get(vtmin));
+				slmin=new BigDecimal(min);
+				d[vtmin]=1;
+				cLBShipper.add(p2pRePiDe.get(pickupPoints.get(vtmin)));
+				bagShipper.set(itShp, cLBShipper);
+				shiperPoint.set(itShp, pickupPoints.get(vtmin));
+ 			} else
+ 			if(xd==1&&xd2==1&&cLBShipper.size()<shps[itShp].getCapacity() && min<min2 ){
+ 					shpR=p2ShipRePi.get(pickupPoints.get(vtmin));
+ 					slmin=new BigDecimal(min);
+ 					d[vtmin]=1;
+ 					cLBShipper.add(p2pRePiDe.get(pickupPoints.get(vtmin)));
+ 					bagShipper.set(itShp, cLBShipper);
+ 					shiperPoint.set(itShp, pickupPoints.get(vtmin));
+ 			
+ 			} 
+ 			else {
+ 				shpR= p2ShipReDe.get(cLBShipper.get(vtmin2));
+ 				slmin=new BigDecimal(min2);
+ 				shiperPoint.set(itShp, cLBShipper.get(vtmin2));
+ 				cLBShipper.remove(vtmin2);
+ 				bagShipper.set(itShp, cLBShipper);
+ 				tmp="DELIVERY";
+ 			}
+ 			//System.out.println(name()+slmin);
+ 			slmin=slmin.setScale(2, RoundingMode.HALF_UP);
+ 			//System.out.println(name()+slmin.setScale(2, RoundingMode.HALF_UP));
+ 			lrmi.set(itShp, lrmi.get(itShp)+slmin.doubleValue());
+ 			
+ 			
+ 			if(tmp.equals("PICKUP"))
  			lr.get(itShp).add(
- 					new RequestShipperMatchingRouteElement(p2ShipRePi.get(pickupPoints.get(vtmin)).getCode(),p2ShipRePi.get(pickupPoints.get(vtmin)).getPickupLocation(), "PICKUP"));
- 			lr.get(itShp).add(
- 					new RequestShipperMatchingRouteElement(p2ShipReDe.get(deliveryPoints.get(vtmin)).getCode(),p2ShipReDe.get(deliveryPoints.get(vtmin)).getDeliveryLocation(), "DELIVERY"));
- 			shiperPoint.set(itShp, deliveryPoints.get(vtmin));
+ 					new RequestShipperMatchingRouteElement(shpR.getCode(),shpR.getPickupLocation(), tmp,shpR.getPickupAddress(),slmin.doubleValue()));
+ 			else 
+ 				lr.get(itShp).add(
+ 	 					new RequestShipperMatchingRouteElement(shpR.getCode(),shpR.getDeliveryLocation(), tmp,shpR.getDeliveryAddress(),slmin.doubleValue()));
+ 			//shiperPoint.set(itShp, deliveryPoints.get(vtmin));
  			itShp=(itShp+1) % shiperPoint.size();
- 			d[vtmin]=1;
- 			
- 			
+ 			//System.out.println(name()+"end");
  		}
+ 		System.out.println(lrmi);
  		RequestShipperMatchingSolution re= new RequestShipperMatchingSolution();
  		RequestShipperMatchingRoute lRSMR[]=new RequestShipperMatchingRoute[lr.size()];
  		for(int i=0;i<lr.size();i++){
@@ -159,6 +286,7 @@ public class RequestShipperMatchingService {
  			lRSMR[i]= new RequestShipperMatchingRoute();
  			lRSMR[i].setRoute(lRE);
  		}
+ 		
  		re.setRoutes(lRSMR);
 		return re;
 	}
@@ -166,10 +294,11 @@ public class RequestShipperMatchingService {
 	
 	public RequestShipperMatchingSolution computeRequestShipperMatchingSolution(RequestShipperInput input){
 		// TODO by Tu-Dat
-		mID2Shipper = new HashMap<Integer, Shipper>();
-		mID2Request = new HashMap<Integer, ShipRequest>();
-		mPickupRe2Point = new HashMap<ShipRequest, Point>();
-		mDeliveryRe2Point = new HashMap<ShipRequest, Point>();
+		mPoint2Shipper = new HashMap<Point, Shipper>();
+		mPoint2Request = new HashMap<Point, ShipRequest>();
+		mPoint2RequestID = new HashMap<Point, Integer>();
+//		mPickupRe2Point = new HashMap<ShipRequest, Point>();
+//		mDeliveryRe2Point = new HashMap<ShipRequest, Point>();
 		
 		pickup_points = new ArrayList<Point>();
 		delivery_points = new ArrayList<Point>();
@@ -189,7 +318,7 @@ public class RequestShipperMatchingService {
 		for(int i=0; i<n_shipper; i++){
 			LatLng ll = new LatLng(lst_shippers[i].getLocation());
 			Point p = new Point(pointID,ll.lat,ll.lng);
-			mID2Shipper.put(pointID, lst_shippers[i]);
+			mPoint2Shipper.put(p, lst_shippers[i]);
 			startPoints.add(p);
 			allPoints.add(p);
 			pointID++;
@@ -206,8 +335,9 @@ public class RequestShipperMatchingService {
 			pickup_points.add(p_pickup);
 			clientPoints.add(p_pickup);
 			allPoints.add(p_pickup);
-			mID2Request.put(pointID, lst_shipRequests[i]);
-			mPickupRe2Point.put(lst_shipRequests[i], p_pickup);
+			mPoint2Request.put(p_pickup, lst_shipRequests[i]);
+			mPoint2RequestID.put(p_pickup, i);
+			//mPickupRe2Point.put(lst_shipRequests[i], p_pickup);
 			pointID++;
 			
 			ll = new LatLng(lst_shipRequests[i].getDeliveryLocation());
@@ -215,8 +345,9 @@ public class RequestShipperMatchingService {
 			delivery_points.add(p_delivery);
 			allPoints.add(p_delivery);
 			clientPoints.add(p_delivery);
-			mID2Request.put(pointID, lst_shipRequests[i]);
-			mPickupRe2Point.put(lst_shipRequests[i], p_delivery);
+			mPoint2Request.put(p_delivery, lst_shipRequests[i]);
+			mPoint2RequestID.put(p_delivery, i);
+			//mPickupRe2Point.put(lst_shipRequests[i], p_delivery);
 			pointID++;
 		}
 		
@@ -248,53 +379,87 @@ public class RequestShipperMatchingService {
 			}
 		}
 		
+		nwm = new NodeWeightsManager(allPoints);
+		for(Point pc : pickup_points){
+			nwm.setWeight(pc, 1);
+		}
+		for(Point pc : delivery_points){
+			nwm.setWeight(pc, -1);
+		}
+		
+		for(Point ps : startPoints){
+			nwm.setWeight(ps, 0);
+		}
+		for(Point pe : endPoints){
+			nwm.setWeight(pe, 0);
+		}
+		
 		stateModel();
 		search();
-//		ArrayList<String> route[] = new ArrayList[n_shipper];
-//		ArrayList<String> routeID[] = new ArrayList[n_shipper];
-//		
-//		boolean check_request_assigned[] = new boolean[n_request];
-//		
-//		for(int i=0; i<n_shipper; i++){
-//			route[i] = new ArrayList<String>();
-//			
-//			Shipper s = lst_shippers[i];
-//			
-//			route[i].add(s.getLocation());
-//		}
-//		
-//		GoogleMapsQuery gmq = new GoogleMapsQuery();
-//		
-//		for(int i=0; i<n_request; i++){
-//			check_request_assigned[i] = false;
-//		}
-//		
-//		int n_request_assigned = 0;
-//		//for(int i=0; i<n_request; i++){
-//		while(n_request_assigned < n_request){
-//		
-//			for(int j=0; j<n_shipper; j++){
-//				int indexRoute = -1;
-//				double minDistance = 100000;
-//				
-//				for(int i=0; i<n_request; i++){
-//					if(!check_request_assigned[i]){
-//						String deliveryLocation = lst_shipRequests[i].getDeliveryLocation();
-//						
-//						String endOfRouteLocation = route[j].get(route[j].size()-1);
-//						double distance = gmq.computeDistanceHaversine(deliveryLocation,endOfRouteLocation);
-//						if(distance < minDistance){
-//							indexRoute = j;
-//							minDistance = distance;
-//						}
-//					}
-//				}
-//				route[j].add(lst_shipRequests[indexRoute].getPickupLocation());
-//				n_request_assigned++;
-//			}
-//		}
-//		
-		return null;
+		
+		RequestShipperMatchingSolution solution = new RequestShipperMatchingSolution();
+		RequestShipperMatchingRoute sol_routes[] = new RequestShipperMatchingRoute[n_shipper];
+		
+		for(int i=1; i<=n_shipper; i++){
+			ArrayList<RequestShipperMatchingRouteElement> sol_ele = new ArrayList<RequestShipperMatchingRouteElement>();
+			Point x = XR.getStartingPointOfRoute(i);
+			Shipper s = mPoint2Shipper.get(x);
+			Point tmp = XR.next(x);
+			RequestShipperMatchingRouteElement start_point = new RequestShipperMatchingRouteElement(s.getCode(), s.getLocation(), "PICKUP","--",gmq.computeDistanceHaversine(x.getX(), x.getY(),tmp.getX(),tmp.getY())); 
+			
+			sol_ele.add(start_point);
+			int n_point = 1;
+//			System.out.println("route["+i+"]: ");
+//			System.out.println("end pont of route["+i+"]: "+XR.getTerminatingPointOfRoute(i));
+			while(true){
+				x = XR.next(x);
+				Point nextX = XR.next(x);
+				//System.out.print(x.ID+", ");
+				if(x == XR.getTerminatingPointOfRoute(i)) break;
+				
+				RequestShipperMatchingRouteElement point;
+				
+				if(nextX == XR.getTerminatingPointOfRoute(i)){
+					if(pickup_points.contains(x)){
+						ShipRequest sq = mPoint2Request.get(x);
+						point = new RequestShipperMatchingRouteElement(sq.getCode(), sq.getPickupLocation(),"PICKUP",sq.getPickupAddress(),0);
+						sol_ele.add(point);
+					}else{
+						ShipRequest sq = mPoint2Request.get(x);
+						point = new RequestShipperMatchingRouteElement(sq.getCode(), sq.getDeliveryLocation(),"DELIVERY",sq.getDeliveryAddress(),0);
+						sol_ele.add(point);
+					}
+				}else{
+					if(pickup_points.contains(x)){
+						ShipRequest sq = mPoint2Request.get(x);
+						ShipRequest nextSq = mPoint2Request.get(nextX);
+						if(pickup_points.contains(nextX)){
+							point = new RequestShipperMatchingRouteElement(sq.getCode(), sq.getPickupLocation(),"PICKUP",sq.getPickupAddress(),gmq.computeDistanceHaversine(sq.getPickupLocation(), nextSq.getPickupLocation()));
+						}else{
+							point = new RequestShipperMatchingRouteElement(sq.getCode(),sq.getPickupLocation(),"PICKUP",sq.getPickupAddress(),gmq.computeDistanceHaversine(sq.getPickupLocation(), nextSq.getDeliveryLocation()));
+						}
+						sol_ele.add(point);
+					}else{
+						ShipRequest sq = mPoint2Request.get(x);
+						ShipRequest nextSq = mPoint2Request.get(nextX);
+						if(pickup_points.contains(nextX)){
+							point = new RequestShipperMatchingRouteElement(sq.getCode(), sq.getDeliveryLocation(),"DELIVERY",sq.getDeliveryAddress(),gmq.computeDistanceHaversine(sq.getDeliveryLocation(), nextSq.getPickupLocation()));
+						}else{
+							point = new RequestShipperMatchingRouteElement(sq.getCode(),sq.getDeliveryLocation(),"DELIVERY",sq.getDeliveryAddress(),gmq.computeDistanceHaversine(sq.getDeliveryLocation(), nextSq.getDeliveryLocation()));
+						}
+						sol_ele.add(point);
+					}
+				}
+				
+				n_point++;
+			}
+			sol_routes[i-1] = new RequestShipperMatchingRoute();
+			RequestShipperMatchingRouteElement sol_route_array[] = new RequestShipperMatchingRouteElement[n_point]; 
+			sol_routes[i-1].setRoute(sol_ele.toArray(sol_route_array));
+		}
+		solution.setRoutes(sol_routes);
+		
+		return solution;
 	}
 	
 
@@ -311,9 +476,9 @@ public class RequestShipperMatchingService {
 			XR.addClientPoint(clientPoints.get(i));
 		}
 		
-		for(int i=0; i<lst_shipRequests.length; i++){
-			Point p_pickup = mPickupRe2Point.get(lst_shipRequests[i]);
-			Point p_delivery = mDeliveryRe2Point.get(lst_shipRequests[i]);
+		for(int i=0; i<pickup_points.size(); i++){
+			Point p_pickup = pickup_points.get(i);
+			Point p_delivery = delivery_points.get(i);
 			
 			IFunctionVR r_pickup = new RouteIndex(XR, p_pickup);
 			IFunctionVR r_delivery = new RouteIndex(XR,p_delivery);
@@ -325,10 +490,25 @@ public class RequestShipperMatchingService {
 		}
 		
 		AccumulatedWeightEdgesVR awe = new AccumulatedWeightEdgesVR(XR, awm);
-		cost = new IFunctionVR[n_shipper];
+		AccumulatedWeightNodesVR awn = new AccumulatedWeightNodesVR(XR, nwm);
+		
+		a_cost = new IFunctionVR[n_shipper];
+		demand = new IFunctionVR[n_shipper];
 		for(int i=1; i <= n_shipper; i++){
-			cost[i-1] = new AccumulatedEdgeWeightsOnPathVR(awe, XR.endPoint(i));
+			a_cost[i-1] = new AccumulatedEdgeWeightsOnPathVR(awe, XR.endPoint(i));
+			
+			demand[i-1] = new AccumulatedNodeWeightsOnPathVR(awn, XR.endPoint(i));
+			Point p = XR.startPoint(i);
+			Shipper s = mPoint2Shipper.get(p); 
+			//System.out.println(name()+"stateModel-- capcity of shipper["+i+"]:" + s.getCapacity());
+			CS.post(new Leq(demand[i-1],s.getCapacity()));
 		}
+		cost = new MaxVR(a_cost);
+		
+		
+		F = new LexMultiFunctions();
+		F.add(CS);
+		F.add(cost);
 		
 		mgr.close();
 		
@@ -336,19 +516,155 @@ public class RequestShipperMatchingService {
 	
 	public void search(){
 		print();
-		XR.setRandom();
+		//initSequence();
+		initGreedy();
+		ArrayList<INeighborhoodExplorer> NE = new ArrayList<INeighborhoodExplorer>();
+		NE.add(new GreedyOnePointMoveExplorer(XR, F));
+		NE.add(new GreedyOrOptMove1Explorer(XR, F));
+		NE.add(new GreedyOrOptMove2Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove1Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove2Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove3Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove4Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove5Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove6Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove7Explorer(XR, F));
+		NE.add(new GreedyThreeOptMove8Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove1Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove2Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove3Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove4Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove5Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove6Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove7Explorer(XR, F));
+		NE.add(new GreedyTwoOptMove8Explorer(XR, F));
+		// NE.add(new GreedyTwoPointsMoveExplorer(XR, F));
+		NE.add(new GreedyCrossExchangeMoveExplorer(XR, F));
+		// NE.add(new GreedyAddOnePointMoveExplorer(XR, F));
+		
+		GenericLocalSearch gs = new GenericLocalSearch(mgr);
+		gs.setNeighborhoodExplorer(NE);
+		gs.setObjectiveFunction(F);
+		gs.setMaxStable(50);
+		
+		gs.search(300, 10);
+		
 		print();
 		
 	}
 	
+	public void initSequence(){
+		int it=0;
+		while(it < pickup_points.size()){
+			for(int i=1; i<=n_shipper; i++){
+				Point x = XR.getTerminatingPointOfRoute(i);
+				x = XR.prev(x);
+				mgr.performAddOnePoint(pickup_points.get(it), x);
+				x = XR.next(x);
+				mgr.performAddOnePoint(delivery_points.get(it), x);
+				it++;
+			}
+		}
+	}
+	
 	public void initGreedy(){
+		boolean check[] = new boolean[clientPoints.size()];
+		//System.out.println(name()+"initGreedy:: number of clientPoints: "+clientPoints.size());
+		for(int i=0; i<clientPoints.size(); i++){
+			check[i] = false;
+		}
 		
+		int check_pickup[] = new int[pickup_points.size()];
+		for(int i=0; i<pickup_points.size(); i++){
+			check_pickup[i] = -1;
+		}
+		
+		GoogleMapsQuery gmq = new GoogleMapsQuery();
+		
+		int it = 0;
+		
+		int n_pickup = pickup_points.size();
+		int n_delivery = delivery_points.size();
+		
+		while(it < clientPoints.size()){
+			for(int i=1; i <= n_shipper; i++){
+				Point x = XR.getTerminatingPointOfRoute(i);
+				x = XR.prev(x);
+				
+				double min = 10000000;	
+				int index_min = -1;
+				for(int j=0; j<clientPoints.size(); j++){
+					if(!check[j]){
+						double distance = gmq.computeDistanceHaversine(clientPoints.get(j).getX(),clientPoints.get(j).getY(), x.getX(), x.getY());
+						//System.out.println(name()+"initGreedy-- route["+i+"]: Point dang xet: "+clientPoints.get(j).getID()+"distance ="+distance);
+						if(distance <= min){
+							//System.out.println("distance("+distance+") <= min("+min+")");
+							if(pickup_points.contains(clientPoints.get(j))){
+								Point p = XR.getStartingPointOfRoute(i);
+								Shipper s = mPoint2Shipper.get(p);
+								if(demand[i-1].getValue() < s.getCapacity()){
+									min = distance;
+									index_min = j;
+									//System.out.println(name()+"initGreedy-- index_min (pickup point):" +index_min);
+								}
+							}else{
+								//System.out.println("point is delivery");
+								Point tmp = clientPoints.get(j);
+								int reId = mPoint2RequestID.get(tmp);
+								if(check_pickup[reId] == i){
+									min = distance;
+									index_min = j;
+									//System.out.println(name()+"initGreedy-- index_min (delivery point):" +index_min);
+								}
+							}
+						}
+					}
+				}
+				//System.out.println(name()+"initGreedy-- it = "+it+"Point added: "+index_min);
+				if(index_min != -1){
+					mgr.performAddOnePoint(clientPoints.get(index_min), x);
+					it++;
+					check[index_min] = true;
+					if(pickup_points.contains(clientPoints.get(index_min))){
+						Point tmp = clientPoints.get(index_min);
+						int reId = mPoint2RequestID.get(tmp);
+						check_pickup[reId] = i;
+						n_pickup--;
+//						System.out.println(name()+"initGreedy-- n_pickup = "+n_pickup);
+//						System.out.println(name()+"initGreedy-- n_delivery = "+n_delivery);
+					}else{
+						n_delivery--;
+//						System.out.println(name()+"initGreedy-- n_pickup = "+n_pickup);
+//						System.out.println(name()+"initGreedy-- n_delivery = "+n_delivery);
+					}
+				}else{
+			
+					ArrayList<Point> lst_point = new ArrayList<Point>();
+					for(int in=0; in<clientPoints.size(); in++){
+						if(!check[in]){
+							lst_point.add(clientPoints.get(in));
+							it++;
+						}
+					}
+					for(int in=0; in<lst_point.size(); in++){
+						int reId = mPoint2RequestID.get(lst_point.get(in));
+						//mgr.performAddOnePoint(, y);
+						int routeIndex = check_pickup[reId];
+						Point tmp_t = XR.getTerminatingPointOfRoute(routeIndex);
+						tmp_t = XR.prev(tmp_t);
+						mgr.performAddOnePoint(lst_point.get(in),tmp_t);
+					}
+					//System.out.println(name()+"initGreedy-- it="+it+"  index_min = -1");
+					break;				
+				}
+			}
+		}
 	}
 	
 	public void print(){
 		System.out.println(XR);
 		for(int i=0; i<n_shipper; i++){
-			System.out.println("cost of route "+(i+1)+": "+cost[i].getValue());
+			System.out.println("cost of route "+(i+1)+": "+a_cost[i].getValue());
 		}
 		System.out.println("violation: "+CS.violations());
 	}

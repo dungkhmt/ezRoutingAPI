@@ -37,6 +37,8 @@ public class DeliveryGoodService {
 		shippers = input.getShippers();
 		store = input.getStore();
 		
+		System.out.println(name() + "::computeDeliveryGoodSolution, requests.length = " + requests.length);
+		
 		ArrayList<Point> startPoints = new ArrayList<Point>();
 		ArrayList<Point> endPoints = new ArrayList<Point>();
 		ArrayList<Point> deliveryPoints = new ArrayList<Point>();

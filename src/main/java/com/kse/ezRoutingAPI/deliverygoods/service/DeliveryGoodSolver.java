@@ -115,7 +115,14 @@ public class DeliveryGoodSolver {
 	IFunctionVR obj;// = new TotalCostVR(XR, distances);
 	LexMultiFunctions F;// = new LexMultiFunctions();
 
+	public String name(){
+		return "DeliveryGoodSolver";
+	}
 	public void computeSolution(){
+		
+		System.out.println(name() + "::computeSolution, nbClients = " + deliveryPoints.size() + ", nbVehicles = " + startPoints.size());
+		
+		
 		// model
 		mgr = new VRManager();
 		XR = new VarRoutesVR(mgr);
@@ -173,7 +180,7 @@ public class DeliveryGoodSolver {
 		F = new LexMultiFunctions();
 		IFunctionVR maxDistanceRoute = new MaxVR(distanceOfRoute);
 		F.add(new ConstraintViolationsVR(CS));
-		F.add(maxDistanceRoute);
+		//F.add(maxDistanceRoute);
 		F.add(obj);
 		
 
@@ -275,5 +282,13 @@ public class DeliveryGoodSolver {
 			System.out.println("Point " + p.ID + ": earliestArrivalTime = " + eat.getEarliestArrivalTime(p) + ", latestAllowed = " + latestAllowedArrivalTime.get(p));
 		}
 		
+		System.out.println(name() + "::computeSolution, nbClients = " + deliveryPoints.size() + ", nbVehicles = " + startPoints.size());
+		for(Point s: startPoints){
+			Shipper sh = mPoint2Shipper.get(s);
+			System.out.println(name() + "::computeSolution, shipper weight = " + sh.getWeight());
+		}
+		for(Point p: deliveryPoints){
+			System.out.println(name() + "::computeSolution, point demand = " + demand.getWeight(p));
+		}
 	}
 }

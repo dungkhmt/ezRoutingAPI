@@ -1498,7 +1498,8 @@ public class DichungService {
 				boolean distanceOK = true;
 				for (int k = 0; k < cluster.size(); k++) {
 					double d = G.computeDistanceHaversine(
-							a[j].getDeliveryPos(), a[k].getDeliveryPos());
+							a[j].getDeliveryPos(), a[k].getDeliveryPos()) * 1000;// in meter
+					System.out.println(name() + "::matchTripFromAirport, d = " + d + ", maxDistance = " + maxDistance);
 					if (d > maxDistance) {
 						distanceOK = false;
 						break;
@@ -1512,7 +1513,7 @@ public class DichungService {
 				// add request a[j] to the cluster
 				cluster.add(a[j]);
 				E.add(establishRouteElementForOneRequest(a[j], "latlng"));
-
+				System.out.println(name() + "::matchTripFromAirport, matched E.sz = " + E.size());
 				j++;
 			}
 			String taxiType = "5-places";
