@@ -112,7 +112,7 @@ public class GenericLocalSearch implements ISearch {
 	public void search(int maxIter, int timeLimit){
 		bestSolution = new ValueRoutesVR(XR);
 		currentIter = 0;
-		//generateInitialSolution();
+		generateInitialSolution();
 		nic = 0;
 		Neighborhood N = new Neighborhood(mgr);
 		bestValue = new LexMultiValues(F.getValues());

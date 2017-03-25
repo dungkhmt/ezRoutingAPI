@@ -1498,7 +1498,7 @@ public class DichungService {
 				boolean distanceOK = true;
 				for (int k = 0; k < cluster.size(); k++) {
 					double d = G.computeDistanceHaversine(
-							a[j].getDeliveryPos(), a[k].getDeliveryPos());
+							a[j].getDeliveryPos(), a[k].getDeliveryPos()) * 1000;// in meter
 					System.out.println(name() + "::matchTripFromAirport, d = " + d + ", maxDistance = " + maxDistance);
 					if (d > maxDistance) {
 						distanceOK = false;
