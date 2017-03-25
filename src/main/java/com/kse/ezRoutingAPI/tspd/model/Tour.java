@@ -3,12 +3,12 @@ package com.kse.ezRoutingAPI.tspd.model;
 import java.util.ArrayList;
 
 public class Tour {
-	private TrunkTour TD;
+	private TruckTour TD;
 	private ArrayList<DroneDelivery> DD;
-	public TrunkTour getTD() {
+	public TruckTour getTD() {
 		return TD;
 	}
-	public void setTD(TrunkTour tD) {
+	public void setTD(TruckTour tD) {
 		TD = tD;
 	}
 	public ArrayList<DroneDelivery> getDD() {
@@ -17,7 +17,7 @@ public class Tour {
 	public void setDD(ArrayList<DroneDelivery> dD) {
 		DD = dD;
 	}
-	public Tour(TrunkTour tD, ArrayList<DroneDelivery> dD) {
+	public Tour(TruckTour tD, ArrayList<DroneDelivery> dD) {
 		super();
 		TD = tD;
 		DD = dD;
