@@ -164,18 +164,5 @@ public class GRASP {
 	
 	public ArrayList<Point> relocate(Tour tspd, Point a, Point b){
 		
-		
-		
-	}
-	
-	public ArrayList<Point> getTrunkOnlyNodes(Tour tspd){
-		ArrayList<Point> TD = tspd.getTD().getTrunk_tour();
-		ArrayList<DroneDelivery> DD = tspd.getDD();
-		
-		ArrayList<Point> trunkOnlyNodes = new ArrayList<Point>();
-		
-		for(int i=0; i<TD.size(); i++){
-			Point 
-		}
 	}
 }

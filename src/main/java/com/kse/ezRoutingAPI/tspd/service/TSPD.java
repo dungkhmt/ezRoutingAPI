@@ -139,4 +139,19 @@ public class TSPD {
 		}
 		return false;
 	}
+	
+	public ArrayList<Point> getTrunkOnlyNodes(Tour tspd){
+		ArrayList<Point> TD = tspd.getTD().getTrunk_tour();
+		ArrayList<DroneDelivery> DD = tspd.getDD();
+		
+		ArrayList<Point> trunkOnlyNodes = new ArrayList<Point>();
+		
+		for(int i=0; i<TD.size(); i++){
+			Point pi = TD.get(i);
+			for(int j=0; j<DD.size(); j++){
+				
+				if()
+			}
+		}
+	}
 }
