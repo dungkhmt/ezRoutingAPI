@@ -8,7 +8,7 @@ import com.kse.ezRoutingAPI.tspd.model.DroneDelivery;
 import com.kse.ezRoutingAPI.tspd.model.GRASP_Arc;
 import com.kse.ezRoutingAPI.tspd.model.Point;
 import com.kse.ezRoutingAPI.tspd.model.Tour;
-import com.kse.ezRoutingAPI.tspd.model.TrunkTour;
+import com.kse.ezRoutingAPI.tspd.model.TruckTour;
 
 public class GRASP {
 	private Tour solution_tour;
@@ -89,8 +89,8 @@ public class GRASP {
 			currentPosition = tsp_tour.get(index);
 		}
 		
-		TrunkTour trunk_tour = new TrunkTour(St);
-		Tour tour = new Tour(trunk_tour, Sd);
+		TruckTour trunk_tour = new TruckTour(St);
+		Tour tour = new Tour(truck_tour, Sd);
 		
 		return tour;
 	}

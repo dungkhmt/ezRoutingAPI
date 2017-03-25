@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import com.kse.ezRoutingAPI.tspd.model.DroneDelivery;
 import com.kse.ezRoutingAPI.tspd.model.Tour;
-import com.kse.ezRoutingAPI.tspd.model.TrunkTour;
 import com.kse.ezRoutingAPI.tspd.model.Point;
+import com.kse.ezRoutingAPI.tspd.model.TruckTour;
 
 public class TSPD {
 	private int C1 = 30;//cost per unit of trunk
@@ -86,8 +86,8 @@ public class TSPD {
 		return C1*d_truck(i, j);
 	}
 	
-	public double cost(TrunkTour td){
-		ArrayList<Point> point_tour= td.getTrunk_tour();
+	public double cost(TruckTour td){
+		ArrayList<Point> point_tour= td.getTruck_tour();
 		double cost = 0;
 		for(int i=0; i<point_tour.size()-1; i++){
 			cost += C1*d_truck(point_tour.get(i), point_tour.get(i+1));
@@ -120,7 +120,7 @@ public class TSPD {
 	}
 	
 	public double cost(Tour tspd){
-		TrunkTour td = tspd.getTD();
+		TruckTour td = tspd.getTD();
 		ArrayList<DroneDelivery> dd = tspd.getDD();
 		return cost(td) + cost(dd); 
 	}
