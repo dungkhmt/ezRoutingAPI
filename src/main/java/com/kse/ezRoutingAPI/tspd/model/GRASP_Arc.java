@@ -28,5 +28,9 @@ public class GRASP_Arc {
 		this.k = k;
 		this.cost = cost;
 	}
+	@Override
+	public String toString() {
+		return "GRASP_Arc [i=" + i + ", k=" + k + ", cost=" + cost + "]";
+	}
 	
 }

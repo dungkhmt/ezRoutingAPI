@@ -32,4 +32,14 @@ public class Point {
 	public boolean equals(Point other){
 		return other.getID() == this.ID;
 	}
+	@Override
+	public String toString() {
+		return "Point [ID=" + ID + ", lat=" + lat + ", lng=" + lng + "]";
+	}
+	public Point() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	
+	
 }
