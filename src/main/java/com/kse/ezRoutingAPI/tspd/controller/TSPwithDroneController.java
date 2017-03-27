@@ -33,7 +33,7 @@ public class TSPwithDroneController {
 			clientPoints.add(clientPoint);
 		}
 		
-		TSPD tspd = new TSPD(50, 2, 1, 13, startPoint, clientPoints, endPoint);
+		TSPD tspd = new TSPD(50, 2, 5, 13, startPoint, clientPoints, endPoint);
 		GRASP grasp = new GRASP(tspd);
 		Tour tour = grasp.solve();
 		return tour;

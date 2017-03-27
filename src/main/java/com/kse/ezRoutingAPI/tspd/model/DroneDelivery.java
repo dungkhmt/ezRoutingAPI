@@ -35,5 +35,10 @@ public class DroneDelivery {
 		this.drone_node = drone_node;
 		this.rendezvous_node = rendezvous_node;
 	}
+	@Override
+	public String toString() {
+		return "DroneDelivery [lauch_node=" + lauch_node + ", drone_node="
+				+ drone_node + ", rendezvous_node=" + rendezvous_node + "]";
+	}
 	
 }
