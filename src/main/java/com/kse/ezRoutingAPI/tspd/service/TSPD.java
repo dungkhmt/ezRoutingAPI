@@ -243,4 +243,15 @@ public class TSPD {
 		
 		return checkWaitime && checkDroneEndurance;
 	}
+	public Point drone(Point start,Point end,Tour tour){
+		ArrayList<Point> listTruckPoint=tour.getTD().getTruck_tour();
+		ArrayList<DroneDelivery> listDroneDeli= tour.getDD();
+		for(int i=0;i<listDroneDeli.size();i++ ){
+			DroneDelivery d=listDroneDeli.get(i);
+			if(d.getLauch_node().equals(startPoint)||d.getRendezvous_node().equals(end)){
+				return d.getDrone_node();
+			}
+		}
+		return null;
+	}
 }
