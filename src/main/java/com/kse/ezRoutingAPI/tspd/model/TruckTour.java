@@ -17,6 +17,11 @@ public class TruckTour {
 		super();
 		this.truck_tour = truck_tour;
 	}
+
+	@Override
+	public String toString() {
+		return truck_tour.toString();
+	}
 	
 	
 }

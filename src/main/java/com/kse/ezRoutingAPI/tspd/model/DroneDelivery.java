@@ -37,8 +37,8 @@ public class DroneDelivery {
 	}
 	@Override
 	public String toString() {
-		return "DroneDelivery [lauch_node=" + lauch_node + ", drone_node="
-				+ drone_node + ", rendezvous_node=" + rendezvous_node + "]";
+//		return "DroneDelivery [lauch_node=" + lauch_node + ", drone_node="
+//				+ drone_node + ", rendezvous_node=" + rendezvous_node + "]";
+		return "["+lauch_node+", "+drone_node+", "+rendezvous_node+"]";
 	}
-	
 }

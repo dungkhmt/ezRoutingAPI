@@ -33,14 +33,18 @@ public class GRASP {
 		while(iteration < nTSP){
 			iteration++;
 			ArrayList<Point> tour = tsp.randomGenerator();
+			System.out.println("iteration "+iteration);
+			System.out.println("tsp random tour = "+tour.toString());
 			Tour tspdSolution = split_algorithm(tour);
+			System.out.println("tspd using split = " + tspdSolution.toString()+"  cost = "+tspd.cost(tspdSolution));
 			tspdSolution = local_search(tspdSolution);
+			System.out.println("tspd after local_search = " + tspdSolution.toString()+"  cost = "+tspd.cost(tspdSolution));
 			if(tspd.cost(tspdSolution) < bestObjectiveValue){
 				solution_tour = tspdSolution;
 				bestObjectiveValue = tspd.cost(tspdSolution);
 				iteration = 0;
 			}
-			System.out.println("iter "+iteration+": bestObjectiveValue"+bestObjectiveValue);
+			System.out.println("bestTour = "+solution_tour.toString()+"   bestObjectiveValue "+bestObjectiveValue);
 		}
 		
 		return solution_tour;
@@ -115,7 +119,7 @@ public class GRASP {
 	public void build_graph(ArrayList<Point> tsp_tour){
 		ArrayList<GRASP_Arc> arcs = new ArrayList<GRASP_Arc>();
 		T = new ArrayList<DroneDelivery>();
-		System.out.println("build_graph: tsp_tour input="+tsp_tour.toString());
+		//System.out.println("build_graph: tsp_tour input="+tsp_tour.toString());
 		for(int i=0; i<tsp_tour.size()-1; i++){
 			Point pi = tsp_tour.get(i);
 			Point pk = tsp_tour.get(i+1);	
