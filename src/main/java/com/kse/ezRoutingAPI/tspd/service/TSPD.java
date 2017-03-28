@@ -181,7 +181,12 @@ public class TSPD {
 		//System.out.println("TSPD::checkWaitTime("+i.getID()+","+j.getID()+","+k.getID()+")::index_i="+iLaunchNode+"  index_k="+irendezvousNode);
 		double distanceTruck = 0;
 		for(int in=iLaunchNode; in<irendezvousNode; in++){
-			distanceTruck += d_truck(truckTour.get(in), truckTour.get(in+1));
+			if(truckTour.get(in+1).equals(j)){
+				distanceTruck += d_truck(truckTour.get(in), truckTour.get(in+2));
+				in++;
+			}else{
+				distanceTruck += d_truck(truckTour.get(in),truckTour.get(in+1));
+			}
 		}
 		
 		return Math.abs(distanceTruck - (d_drone(i, j) + d_drone(j, k))) <= delta;

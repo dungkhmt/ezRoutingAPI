@@ -22,6 +22,10 @@ public class Tour {
 		TD = tD;
 		DD = dD;
 	}
+	@Override
+	public String toString() {
+		return "Tour [TD=" + TD.toString() + ", DD=" + DD.toString() + "]";
+	}
 	
 	
 }
