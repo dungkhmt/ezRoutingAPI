@@ -111,6 +111,17 @@ public class TSPD {
 				}
 			}
 		}
+		System.out.println("P="+P.toString());
+	}
+	
+	public boolean inP(Point i, Point j, Point k){
+		for(int in=0; in<P.size(); in++){
+			DroneDelivery dd = P.get(in);
+			if(dd.getLauch_node().equals(i) && dd.getDrone_node().equals(j) && dd.getRendezvous_node().equals(k)){
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public double d_drone(Point i, Point j){
@@ -167,7 +178,7 @@ public class TSPD {
 	public boolean checkWaitTime(Point i, Point j, Point k, ArrayList<Point> truckTour){
 		int iLaunchNode = truckTour.indexOf(i);
 		int irendezvousNode = truckTour.indexOf(k);
-		
+		//System.out.println("TSPD::checkWaitTime("+i.getID()+","+j.getID()+","+k.getID()+")::index_i="+iLaunchNode+"  index_k="+irendezvousNode);
 		double distanceTruck = 0;
 		for(int in=iLaunchNode; in<irendezvousNode; in++){
 			distanceTruck += d_truck(truckTour.get(in), truckTour.get(in+1));

@@ -123,23 +123,27 @@ public class GRASP {
 			arcs.add(arc);
 		}
 		
+		//System.out.println("check isDroneDelivery and add auxilary graph");
 		for(int i=0; i<tsp_tour.size()-2; i++){
 			for(int k=i+2; k<tsp_tour.size(); k++){
 				double minValue = Double.MAX_VALUE;
 				int minIndex = nTSP+3;
+				
 				Point pi = tsp_tour.get(i);
 				Point pk = tsp_tour.get(k);
 				
+				//System.out.println("pi="+pi.toString());
+				//System.out.println("pk="+pk.toString());
 				for(int j=i+1; j<k; j++){
 					Point pj = tsp_tour.get(j);
-				
-					if(tspd.isDroneDelivery(pi, pj, pk,tsp_tour) && tspd.checkWaitTime(pi, pj, pk, tsp_tour)){
+					//System.out.println("pj="+pj.toString());
+					if(tspd.inP(pi, pj, pk) && tspd.checkWaitTime(pi, pj, pk, tsp_tour)){
 						double d1 = tspd.d_truck(tsp_tour.get(j-1), tsp_tour.get(j+1));
 						double d2 = tspd.d_truck(tsp_tour.get(j-1), tsp_tour.get(j));
 						double d3 = tspd.d_truck(tsp_tour.get(j), tsp_tour.get(j+1));
 						
 						double cost = tspd.cost(i, k, tsp_tour) + tspd.getC1()*(d1-d2-d3) + tspd.cost(pi,pj,pk);
-						
+						//System.out.println("pi,pj,pk is droneDelivery , cost="+cost);
 						if(cost < minValue){
 							minValue = cost;
 							minIndex = j;
@@ -149,6 +153,8 @@ public class GRASP {
 				
 				GRASP_Arc arc = new GRASP_Arc(pi, pk, minValue);
 				arcs.add(arc);
+				//System.out.println("add arc "+arc.toString());
+				//System.out.println("minValue = "+minValue+"    minIndex="+minIndex);
 				if(minIndex != nTSP+3){
 					DroneDelivery dd = new DroneDelivery(pi,tsp_tour.get(minIndex),pk);
 					T.add(dd);
@@ -156,11 +162,14 @@ public class GRASP {
 			}
 		}
 		
-		System.out.println("build_graph: auxilary graph="+arcs.toString());
+		//System.out.println("build_graph: auxilary graph="+arcs.toString());
 		
 		P = new Point[nTSP+2];
 		double V[] = new double[nTSP+2];
 		V[0] = 0;
+		for(int i=1; i<nTSP+2; i++){
+			V[i] = Double.MAX_VALUE;
+		}
 		P[0] = tsp_tour.get(0);
 		for(int k=1; k< tsp_tour.size(); k++){
 			for(int j=0; j<arcs.size(); j++){
@@ -175,6 +184,12 @@ public class GRASP {
 				}
 			}
 		}
+//		System.out.println("P=[");
+//		for(int i=0; i<nTSP+2; i++){
+//			System.out.print(P[i].toString()+", ");
+//		}
+//		System.out.print("]");
+//		System.out.println();
 	}
 	
 	public Tour local_search(Tour tspdSolution){
