@@ -178,7 +178,8 @@ public class TSPD {
 	public boolean checkWaitTime(Point i, Point j, Point k, ArrayList<Point> truckTour){
 		int iLaunchNode = truckTour.indexOf(i);
 		int irendezvousNode = truckTour.indexOf(k);
-		//System.out.println("TSPD::checkWaitTime("+i.getID()+","+j.getID()+","+k.getID()+")::index_i="+iLaunchNode+"  index_k="+irendezvousNode);
+		System.out.println("TSPD::checkWaitTime("+i.getID()+","+j.getID()+","+k.getID()+")::index_i="+iLaunchNode+"  index_k="+irendezvousNode);
+		System.out.println("trunckTour: "+truckTour.toString());
 		double distanceTruck = 0;
 		for(int in=iLaunchNode; in<irendezvousNode; in++){
 			if(truckTour.get(in+1).equals(j)){
@@ -248,7 +249,7 @@ public class TSPD {
 		boolean checkDroneEndurance = false;
 		for(int i=0; i<dronDeliveries.size(); i++){
 			DroneDelivery dd_tmp = dronDeliveries.get(i);
-			if(!checkWaitTime(dd_tmp.getLauch_node(), dd_tmp.getLauch_node(), dd_tmp.getRendezvous_node(), truckTour)){
+			if(!checkWaitTime(dd_tmp.getLauch_node(), dd_tmp.getDrone_node(), dd_tmp.getRendezvous_node(), truckTour)){
 				checkWaitime = false;
 			}
 			double droneEndurance = d_drone(dd_tmp.getLauch_node(), dd_tmp.getDrone_node()) + d_drone(dd_tmp.getDrone_node(),dd_tmp.getRendezvous_node());
