@@ -9,35 +9,23 @@ package com.kse.ezRoutingAPI.tspd.model;
  */
 public class NeighborHood {
 	boolean isDroneNode;
-	double maxSavings;
 	Point ni;
 	Point nj;
 	Point nk;
+	
 	public boolean isDroneNode() {
 		return isDroneNode;
 	}
 	public void setDroneNode(boolean isDroneNode) {
 		this.isDroneNode = isDroneNode;
 	}
-	public double getMaxSavings() {
-		return maxSavings;
-	}
-	public void setMaxSavings(double maxSavings) {
-		this.maxSavings = maxSavings;
-	}
 	
-	public NeighborHood(boolean isDroneNode, double maxSavings, int ni, int nj,
-			int nk) {
-		super();
-		this.isDroneNode = isDroneNode;
-		this.maxSavings = maxSavings;
-		
-		}
-	public NeighborHood(boolean isDroneNode, double maxSavings, Point ni,
+	
+	public NeighborHood(boolean isDroneNode, Point ni,
 			Point nj, Point nk) {
 		super();
 		this.isDroneNode = isDroneNode;
-		this.maxSavings = maxSavings;
+	
 		this.ni = ni;
 		this.nj = nj;
 		this.nk = nk;
@@ -59,6 +47,11 @@ public class NeighborHood {
 	}
 	public void setNk(Point nk) {
 		this.nk = nk;
+	}
+	@Override
+	public String toString() {
+		return "NeighborHood [isDroneNode=" + isDroneNode + ", ni=" + ni
+				+ ", nj=" + nj + ", nk=" + nk + "]";
 	}
 	
 	

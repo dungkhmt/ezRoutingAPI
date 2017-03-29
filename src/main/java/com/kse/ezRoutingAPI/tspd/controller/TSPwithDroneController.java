@@ -14,6 +14,7 @@ import com.kse.ezRoutingAPI.tspd.model.TSPDRequest;
 import com.kse.ezRoutingAPI.tspd.model.Tour;
 import com.kse.ezRoutingAPI.tspd.service.GRASP;
 import com.kse.ezRoutingAPI.tspd.service.TSPD;
+import com.kse.ezRoutingAPI.tspd.service.TSPD_LS;
 
 @RestController
 public class TSPwithDroneController {
@@ -24,7 +25,7 @@ public class TSPwithDroneController {
 		//System.out.println(input.toString());
 		Point startPoint = input.getListPoints()[0];
 		startPoint.setID(0);
-		Point endPoint = new Point(input.getListPoints().length, 0.0, 0.0);
+		Point endPoint = new Point(input.getListPoints().length, startPoint.getLat(), startPoint.getLng());
 		
 		ArrayList<Point> clientPoints = new ArrayList<Point>();
 		for(int i=1; i<input.getListPoints().length; i++){
@@ -34,8 +35,10 @@ public class TSPwithDroneController {
 		}
 		
 		TSPD tspd = new TSPD(50, 2, 5, 13, startPoint, clientPoints, endPoint);
-		GRASP grasp = new GRASP(tspd);
-		Tour tour = grasp.solve();
+		//GRASP grasp = new GRASP(tspd);
+		//Tour tour = grasp.solve();
+		TSPD_LS tspls= new TSPD_LS(tspd);
+		Tour tour=tspls.solve();
 		return tour;
 	}
 	

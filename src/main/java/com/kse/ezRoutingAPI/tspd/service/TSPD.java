@@ -180,15 +180,12 @@ public class TSPD {
 		int irendezvousNode = truckTour.indexOf(k);
 		//System.out.println("TSPD::checkWaitTime("+i.getID()+","+j.getID()+","+k.getID()+")::index_i="+iLaunchNode+"  index_k="+irendezvousNode);
 		double distanceTruck = 0;
+		//System.out.println(name()+"size "+truckTour.size());
 		for(int in=iLaunchNode; in<irendezvousNode; in++){
-			if(truckTour.get(in+1).equals(j)){
-				distanceTruck += d_truck(truckTour.get(in), truckTour.get(in+2));
-				in++;
-			}else{
-				distanceTruck += d_truck(truckTour.get(in),truckTour.get(in+1));
-			}
+			//System.out.println(name()+"in "+in);
+				distanceTruck += d_truck(truckTour.get(in),
+						truckTour.get(in+1));
 		}
-		
 		return Math.abs(distanceTruck - (d_drone(i, j) + d_drone(j, k))) <= delta;
 	}
 	
@@ -248,7 +245,7 @@ public class TSPD {
 		boolean checkDroneEndurance = false;
 		for(int i=0; i<dronDeliveries.size(); i++){
 			DroneDelivery dd_tmp = dronDeliveries.get(i);
-			if(!checkWaitTime(dd_tmp.getLauch_node(), dd_tmp.getLauch_node(), dd_tmp.getRendezvous_node(), truckTour)){
+			if(!checkWaitTime(dd_tmp.getLauch_node(), dd_tmp.getDrone_node(), dd_tmp.getRendezvous_node(), truckTour)){
 				checkWaitime = false;
 			}
 			double droneEndurance = d_drone(dd_tmp.getLauch_node(), dd_tmp.getDrone_node()) + d_drone(dd_tmp.getDrone_node(),dd_tmp.getRendezvous_node());
@@ -269,5 +266,28 @@ public class TSPD {
 			}
 		}
 		return null;
+	}
+	
+	public int checkNotOverLapDroneDelivery(DroneDelivery de,Tour tour){
+		int d[]= new int[tour.getTD().getTruck_tour().size()];
+		for(int i=0;i<d.length-1;i++){
+			d[i]=0;
+		}
+		ArrayList<DroneDelivery> lde=tour.getDD();
+		ArrayList<Point> ltrt=tour.getTD().getTruck_tour();
+		for(int i=0;i<lde.size();i++){
+			DroneDelivery ide=lde.get(i);
+			for(int j=ltrt.indexOf(ide.getLauch_node());j<ltrt.indexOf(ide.getRendezvous_node());j++){
+				d[j]+=1;
+				if(d[j]>1) return -1;
+			}
+		}
+		for(int j=ltrt.indexOf(de.getLauch_node());j<ltrt.indexOf(de.getRendezvous_node());j++){
+			if(d[j]>0) return 0;
+		}
+		return 1;
+	}
+	String name(){
+		return "TSPD:: ";
 	}
 }
