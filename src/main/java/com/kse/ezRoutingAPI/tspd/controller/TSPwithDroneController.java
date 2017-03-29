@@ -26,7 +26,6 @@ public class TSPwithDroneController {
 		Point startPoint = input.getListPoints()[0];
 		startPoint.setID(0);
 		Point endPoint = new Point(input.getListPoints().length, startPoint.getLat(), startPoint.getLng());
-		
 		ArrayList<Point> clientPoints = new ArrayList<Point>();
 		for(int i=1; i<input.getListPoints().length; i++){
 			Point clientPoint = input.getListPoints()[i];

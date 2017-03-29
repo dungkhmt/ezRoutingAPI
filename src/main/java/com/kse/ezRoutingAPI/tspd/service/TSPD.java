@@ -178,7 +178,8 @@ public class TSPD {
 	public boolean checkWaitTime(Point i, Point j, Point k, ArrayList<Point> truckTour){
 		int iLaunchNode = truckTour.indexOf(i);
 		int irendezvousNode = truckTour.indexOf(k);
-		//System.out.println("TSPD::checkWaitTime("+i.getID()+","+j.getID()+","+k.getID()+")::index_i="+iLaunchNode+"  index_k="+irendezvousNode);
+//		System.out.println("TSPD::checkWaitTime("+i.getID()+","+j.getID()+","+k.getID()+")::index_i="+iLaunchNode+"  index_k="+irendezvousNode);
+//		System.out.println("TSPD::checkWaitTime::trunckTour: "+truckTour.toString());
 		double distanceTruck = 0;
 		//System.out.println(name()+"size "+truckTour.size());
 		for(int in=iLaunchNode; in<irendezvousNode; in++){
