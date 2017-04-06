@@ -14,6 +14,7 @@ import com.kse.ezRoutingAPI.deliverygoods.service.DeliveryGoodService;
 public class DeliveryGoodController {
 	@RequestMapping(value="/delivery-goods-plan", method = RequestMethod.POST)
 	public DeliveryGoodSolution computeDeliveryGoodSolution(@RequestBody DeliveryGoodInput input){
+		System.out.println("DeliveryGoodController::delivery-goods-plan");
 		DeliveryGoodService service = new DeliveryGoodService();
 		return service.computeDeliveryGoodSolution(input);
 	}

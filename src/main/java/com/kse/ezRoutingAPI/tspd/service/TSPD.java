@@ -14,6 +14,8 @@ public class TSPD {
 	private int C2; //cost per unit of drone
 	private double delta;
 	private double e;
+	private double truckSpeed; //Speed of truck
+	private double droneSpeed; //Speed of drone
 	private Point startPoint;
 	private ArrayList<Point> clientPoints;
 	private Point endPoint;
@@ -61,22 +63,36 @@ public class TSPD {
 	}
 	public void setEndPoint(Point endPoint) {
 		this.endPoint = endPoint;
+	}	
+	public double getTruckSpeed() {
+		return truckSpeed;
+	}
+	public void setTruckSpeed(double truckSpeed) {
+		this.truckSpeed = truckSpeed;
+	}
+	public double getDroneSpeed() {
+		return droneSpeed;
+	}
+	public void setDroneSpeed(double droneSpeed) {
+		this.droneSpeed = droneSpeed;
 	}
 	
-	
-	
-	public TSPD(int c1, int c2, double delta, double e, Point startPoint,
-			ArrayList<Point> clientPoints, Point endPoint) {
+	public TSPD(int c1, int c2, double delta, double e, double truckSpeed,
+			double droneSpeed, Point startPoint, ArrayList<Point> clientPoints,
+			Point endPoint) {
 		super();
 		C1 = c1;
 		C2 = c2;
 		this.delta = delta;
 		this.e = e;
+		this.truckSpeed = truckSpeed;
+		this.droneSpeed = droneSpeed;
 		this.startPoint = startPoint;
 		this.clientPoints = clientPoints;
 		this.endPoint = endPoint;
 		build_P();
 	}
+	
 	
 	public void build_P(){
 		P = new ArrayList<DroneDelivery>();
