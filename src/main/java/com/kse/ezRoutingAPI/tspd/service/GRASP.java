@@ -242,7 +242,7 @@ public class GRASP {
 		}
 		//System.out.println("GRASP::local_search:: totalPoints="+totalPoints.toString());
 		//System.out.println()
-		//while(next_tour == null){
+		while(next_tour == null){
 			int iMoveOperator = rand.nextInt(4);
 			int iPa = rand.nextInt(totalPoints.size());
 			int iPb = rand.nextInt(totalPoints.size());
@@ -267,7 +267,7 @@ public class GRASP {
 			}else{
 				next_tour = two_exchange(tspdSolution, a, b);
 			}
-		//}
+		}
 		
 		return next_tour;
 	}
