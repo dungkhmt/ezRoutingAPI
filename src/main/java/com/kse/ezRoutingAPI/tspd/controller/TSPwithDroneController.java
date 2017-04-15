@@ -33,15 +33,15 @@ public class TSPwithDroneController {
 			clientPoints.add(clientPoint);
 		}
 		
-		Tour[] tours = new Tour[2];
+		Tour[] tours = new Tour[1];
 		TSPD tspd = new TSPD(input.getTruckCost(), input.getDroneCost(), input.getDelta(), input.getEndurance(),input.getTruckSpeed(),input.getDroneSpeed(),startPoint, clientPoints, endPoint);
 		System.out.println(name()+"computeTSPwithDroneProblem::tspd"+tspd.toString());
 
-//		TSPD_LS tspls= new TSPD_LS(tspd);
-//		tours[0] = tspls.solve();
+		TSPD_LS tspls= new TSPD_LS(tspd);
+		tours[0] = tspls.solve();
 		
-		GRASP grasp = new GRASP(tspd);
-		tours[1] = grasp.solve();
+//		GRASP grasp = new GRASP(tspd);
+//		tours[1] = grasp.solve();
 		
 		return tours;
 	}
