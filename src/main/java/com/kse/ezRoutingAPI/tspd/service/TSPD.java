@@ -1,6 +1,9 @@
 package com.kse.ezRoutingAPI.tspd.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+
+import localsearch.domainspecific.vehiclerouting.vrp.utils.googlemaps.GoogleMapsQuery;
 
 import org.apache.xmlbeans.impl.jam.xml.TunnelledException;
 
@@ -20,7 +23,8 @@ public class TSPD {
 	private ArrayList<Point> clientPoints;
 	private Point endPoint;
 	private ArrayList<DroneDelivery> P;
-	
+	private double distancesDrone[][];
+	private double distancesTruck[][];
 	
 	public int getC1() {
 		return C1;
@@ -90,20 +94,82 @@ public class TSPD {
 		this.startPoint = startPoint;
 		this.clientPoints = clientPoints;
 		this.endPoint = endPoint;
+		
+		build_distances_array();
 		build_P();
 	}
 	
 	
+	public void build_distances_array(){
+		System.out.println(name()+"::build_distances_array-----------");
+		int nPoints = clientPoints.size() + 2;
+		distancesDrone = new double[nPoints][nPoints];
+		distancesTruck = new double[nPoints][nPoints];
+		
+		GoogleMapsQuery gmap = new GoogleMapsQuery();
+		
+		for(int i=0; i<clientPoints.size(); i++){
+			Point pi = clientPoints.get(i);
+			for(int j=0; j<clientPoints.size(); j++){
+				Point pj = clientPoints.get(j);
+				if(j==i){
+					distancesDrone[pi.getID()][pj.getID()] = 0;
+					distancesTruck[pi.getID()][pj.getID()] = 0;
+				}else{
+					distancesDrone[pi.getID()][pj.getID()] = gmap.computeDistanceHaversine(pi.getLat(), pi.getLng(), pj.getLat(), pj.getLng());
+					double dis = gmap.getDistance(pi.getLat(), pi.getLng(), pj.getLat(), pj.getLng());
+					if(dis == -1){
+						distancesTruck[pi.getID()][pj.getID()] = gmap.getApproximateDistanceMeter(pi.getLat(), pi.getLng(), pj.getLat(), pj.getLng())/1000;
+					}else{
+						distancesTruck[pi.getID()][pj.getID()] = dis;
+					}
+				}
+			}
+		}
+		
+		for(int i=0; i<clientPoints.size(); i++){
+			Point pi = clientPoints.get(i);
+			distancesDrone[startPoint.getID()][pi.getID()] = gmap.computeDistanceHaversine(startPoint.getLat(), startPoint.getLng(), pi.getLat(), pi.getLng());
+			double dis = gmap.getDistance(startPoint.getLat(), startPoint.getLng(), pi.getLat(), pi.getLng());
+			if(dis == -1){
+				distancesTruck[startPoint.getID()][pi.getID()] = gmap.computeDistanceHaversine(startPoint.getLat(), startPoint.getLng(), pi.getLat(), pi.getLng());
+			}else{
+				distancesTruck[startPoint.getID()][pi.getID()] = dis;
+			}
+			distancesDrone[pi.getID()][endPoint.getID()] = 0;
+			distancesTruck[pi.getID()][endPoint.getID()] = 0;
+		}
+		System.out.println(name()+"::build_distances_array DONE ---------");
+		System.out.println("distancesDrone");
+		for(int i=0; i<nPoints ; i++){
+			for(int j=0; j<nPoints; j++){
+				System.out.print(distancesDrone[i][j]+" ");
+			}
+			System.out.println();
+		}
+		System.out.println("distancesTruck");
+		for(int i=0; i<nPoints ; i++){
+			for(int j=0; j<nPoints; j++){
+				System.out.print(distancesTruck[i][j]+" ");
+			}
+			System.out.println();
+		}
+	}
+	
 	public void build_P(){
 		P = new ArrayList<DroneDelivery>();
 		for(int i=0; i<clientPoints.size()-2; i++){
-			for(int j=i+1; j<clientPoints.size()-1; j++){
-				for(int k=j+1; k<clientPoints.size(); k++){
-					Point pi = clientPoints.get(i);
-					Point pj = clientPoints.get(j);
+			Point pi = clientPoints.get(i);
+			for(int j=0; j<clientPoints.size()-1; j++){
+				if(i==j)continue;
+				
+				Point pj = clientPoints.get(j);
+				for(int k=0; k<clientPoints.size(); k++){
+					if(j==k || i==k) continue;
+					
 					Point pk = clientPoints.get(k);
 					double dDrone = d_drone(pi, pj) + d_drone(pj, pk);
-					if(dDrone <= e && Math.abs(d_truck(pi, pk)-dDrone) <= delta){
+					if(dDrone <= e && Math.abs(d_truck(pi, pk)/truckSpeed-dDrone/droneSpeed)*60 <= delta){
 						P.add(new DroneDelivery(pi,pj,pk));
 					}
 				}
@@ -111,23 +177,25 @@ public class TSPD {
 		}
 		
 		for(int i=0; i<clientPoints.size()-1; i++){
+			Point pi = clientPoints.get(i);
 			for(int j=0; j<clientPoints.size(); j++){
-				Point pi = clientPoints.get(i);
+				if(i==j) continue;
+				
 				Point pj = clientPoints.get(j);
 				
 				double dsDrone = d_drone(startPoint, pi) + d_drone(pi, pj);
 				double deDrone = d_drone(pi, pj) + d_drone(pj, endPoint);
 				
-				if(dsDrone <= e && Math.abs(d_truck(startPoint, pj)-dsDrone) <= delta){
+				if(dsDrone <= e && Math.abs(d_truck(startPoint, pj)/truckSpeed-dsDrone/droneSpeed)*60 <= delta){
 					P.add(new DroneDelivery(startPoint, pi, pj));
 				}
 				
-				if(deDrone <= e && Math.abs(d_truck(pi,endPoint)-deDrone) <= delta){
+				if(deDrone <= e && Math.abs(d_truck(pi,endPoint)/truckSpeed-deDrone/droneSpeed)*60 <= delta){
 					P.add(new DroneDelivery(pi,pj,endPoint));
 				}
 			}
 		}
-		System.out.println("P="+P.toString());
+		System.out.println("build_P P="+P.toString());
 	}
 	
 	public boolean inP(Point i, Point j, Point k){
@@ -141,11 +209,12 @@ public class TSPD {
 	}
 	
 	public double d_drone(Point i, Point j){
-		return Math.sqrt(Math.pow(i.getLat()-j.getLat(), 2)+Math.pow(i.getLng()-j.getLng(), 2));
+		//System.out.println()
+		return distancesDrone[i.getID()][j.getID()];
 	}
 	
 	public double d_truck(Point i, Point j){
-		return Math.sqrt(Math.pow(i.getLat()-j.getLat(), 2)+Math.pow(i.getLng()-j.getLng(), 2));
+		return distancesTruck[i.getID()][j.getID()];
 	}
 	
 	public double cost(Point i, Point j){
@@ -203,7 +272,9 @@ public class TSPD {
 				distanceTruck += d_truck(truckTour.get(in),
 						truckTour.get(in+1));
 		}
-		return Math.abs(distanceTruck - (d_drone(i, j) + d_drone(j, k))) <= delta;
+		boolean check = Math.abs(distanceTruck/truckSpeed - (d_drone(i, j) + d_drone(j, k))/droneSpeed)*60 <= delta;
+		//System.out.println("checkWaitime("+i.getID()+", "+j.getID()+", "+k.getID()+") -> "+check);
+		return  check;//minitue;
 	}
 	
 	public boolean isDroneDelivery(Point i, Point j, Point k, ArrayList<Point> trucktour){
@@ -270,8 +341,9 @@ public class TSPD {
 			if(droneEndurance <= e) 
 				checkDroneEndurance = true;
 		}
-		
-		return checkWaitime && checkDroneEndurance;
+		boolean check = checkWaitime && checkDroneEndurance;
+		//System.out.println("checkConstraint("+tour.toString()+") -> "+check);
+		return check;
 	}
 	public Point drone(Point start,Point end,Tour tour){
 		ArrayList<Point> listTruckPoint=tour.getTD().getTruck_tour();
@@ -307,4 +379,14 @@ public class TSPD {
 	String name(){
 		return "TSPD:: ";
 	}
+	@Override
+	public String toString() {
+		return "TSPD [C1=" + C1 + ", C2=" + C2 + ", delta=" + delta + ", e="
+				+ e + ", truckSpeed=" + truckSpeed + ", droneSpeed="
+				+ droneSpeed + ", startPoint=" + startPoint + ", clientPoints="
+				+ clientPoints + ", endPoint=" + endPoint + ", P=" + P
+				+ ", distancesDrone=" + Arrays.toString(distancesDrone)
+				+ ", distancesTruck=" + Arrays.toString(distancesTruck) + "]";
+	}
+	
 }

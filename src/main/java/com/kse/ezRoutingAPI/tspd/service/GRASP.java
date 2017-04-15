@@ -55,7 +55,7 @@ public class GRASP {
 	
 	public Tour split_algorithm(ArrayList<Point> tsp_tour){
 		build_graph(tsp_tour);
-//		System.out.println("GRASP::split_alogrithm::T="+T.toString());
+		System.out.println("GRASP::split_alogrithm::T="+T.toString());
 //		System.out.print("GRASP::split_alogrithm::P=[");
 //		for(int i=0; i<P.length; i++){
 //			System.out.print(P[i].toString()+", ");
@@ -240,9 +240,9 @@ public class GRASP {
 		for(int i=0; i<droneNodes.size(); i++){
 			totalPoints.add(droneNodes.get(i));
 		}
-		System.out.println("GRASP::local_search:: totalPoints="+totalPoints.toString());
+		//System.out.println("GRASP::local_search:: totalPoints="+totalPoints.toString());
 		//System.out.println()
-		while(next_tour == null){
+		//while(next_tour == null){
 			int iMoveOperator = rand.nextInt(4);
 			int iPa = rand.nextInt(totalPoints.size());
 			int iPb = rand.nextInt(totalPoints.size());
@@ -267,7 +267,7 @@ public class GRASP {
 			}else{
 				next_tour = two_exchange(tspdSolution, a, b);
 			}
-		}
+		//}
 		
 		return next_tour;
 	}
@@ -432,7 +432,7 @@ public class GRASP {
 				if(dd.getDrone_node().equals(b)){
 					dd.setDrone_node(a);
 					Tour tmp_tour= new Tour(new TruckTour(truckTour),droneDeliveries);
-					//System.out.println("tour check constraint = "+tmp_tour.toString());
+					System.out.println("tour check constraint = "+tmp_tour.toString());
 					if(!tspd.checkConstraint(tmp_tour)){
 						dd.setDrone_node(b);
 						truckTour.remove(b);
@@ -446,15 +446,15 @@ public class GRASP {
 								tmp_dd.setRendezvous_node(a);
 							}
 						}
-						//System.out.println("checkConstraint is not valid return null");
+						System.out.println("checkConstraint is not valid return null");
 						return null;
 					}
 					Tour new_tour = new Tour(new TruckTour(truckTour),droneDeliveries);
-					//System.out.println("new_tour="+new_tour.toString());
+					System.out.println("new_tour="+new_tour.toString());
 					return new_tour;
 				}
 			}
-			//System.out.println("GRASP::two_exchange::error when compare drone node");
+			System.out.println("GRASP::two_exchange::error when compare drone node");
 			return null;
 		}
 		else if(droneNodes.contains(a) && droneNodes.contains(b)){
@@ -469,7 +469,7 @@ public class GRASP {
 			}
 			Tour new_tour = new Tour(new TruckTour(truckTour), droneDeliveries);
 			if(tspd.checkConstraint(new_tour)){
-				//System.out.println("new_tour="+new_tour.toString());
+				System.out.println("new_tour="+new_tour.toString());
 				return new_tour;
 			}else{
 				for(int i=0; i<droneDeliveries.size(); i++){
@@ -481,7 +481,7 @@ public class GRASP {
 						dd.setDrone_node(a);
 					}
 				}
-				//System.out.println("return null");
+				System.out.println("return null");
 				return null;
 			}
 		}
@@ -511,7 +511,7 @@ public class GRASP {
 			
 			Tour new_tour = new Tour(new TruckTour(truckTour), droneDeliveries);
 			if(tspd.checkConstraint(new_tour)){
-				//System.out.println("new_tour="+new_tour.toString());
+				System.out.println("new_tour="+new_tour.toString());
 				return new_tour;
 			}else{
 				truckTour.remove(a);
@@ -532,7 +532,7 @@ public class GRASP {
 						dd.setRendezvous_node(a);
 					}
 				}
-				//System.out.println("return null");
+				System.out.println("return null");
 				return null;
 			}
 		}

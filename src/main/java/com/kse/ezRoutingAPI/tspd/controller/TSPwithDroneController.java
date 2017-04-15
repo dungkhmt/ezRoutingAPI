@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,8 +19,8 @@ import com.kse.ezRoutingAPI.tspd.service.TSPD_LS;
 @RestController
 public class TSPwithDroneController {
 
-	@RequestMapping(value="/tsp-with-drone/{id}", method= RequestMethod.POST)
-	public Tour computeTSPwithDroneProblem(HttpServletRequest request,@RequestBody TSPDRequest input,@PathVariable("id") String alg){
+	@RequestMapping(value="/tsp-with-drone", method= RequestMethod.POST)
+	public Tour[] computeTSPwithDroneProblem(HttpServletRequest request,@RequestBody TSPDRequest input){
 		System.out.println(name()+"computeTSPwithDroneProblem::request");
 		System.out.println(input.toString());
 		Point startPoint = input.getListPoints()[0];
@@ -34,18 +33,17 @@ public class TSPwithDroneController {
 			clientPoints.add(clientPoint);
 		}
 		
-		Tour tour;
+		Tour[] tours = new Tour[2];
 		TSPD tspd = new TSPD(input.getTruckCost(), input.getDroneCost(), input.getDelta(), input.getEndurance(),input.getTruckSpeed(),input.getDroneSpeed(),startPoint, clientPoints, endPoint);
-		if(alg.equals("tspd-ls")){
-			//GRASP grasp = new GRASP(tspd);
-			//Tour tour = grasp.solve();
-			TSPD_LS tspls= new TSPD_LS(tspd);
-			tour = tspls.solve();
-		}else{
-			GRASP grasp = new GRASP(tspd);
-			tour = grasp.solve();
-		}
-		return tour;
+		System.out.println(name()+"computeTSPwithDroneProblem::tspd"+tspd.toString());
+
+//		TSPD_LS tspls= new TSPD_LS(tspd);
+//		tours[0] = tspls.solve();
+		
+		GRASP grasp = new GRASP(tspd);
+		tours[1] = grasp.solve();
+		
+		return tours;
 	}
 	
 	public String name(){

@@ -24,8 +24,7 @@ public class Tour {
 	}
 	@Override
 	public String toString() {
-		return "Tour [TD=" + TD.toString() + ", DD=" + DD.toString() + "]";
+		return "Tour [ TD=" + TD.toString() + ", DD=" + DD.toString() + "]";
 	}
-	
 	
 }
