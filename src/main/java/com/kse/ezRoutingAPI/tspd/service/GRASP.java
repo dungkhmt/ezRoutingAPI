@@ -55,7 +55,7 @@ public class GRASP {
 	
 	public Tour split_algorithm(ArrayList<Point> tsp_tour){
 		build_graph(tsp_tour);
-		System.out.println("GRASP::split_alogrithm::T="+T.toString());
+//		System.out.println("GRASP::split_alogrithm::T="+T.toString());
 //		System.out.print("GRASP::split_alogrithm::P=[");
 //		for(int i=0; i<P.length; i++){
 //			System.out.print(P[i].toString()+", ");
@@ -242,7 +242,9 @@ public class GRASP {
 		}
 		//System.out.println("GRASP::local_search:: totalPoints="+totalPoints.toString());
 		//System.out.println()
-		while(next_tour == null){
+		int maxIter = 1000;
+		int it = 0;
+		while(next_tour == null && it < maxIter){
 			int iMoveOperator = rand.nextInt(4);
 			int iPa = rand.nextInt(totalPoints.size());
 			int iPb = rand.nextInt(totalPoints.size());
@@ -267,15 +269,18 @@ public class GRASP {
 			}else{
 				next_tour = two_exchange(tspdSolution, a, b);
 			}
+			it++ ;
 		}
 		
-		return next_tour;
+		if(next_tour == null ) return tspdSolution;
+		
+ 		return next_tour;
 	}
 	
 	public Tour relocate(Tour tspd_tour, Point a, Point b){
 		ArrayList<Point> truckOnlyNodes = tspd.getTruckOnlyNodes(tspd_tour);
 		ArrayList<Point> truckTour = tspd_tour.getTD().getTruck_tour();
-		System.out.println("relocate("+a.toString()+", "+b.toString()+")");
+		//System.out.println("relocate("+a.toString()+", "+b.toString()+")");
 		if(truckOnlyNodes.contains(a) && truckTour.contains(b)){
 			int iInsert = truckTour.indexOf(b);
 			int pRelocation = truckTour.indexOf(a);
@@ -284,19 +289,19 @@ public class GRASP {
 			
 			Tour new_tour = new Tour(new TruckTour(truckTour), tspd_tour.getDD());
 			if(tspd.checkConstraint(new_tour)){
-				System.out.println("NEW_TOUR = "+new_tour.toString());
+				//System.out.println("NEW_TOUR = "+new_tour.toString());
 				return new_tour;
 			}
 	
 			truckTour.remove(iInsert);
 			truckTour.add(pRelocation,a);
 		}
-		System.out.println("a is NOT in truckOnlyNodes or b is NOT in truckTour => RETURN NULL");
+		//System.out.println("a is NOT in truckOnlyNodes or b is NOT in truckTour => RETURN NULL");
 		return null;
 	}
 	
 	public Tour relocate(Tour tspd_tour, Point a, Point i, Point k){
-		System.out.println("relocate("+a.toString()+", "+i.toString()+", "+k.toString()+")");
+		//System.out.println("relocate("+a.toString()+", "+i.toString()+", "+k.toString()+")");
 		
 		ArrayList<Point> truckOnlyNodes = tspd.getTruckOnlyNodes(tspd_tour);
 		ArrayList<Point> droneNodes = tspd.getDroneNodes(tspd_tour);
@@ -307,29 +312,29 @@ public class GRASP {
 		Tour new_tour;
 		
 		if(a.equals(i) && i.equals(k) && k.equals(a)) {
-			System.out.println("a=i=k => return null");
+			//System.out.println("a=i=k => return null");
 			return null;
 		}
 		
 		if(!(truckTour.contains(i) && truckTour.contains(k))) {
-			System.out.println("i,k not in truckTour => return null");
+			//System.out.println("i,k not in truckTour => return null");
 			return null;
 		}
 		
 		int index_i = truckTour.indexOf(i);
 		int index_k = truckTour.indexOf(k);
 		if(index_k < index_i){
-			System.out.println("index_k = "+index_k+" < index_i = "+index_i+" => return null");
+			//System.out.println("index_k = "+index_k+" < index_i = "+index_i+" => return null");
 			return null;
 		}
 		
 		if(!tspd.isDroneDelivery(i, a, k, truckTour)){
-			System.out.println("(i,a,k) is not drone delivery => return null");
+			//System.out.println("(i,a,k) is not drone delivery => return null");
 			return null;
 		}
 		
 		if(!(truckOnlyNodes.contains(a) || droneNodes.contains(a))) {
-			System.out.println("a is not in truckOnlyNode or droneNodes => return null");
+			//System.out.println("a is not in truckOnlyNode or droneNodes => return null");
 			return null;
 		}
 		
@@ -340,10 +345,10 @@ public class GRASP {
 				droneDeliveries.add(dd);
 				
 				new_tour = new Tour(new TruckTour(truckTour), droneDeliveries);
-				System.out.println("a is truckNode NEW_TOUR = "+new_tour.toString());
+				//System.out.println("a is truckNode NEW_TOUR = "+new_tour.toString());
 				return new_tour;
 			}	
-			System.out.println("(i,a,k is not drone delivery => return null)");
+			//System.out.println("(i,a,k is not drone delivery => return null)");
 			return null;
 		}else if(droneNodes.contains(a)){
 			for(int index=0; index<droneDeliveries.size(); index++){
@@ -354,16 +359,16 @@ public class GRASP {
 					dd_tmp.setRendezvous_node(k);
 					
 					new_tour = new Tour(new TruckTour(truckTour), droneDeliveries);
-					System.out.println("a is drone node NEW_TOUR="+new_tour.toString());
+					//System.out.println("a is drone node NEW_TOUR="+new_tour.toString());
 					return new_tour;
 				}
 			}
 			
-			System.out.println("a is not droneNode => RETURN NULL");
+			//System.out.println("a is not droneNode => RETURN NULL");
 			return null;
 			
 		}else{
-			System.out.println("a not in NT union ND => RETURN NULL");
+			//System.out.println("a not in NT union ND => RETURN NULL");
 			return null;
 		}
 	}
@@ -372,21 +377,21 @@ public class GRASP {
 		ArrayList<Point> truckTour = tspd_tour.getTD().getTruck_tour();
 		ArrayList<DroneDelivery> droneDeliveries = tspd_tour.getDD();
 		ArrayList<Point> droneNodes = tspd.getDroneNodes(tspd_tour);
-		System.out.println("remove("+j.toString()+", "+k.toString()+")");
+		//System.out.println("remove("+j.toString()+", "+k.toString()+")");
 		if(truckTour.contains(j)){
-			System.out.println("j in truckTour => return null");
+			//System.out.println("j in truckTour => return null");
 			return null;
 		}
 		if(!droneNodes.contains(j)){
-			System.out.println("j is not droneNodes => return null");
+			//System.out.println("j is not droneNodes => return null");
 			return null;
 		}
 		if(!truckTour.contains(k)){
-			System.out.println("k is not in truckTour => return null");
+			//System.out.println("k is not in truckTour => return null");
 			return null;
 		}
 		if(k.equals(truckTour.get(0))) {
-			System.out.println("k is depot => return null");
+			//System.out.println("k is depot => return null");
 			return null;
 		}
 		
@@ -403,7 +408,7 @@ public class GRASP {
 		}
 		
 		Tour new_tour = new Tour(new TruckTour(truckTour), droneDeliveries);
-		System.out.println("NEW_TOUR = "+new_tour.toString());
+		//System.out.println("NEW_TOUR = "+new_tour.toString());
 		return new_tour;
 	}
 	
@@ -411,8 +416,8 @@ public class GRASP {
 		ArrayList<Point> truckTour = tspd_tour.getTD().getTruck_tour();
 		ArrayList<Point> droneNodes = tspd.getDroneNodes(tspd_tour);
 		ArrayList<DroneDelivery> droneDeliveries = tspd_tour.getDD();
-		System.out.println("two_exchange("+a.toString()+", "+b.toString()+")");
-		System.out.println("truckTour input = "+ truckTour.toString());
+		//System.out.println("two_exchange("+a.toString()+", "+b.toString()+")");
+		//System.out.println("truckTour input = "+ truckTour.toString());
 		if(truckTour.contains(a) && droneNodes.contains(b)){
 			int index_a = truckTour.indexOf(a);
 			truckTour.remove(a);
@@ -426,13 +431,13 @@ public class GRASP {
 					dd.setRendezvous_node(b);
 				}
 			}
-			System.out.println("a is truckNode, b is droneNode, after change truckTour ="+truckTour.toString());
+			//System.out.println("a is truckNode, b is droneNode, after change truckTour ="+truckTour.toString());
 			for(int i=0; i<droneDeliveries.size(); i++){
 				DroneDelivery dd = droneDeliveries.get(i);
 				if(dd.getDrone_node().equals(b)){
 					dd.setDrone_node(a);
 					Tour tmp_tour= new Tour(new TruckTour(truckTour),droneDeliveries);
-					System.out.println("tour check constraint = "+tmp_tour.toString());
+					//System.out.println("tour check constraint = "+tmp_tour.toString());
 					if(!tspd.checkConstraint(tmp_tour)){
 						dd.setDrone_node(b);
 						truckTour.remove(b);
@@ -446,15 +451,15 @@ public class GRASP {
 								tmp_dd.setRendezvous_node(a);
 							}
 						}
-						System.out.println("checkConstraint is not valid return null");
+						//System.out.println("checkConstraint is not valid return null");
 						return null;
 					}
 					Tour new_tour = new Tour(new TruckTour(truckTour),droneDeliveries);
-					System.out.println("new_tour="+new_tour.toString());
+					//System.out.println("new_tour="+new_tour.toString());
 					return new_tour;
 				}
 			}
-			System.out.println("GRASP::two_exchange::error when compare drone node");
+			//System.out.println("GRASP::two_exchange::error when compare drone node");
 			return null;
 		}
 		else if(droneNodes.contains(a) && droneNodes.contains(b)){
@@ -469,7 +474,7 @@ public class GRASP {
 			}
 			Tour new_tour = new Tour(new TruckTour(truckTour), droneDeliveries);
 			if(tspd.checkConstraint(new_tour)){
-				System.out.println("new_tour="+new_tour.toString());
+				//System.out.println("new_tour="+new_tour.toString());
 				return new_tour;
 			}else{
 				for(int i=0; i<droneDeliveries.size(); i++){
@@ -481,7 +486,7 @@ public class GRASP {
 						dd.setDrone_node(a);
 					}
 				}
-				System.out.println("return null");
+				//System.out.println("return null");
 				return null;
 			}
 		}
@@ -511,7 +516,7 @@ public class GRASP {
 			
 			Tour new_tour = new Tour(new TruckTour(truckTour), droneDeliveries);
 			if(tspd.checkConstraint(new_tour)){
-				System.out.println("new_tour="+new_tour.toString());
+				//System.out.println("new_tour="+new_tour.toString());
 				return new_tour;
 			}else{
 				truckTour.remove(a);
@@ -532,7 +537,7 @@ public class GRASP {
 						dd.setRendezvous_node(a);
 					}
 				}
-				System.out.println("return null");
+				//System.out.println("return null");
 				return null;
 			}
 		}
