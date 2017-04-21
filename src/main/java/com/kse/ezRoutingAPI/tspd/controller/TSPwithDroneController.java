@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kse.ezRoutingAPI.tspd.model.Point;
 import com.kse.ezRoutingAPI.tspd.model.TSPDRequest;
+import com.kse.ezRoutingAPI.tspd.model.TSPDSolution;
 import com.kse.ezRoutingAPI.tspd.model.Tour;
 import com.kse.ezRoutingAPI.tspd.service.GRASP;
 import com.kse.ezRoutingAPI.tspd.service.TSPD;
@@ -20,7 +21,7 @@ import com.kse.ezRoutingAPI.tspd.service.TSPD_LS;
 public class TSPwithDroneController {
 
 	@RequestMapping(value="/tsp-with-drone", method= RequestMethod.POST)
-	public Tour[] computeTSPwithDroneProblem(HttpServletRequest request,@RequestBody TSPDRequest input){
+	public TSPDSolution computeTSPwithDroneProblem(HttpServletRequest request,@RequestBody TSPDRequest input){
 		System.out.println(name()+"computeTSPwithDroneProblem::request");
 		System.out.println(input.toString());
 		Point startPoint = input.getListPoints()[0];
@@ -40,10 +41,11 @@ public class TSPwithDroneController {
 		TSPD_LS tspls= new TSPD_LS(tspd);
 		tours[0] = tspls.solve();
 		
-		GRASP grasp = new GRASP(tspd);
-		tours[1] = grasp.solve();
+		//GRASP grasp = new GRASP(tspd);
+		//tours[1] = grasp.solve();
 		
-		return tours;
+		TSPDSolution tspdSol= new TSPDSolution(tours, input.getTruckSpeed(), input.getDroneSpeed(), input.getTruckCost(), input.getDroneCost(), input.getDelta(), input.getEndurance());
+		return tspdSol;
 	}
 	
 	public String name(){
