@@ -41,8 +41,8 @@ public class TSPwithDroneController {
 		TSPD_LS tspls= new TSPD_LS(tspd);
 		tours[0] = tspls.solve();
 		
-		//GRASP grasp = new GRASP(tspd);
-		//tours[1] = grasp.solve();
+		GRASP grasp = new GRASP(tspd);
+		tours[1] = grasp.solve();
 		
 		TSPDSolution tspdSol= new TSPDSolution(tours, input.getTruckSpeed(), input.getDroneSpeed(), input.getTruckCost(), input.getDroneCost(), input.getDelta(), input.getEndurance());
 		return tspdSol;
