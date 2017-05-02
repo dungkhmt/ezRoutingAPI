@@ -10,7 +10,40 @@ public class TSP {
 	private Point startPoint;
 	private ArrayList<Point> clientPoints;
 	private Point endPoint;
+	private double distances_matrix[][];
 	
+	public Point getStartPoint() {
+		return startPoint;
+	}
+
+	public void setStartPoint(Point startPoint) {
+		this.startPoint = startPoint;
+	}
+
+	public ArrayList<Point> getClientPoints() {
+		return clientPoints;
+	}
+
+	public void setClientPoints(ArrayList<Point> clientPoints) {
+		this.clientPoints = clientPoints;
+	}
+
+	public Point getEndPoint() {
+		return endPoint;
+	}
+
+	public void setEndPoint(Point endPoint) {
+		this.endPoint = endPoint;
+	}
+
+	public double[][] getDistances_matrix() {
+		return distances_matrix;
+	}
+
+	public void setDistances_matrix(double[][] distances_matrix) {
+		this.distances_matrix = distances_matrix;
+	}
+
 	public TSP(Point sPoint, ArrayList<Point> cPoint, Point ePoint){
 		this.startPoint = sPoint;
 		this.clientPoints = cPoint;
@@ -41,4 +74,10 @@ public class TSP {
 		
 		return tour;
 	}
+
+	/*
+	public ArrayList<Point> localSearchGenerator(){
+		
+	}*/
+	
 }
