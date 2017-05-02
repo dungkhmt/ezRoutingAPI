@@ -47,7 +47,7 @@ public class AccumulatedWeightEdgesVR implements InvariantVR {
 	}
 	
 	protected int getIndex(Point p) {
-		//System.out.println(name() + "::getIndex(" + p.ID + ")");
+		System.out.println(name() +p);
 		return map.get(p);
 	}
 	
