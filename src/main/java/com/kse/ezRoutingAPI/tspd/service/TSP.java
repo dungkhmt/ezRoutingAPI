@@ -174,8 +174,6 @@ public class TSP {
 		XR.setRandom();
 		ArrayList<INeighborhoodExplorer> NE = new ArrayList<INeighborhoodExplorer>();
 		NE.add(new GreedyOnePointMoveExplorer(XR, F));
-		NE.add(new GreedyOrOptMove1Explorer(XR, F));
-		NE.add(new GreedyOrOptMove2Explorer(XR, F));
 		NE.add(new GreedyThreeOptMove1Explorer(XR, F));
 		NE.add(new GreedyThreeOptMove2Explorer(XR, F));
 		NE.add(new GreedyThreeOptMove3Explorer(XR, F));
@@ -184,17 +182,6 @@ public class TSP {
 		NE.add(new GreedyThreeOptMove6Explorer(XR, F));
 		NE.add(new GreedyThreeOptMove7Explorer(XR, F));
 		NE.add(new GreedyThreeOptMove8Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove1Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove2Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove3Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove4Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove5Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove6Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove7Explorer(XR, F));
-		NE.add(new GreedyTwoOptMove8Explorer(XR, F));
-		// NE.add(new GreedyTwoPointsMoveExplorer(XR, F));
-		NE.add(new GreedyCrossExchangeMoveExplorer(XR, F));
-		// NE.add(new GreedyAddOnePointMoveExplorer(XR, F));
 		
 		GenericLocalSearch gs = new GenericLocalSearch(mgr);
 		gs.setNeighborhoodExplorer(NE);
