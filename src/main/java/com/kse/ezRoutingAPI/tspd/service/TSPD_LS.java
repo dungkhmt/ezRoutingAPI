@@ -22,7 +22,9 @@ public class TSPD_LS {
 	public void init(){
 		
 		tsp=new TSP(tspd.getStartPoint(), tspd.getClientPoints(), tspd.getEndPoint());
-		TruckTour truckTour=new TruckTour(tsp.randomGenerator());
+		tsp.setDistances_matrix(tspd.getDistancesDrone());
+		System.out.println(tsp.lsInitTSP());
+		TruckTour truckTour=new TruckTour(tsp.lsInitTSP());
 		ArrayList<DroneDelivery> droneTours=new ArrayList<DroneDelivery>();
 		tour= new Tour(truckTour, droneTours);
 	}

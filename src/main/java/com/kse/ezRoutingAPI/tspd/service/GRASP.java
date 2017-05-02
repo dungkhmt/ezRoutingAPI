@@ -27,12 +27,15 @@ public class GRASP {
 		solution_tour = null;
 		double bestObjectiveValue = Double.MAX_VALUE;
 		TSP tsp = new TSP(tspd.getStartPoint(), tspd.getClientPoints(), tspd.getEndPoint());
+		tsp.setDistances_matrix(tspd.getDistancesTruck());
+		
 		int iteration = 0;
 		nTSP = tspd.getClientPoints().size();
 		
 		while(iteration < nTSP){
 			iteration++;
-			ArrayList<Point> tour = tsp.randomGenerator();
+			//ArrayList<Point> tour = tsp.randomGenerator();
+			ArrayList<Point> tour = tsp.lsInitTSP();
 			System.out.println("iteration "+iteration);
 			System.out.println("tsp random tour = "+tour.toString());
 			Tour tspdSolution = split_algorithm(tour);
@@ -242,7 +245,7 @@ public class GRASP {
 		}
 		//System.out.println("GRASP::local_search:: totalPoints="+totalPoints.toString());
 		//System.out.println()
-		int maxIter = 1000;
+		int maxIter = 10;
 		int it = 0;
 		while(next_tour == null && it < maxIter){
 			int iMoveOperator = rand.nextInt(4);

@@ -24,6 +24,7 @@ public class TSPwithDroneController {
 	public TSPDSolution computeTSPwithDroneProblem(HttpServletRequest request,@RequestBody TSPDRequest input){
 		System.out.println(name()+"computeTSPwithDroneProblem::request");
 		System.out.println(input.toString());
+		TSPDSolution tspdSol;
 		Point startPoint = input.getListPoints()[0];
 		startPoint.setID(0);
 		Point endPoint = new Point(input.getListPoints().length, startPoint.getLat(), startPoint.getLng());
@@ -45,9 +46,11 @@ public class TSPwithDroneController {
 		TSPD_LS tspls= new TSPD_LS(tspd);
 		tours[1] = tspls.solve();
 		
-		System.out.println("TSPD_LS solution = "+tours[0].toString()+"  cost = "+tspd.cost(tours[0]));
-		System.out.println("GRASP solution = "+tours[1].toString()+"    cost = "+tspd.cost(tours[1]));
-		TSPDSolution tspdSol= new TSPDSolution(tours, input.getTruckSpeed(), input.getDroneSpeed(), input.getTruckCost(), input.getDroneCost(), input.getDelta(), input.getEndurance());
+		System.out.println("TSPD_LS solution = "+tours[1].toString()+"  cost = "+tspd.cost(tours[1]));
+		System.out.println("GRASP solution = "+tours[0].toString()+"    cost = "+tspd.cost(tours[0]));
+		
+		tspdSol= new TSPDSolution(tours, input.getTruckSpeed(), input.getDroneSpeed(), input.getTruckCost(), input.getDroneCost(), input.getDelta(), input.getEndurance());
+
 		return tspdSol;
 	}
 	

@@ -80,6 +80,18 @@ public class TSPD {
 	public void setDroneSpeed(double droneSpeed) {
 		this.droneSpeed = droneSpeed;
 	}
+	public double[][] getDistancesDrone() {
+		return distancesDrone;
+	}
+	public void setDistancesDrone(double[][] distancesDrone) {
+		this.distancesDrone = distancesDrone;
+	}
+	public double[][] getDistancesTruck() {
+		return distancesTruck;
+	}
+	public void setDistancesTruck(double[][] distancesTruck) {
+		this.distancesTruck = distancesTruck;
+	}
 	
 	public TSPD(int c1, int c2, double delta, double e, double truckSpeed,
 			double droneSpeed, Point startPoint, ArrayList<Point> clientPoints,
