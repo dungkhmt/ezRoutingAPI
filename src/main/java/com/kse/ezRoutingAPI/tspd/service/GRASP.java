@@ -245,7 +245,7 @@ public class GRASP {
 		}
 		//System.out.println("GRASP::local_search:: totalPoints="+totalPoints.toString());
 		//System.out.println()
-		int maxIter = 50;
+		int maxIter = 20;
 		int it = 0;
 		while(next_tour == null && it < maxIter){
 			int iMoveOperator = rand.nextInt(4);
