@@ -118,9 +118,9 @@ public class GenericLocalSearch implements ISearch {
 		bestValue = new LexMultiValues(F.getValues());
 		updateBest();
 		double t0 = System.currentTimeMillis();
-		System.out.println(name() + "::search, init bestValue = " + bestValue.toString());
+		//System.out.println(name() + "::search, init bestValue = " + bestValue.toString());
 		//System.exit(-1);
-		System.out.println(XR.toString());
+		//System.out.println(XR.toString());
 		while (currentIter < maxIter) {
 			double t = System.currentTimeMillis() - t0;
 			t = t * 0.001;
@@ -144,9 +144,9 @@ public class GenericLocalSearch implements ISearch {
 				IVRMove m = N.getAMove();
 				m.move();
 				
-				System.out.println(name() + "::search, step " + currentIter + ", time " + t + ", F = " + F.getValues().toString() + 
-						", best = " + bestValue.toString() + ", time_to_best = " + time_to_best + 
-						", nic/maxStable = " + nic + "/" + maxStable);
+//				System.out.println(name() + "::search, step " + currentIter + ", time " + t + ", F = " + F.getValues().toString() + 
+//						", best = " + bestValue.toString() + ", time_to_best = " + time_to_best + 
+//						", nic/maxStable = " + nic + "/" + maxStable);
 				if(F.getValues().lt(bestValue)){
 					updateBest();
 					time_to_best = System.currentTimeMillis() - t0;

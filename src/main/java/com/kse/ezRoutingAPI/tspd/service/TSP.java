@@ -89,6 +89,19 @@ public class TSP {
 		tour.add(startPoint);
 		
 		int nClientPoint = clientPoints.size();
+		
+//		for(int i=0; i<nClientPoint; i++){
+//			tour.add(clientPoints.get(i));
+//		}
+//		
+//		Random rand = new Random();
+//		for(int i=1; i <= nClientPoint; i++){
+//			int j = rand.nextInt(nClientPoint+1-i)+i;
+//			Point tmp = new Point(tour.get(i).getID(),tour.get(i).getLat(),tour.get(i).getLng());
+//			tour.set(i, tour.get(j));
+//			tour.set(j, tmp);
+//		}
+		
 		boolean visted[] = new boolean[nClientPoint];
 		for(int i=0; i<nClientPoint; i++){
 			visted[i] = false;
