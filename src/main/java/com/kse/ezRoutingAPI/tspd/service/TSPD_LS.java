@@ -22,7 +22,7 @@ public class TSPD_LS {
 	public void init(){
 		
 		tsp=new TSP(tspd.getStartPoint(), tspd.getClientPoints(), tspd.getEndPoint());
-		tsp.setDistances_matrix(tspd.getDistancesDrone());
+		tsp.setDistances_matrix(tspd.getDistancesTruck());
 		System.out.println(tsp.lsInitTSP());
 		TruckTour truckTour=new TruckTour(tsp.lsInitTSP());
 		ArrayList<DroneDelivery> droneTours=new ArrayList<DroneDelivery>();
@@ -30,9 +30,7 @@ public class TSPD_LS {
 	}
 	public Tour solve(){
 		init();
-		System.out.println(name()+tour);
 		ArrayList<Point> customerPoints=tspd.getClientPoints();
-		System.out.println(name()+"cusPoint "+customerPoints);
 		boolean d[]= new boolean[customerPoints.size()];
 		maxSavings=0;
 		for(int i=0;i<customerPoints.size();i++) d[i]=true;
