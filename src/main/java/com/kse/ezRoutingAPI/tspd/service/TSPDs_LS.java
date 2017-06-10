@@ -13,7 +13,7 @@ public class TSPDs_LS {
 	Tour tour;
 	TSPDs tspds;
 	TSP tsp;
-	double maxSavings=0;
+	
 	
 	public TSPDs_LS(TSPDs tspkd) {
 		this.tspds = tspkd;
@@ -33,96 +33,142 @@ public class TSPDs_LS {
 		tsp.setDistances_matrix(tspds.getDistancesTruck());
 		double x[][]=tspds.getDistancesDrone();
 		
-		System.out.println(tsp.lsInitTSP());
+		//System.out.println(tsp.lsInitTSP());
 		TruckTour truckTour=new TruckTour(tsp.lsInitTSP());
 		ArrayList<DroneDelivery> droneTours=new ArrayList<DroneDelivery>();
 		tour= new Tour(truckTour, droneTours);
-		printDArr(x, tspds.getClientPoints().size()+2 ,  tspds.getClientPoints().size()+2);
+		//printDArr(x, tspds.getClientPoints().size()+2 ,  tspds.getClientPoints().size()+2);
 		x=tspds.getDistancesTruck();
-		printDArr(x, tspds.getClientPoints().size()+2 ,  tspds.getClientPoints().size()+2);
+		//printDArr(x, tspds.getClientPoints().size()+2 ,  tspds.getClientPoints().size()+2);
 	}
 	public Tour solve(){
 		init();
 		ArrayList<Point> customerPoints=tspds.getClientPoints();
-		boolean d[]= new boolean[customerPoints.size()];
-		int dlr[]= new int[customerPoints.size()];
+		boolean d[]= new boolean[tour.getTD().getTruck_tour().size()+1];
+		//int dlr[]= new int[customerPoints.size()];
 		
-		maxSavings=0;
-		for(int i=0;i<customerPoints.size();i++) d[i]=true;
+		
+		for(int i=0;i<d.length;i++) d[i]=true;
 		while (true){
 			ArrayList<Point> truckTourList=tour.getTD().getTruck_tour();
-			NeighborHood ne=null;
+			double globalMaxSavings=0;
+			DronesNeighborHood dnhGlobal= new DronesNeighborHood(0,0);
+			System.out.println(name()+truckTourList);
+			System.out.println(name()+"::");
 			for(int ik=1;ik<=tspds.getK();ik++){
-				for(int i=0;i<truckTourList.size()-(ik+2);i++){
+				for(int i=1;i<truckTourList.size()-(ik+1);i++){
 					boolean xd=true;
-					for(int j=i+1;j<i+ik+2;j++){
-						if(d[i]==false){
+					for(int j=i;j<i+ik;j++){
+						//System.out.println(name()+truckTourList.get(j).getID());
+						if(d[truckTourList.get(j).getID()]==false){
 							xd=false;
 							break;
 						}
 					}
+					System.out.println(name()+"::");
 					if(xd==false) continue;
+					ArrayList<Point> wllbeDrone= new ArrayList<Point>();
+					double savings=-tspds.cost(truckTourList.get(i),truckTourList.get(i+ik+1));
+					for(int ii=0;ii<ik;ii++){
+						savings=+tspds.cost(truckTourList.get(i+ii),truckTourList.get(i+ii+1));
+					}
+					System.out.println(name()+savings);
+					for(int ii=0;ii<ik;ii++){
+						wllbeDrone.add(truckTourList.get(i));
+						truckTourList.remove(i);
+					}
+					System.out.println(name()+"wllbe Drone"+wllbeDrone);
+					System.out.println(name()+"truck Tour 3"+truckTourList);
+					TruckTour t= new TruckTour(truckTourList);
+					tour.setTD(t);
+					DronesNeighborHood dnh=new DronesNeighborHood(ik,i);
+					double maxSavings=0;
+					for(int ii=0;ii<wllbeDrone.size();ii++){
+						dnh.addADroneDelivery(null);
+						for(int jj=0;jj<truckTourList.size()-1;jj++)
+							for(int kk=jj+1;kk<truckTourList.size();kk++){
+								System.out.println(name()+tour.getDD());
+								double cost= caculRelocateAsDrone(wllbeDrone.get(ii), jj, kk, savings);
+								if(cost>maxSavings) {
+									dnh.setDroneLast(new DroneDelivery(truckTourList.get(jj), wllbeDrone.get(ii), truckTourList.get(kk)));
+									dnh.setSavings(cost);
+									maxSavings=cost;
+								}
+							}
+						DroneDelivery de= dnh.getDroneDeliveryLast();
+						if (de==null) {
+							dnh.removeLastDroneDelivery();
+							break;
+						}
+						ArrayList<DroneDelivery> lde= tour.getDD();
+						lde.add(de);
+						tour.setDD(lde);		
+					}
+					if(globalMaxSavings<maxSavings){
+						globalMaxSavings=maxSavings;
+						dnhGlobal=dnh;
+					}
+					//here
+					for(int ii=0;ii<ik;ii++){
+						//wllbeDrone.add(truckTourList.get(i+1));
+						truckTourList.add(i+ii,wllbeDrone.get(ii));
+					}
+					t= new TruckTour(truckTourList);
+					tour.setTD(t);
+					ArrayList<DroneDelivery> lde= tour.getDD();
+					for(int ii=0;ii<dnh.getLde().size();ii++){
+						lde.remove(lde.size()-1);
+					}
+					tour.setDD(lde);	
 				}
 			}
-			System.out.println(name()+tour);
-			
+			System.out.println(name()+"truck Tour 2"+truckTourList);
+			System.out.println(name()+"globalMaxSavings "+globalMaxSavings);
+			if(globalMaxSavings<=0) break;
+			System.out.println(name()+"index truck tour "+dnhGlobal.getTruckPointIndex());
+			System.out.println(name()+"IK stored "+dnhGlobal.getIk());
+			for(int ii=0;ii<dnhGlobal.getIk();ii++){
+				//wllbeDrone.add(truckTourList.get(dnhGlobal.getTruckPointIndex()+ii+1));
+				
+				truckTourList.remove(dnhGlobal.getTruckPointIndex());
+			}
+			TruckTour t= new TruckTour(truckTourList);
+			tour.setTD(t);
+			ArrayList<DroneDelivery> lde= tour.getDD();
+			System.out.println(name()+"list drone delivery"+dnhGlobal.getLde());
+			for(int i=0;i<dnhGlobal.getLde().size();i++){
+				DroneDelivery de= dnhGlobal.getLde().get(i);
+				d[de.getDrone_node().getID()]=false;
+				d[de.getRendezvous_node().getID()]=false;
+				d[de.getLauch_node().getID()]=false;
+				lde.add(dnhGlobal.getLde().get(i));
+				
+			}
+			tour.setDD(lde);
 		}
 		return tour;
-		
 	}
-	public NeighborHood relocateAsDrone(Point j,int subPointStart,int subPointEnd,double savings){
+	public double caculRelocateAsDrone(Point j,int laught,int revouz,double savings){
 		
-		NeighborHood ne=null;
-		for(int i=subPointStart;i<subPointEnd-1;i++)
-			for(int k=i+1;k<subPointEnd;k++){
-				ArrayList<Point> truckPoint=tour.getTD().getTruck_tour();
-				//System.out.println(name()+"truckTour:: "+truckPoint);
-				DroneDelivery de= new DroneDelivery(truckPoint.get(i), j, truckPoint.get(k));
-				if(tspds.checkOverQuantityDrone(de, tour,tspds.getK())!=1) continue;
-				ArrayList<DroneDelivery> lde= tour.getDD();
-				lde.add(de);
-				tour.setDD(lde);
-				if(tspds.checkConstraint(tour)){
-					if(tspds.inP(truckPoint.get(i),j ,truckPoint.get(k))){
-						double delta=tspds.cost(truckPoint.get(i), j,truckPoint.get(k));
-						if (savings-delta>maxSavings){
-							ne= new NeighborHood(true,  truckPoint.get(i), j, truckPoint.get(k));//
-							maxSavings=savings-delta;
-						}
-					}
-				}
-				lde.remove(de);
-				tour.setDD(lde);
-				//System.out.println(name()+"truckTour2:: "+truckPoint);
-			}
-		
-		return ne;
-	}
-	public NeighborHood relocateAsTruck(Point j,int subPointStart,int subPointEnd,double savings){
+		double sol=-1000;
+		System.out.println(name()+j+" "+laught+" "+revouz);
 		ArrayList<Point> truckPoint=tour.getTD().getTruck_tour();
-		NeighborHood ne=null;
-		for(int i=subPointStart;i<subPointEnd-1;i++){
-			
-			if(tspds.checkConstraint(tour)){
-				double delta=tspds.cost(truckPoint.get(i), j)+tspds.cost(j,truckPoint.get(i+1))-tspds.cost(truckPoint.get(i),truckPoint.get(i+1));
-				truckPoint.add(i+1, j);
-				TruckTour t= new TruckTour(truckPoint);
-				tour.setTD(t);
-				if(delta<savings)
-					if(tspds.checkConstraint(tour)){
-						if(savings-delta>maxSavings){
-						ne= new NeighborHood(false, truckPoint.get(i), j, truckPoint.get(i+2));//
-						maxSavings=savings-delta;
-						}
-					}
-				truckPoint.remove(i+1);
-				t= new TruckTour(truckPoint);
-				tour.setTD(t);
-			}
+				//System.out.println(name()+"truckTour:: "+truckPoint);
+		DroneDelivery de= new DroneDelivery(truckPoint.get(laught), j, truckPoint.get(revouz));
+		if(tspds.checkOverQuantityDrone(de, tour,tspds.getK())!=1) return sol;
+		ArrayList<DroneDelivery> lde= tour.getDD();
+		lde.add(de);
+		tour.setDD(lde);
+		if(tspds.checkConstraint(tour)){
+			double delta=tspds.cost(truckPoint.get(laught), j,truckPoint.get(revouz));			
+			sol=savings-delta;
 		}
-		return ne;
+		lde.remove(de);
+		tour.setDD(lde);
+		return sol;
 	}
+
 	String name(){
-		return "TSPD_LS:: ";
+		return "TSPDs_LS:: ";
 	}
 }

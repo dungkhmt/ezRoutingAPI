@@ -409,7 +409,11 @@ public class TSPDs {
 		ArrayList<Point> ltrt=tour.getTD().getTruck_tour();
 		for(int i=0;i<lde.size();i++){
 			DroneDelivery ide=lde.get(i);
-			for(int j=ltrt.indexOf(ide.getLauch_node());j<ltrt.indexOf(ide.getRendezvous_node());j++){
+			System.out.println(name()+ide);
+			System.out.println(name()+ltrt);
+			for(int j=ltrt.indexOf(ide.getLauch_node())
+					;j<ltrt.indexOf(ide.getRendezvous_node())
+					;j++){
 				d[j]+=1;
 				if(d[j]>K) return -1;
 			}
