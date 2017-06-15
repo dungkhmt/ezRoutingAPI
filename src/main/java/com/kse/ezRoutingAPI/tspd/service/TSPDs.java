@@ -1,21 +1,18 @@
 package com.kse.ezRoutingAPI.tspd.service;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import localsearch.domainspecific.vehiclerouting.vrp.utils.googlemaps.GoogleMapsQuery;
 
-import org.apache.xmlbeans.impl.jam.xml.TunnelledException;
-
 import com.kse.ezRoutingAPI.tspd.model.DroneDelivery;
-import com.kse.ezRoutingAPI.tspd.model.Tour;
+
 import com.kse.ezRoutingAPI.tspd.model.Point;
+import com.kse.ezRoutingAPI.tspd.model.Tour;
 import com.kse.ezRoutingAPI.tspd.model.TruckTour;
 
-public class TSPD {
+public class TSPDs {
+	private int K=4;
 	private int C1;//cost per unit of trunk
 	private int C2; //cost per unit of drone
 	private double delta;
@@ -29,6 +26,18 @@ public class TSPD {
 	private double distancesDrone[][];
 	private double distancesTruck[][];
 	
+	public int getK() {
+		return K;
+	}
+	public void setK(int k) {
+		K = k;
+	}
+	public ArrayList<DroneDelivery> getP() {
+		return P;
+	}
+	public void setP(ArrayList<DroneDelivery> p) {
+		P = p;
+	}
 	public int getC1() {
 		return C1;
 	}
@@ -96,7 +105,7 @@ public class TSPD {
 		this.distancesTruck = distancesTruck;
 	}
 	
-	public TSPD(int c1, int c2, double delta, double e, double truckSpeed,
+	public TSPDs(int c1, int c2, double delta, double e, double truckSpeed,
 			double droneSpeed, Point startPoint, ArrayList<Point> clientPoints,
 			Point endPoint) {
 		super();
@@ -116,51 +125,59 @@ public class TSPD {
 	
 	
 	public void build_distances_array(){
-		//System.out.println(name()+"::build_distances_array-----------");
+		System.out.println(name()+"::build_distances_array-----------");
 		int nPoints = clientPoints.size() + 2;
 		distancesDrone = new double[nPoints][nPoints];
 		distancesTruck = new double[nPoints][nPoints];
-		ArrayList<Point> allPoints = new ArrayList<Point>();
-		allPoints.add(startPoint);
-		allPoints.addAll(clientPoints);
-		allPoints.add(endPoint);
 		
 		GoogleMapsQuery gmap = new GoogleMapsQuery();
 		
-		for(int i=0; i<allPoints.size(); i++){
-			Point pi = allPoints.get(i);
-			distancesTruck[pi.getID()][pi.getID()] = 0;
-			distancesDrone[pi.getID()][pi.getID()] = 0;
-			for(int j=i+1; j<allPoints.size(); j++){
-				Point pj = allPoints.get(j);
-				distancesDrone[pi.getID()][pj.getID()] = gmap.computeDistanceHaversine(pi.getLat(), pi.getLng(), pj.getLat(), pj.getLng());
-				double dis = gmap.getDistance(pi.getLat(), pi.getLng(), pj.getLat(), pj.getLng());
-				if(dis == -1){
-					distancesTruck[pi.getID()][pj.getID()] = gmap.getApproximateDistanceMeter(pi.getLat(), pi.getLng(), pj.getLat(), pj.getLng())/1000;
+		for(int i=0; i<clientPoints.size(); i++){
+			Point pi = clientPoints.get(i);
+			for(int j=0; j<clientPoints.size(); j++){
+				Point pj = clientPoints.get(j);
+				if(j==i){
+					distancesDrone[pi.getID()][pj.getID()] = 0;
+					distancesTruck[pi.getID()][pj.getID()] = 0;
 				}else{
-					distancesTruck[pi.getID()][pj.getID()] = dis;
+					distancesDrone[pi.getID()][pj.getID()] = gmap.computeDistanceHaversine(pi.getLat(), pi.getLng(), pj.getLat(), pj.getLng());
+					double dis = gmap.getDistance(pi.getLat(), pi.getLng(), pj.getLat(), pj.getLng());
+					if(dis == -1){
+						distancesTruck[pi.getID()][pj.getID()] = gmap.getApproximateDistanceMeter(pi.getLat(), pi.getLng(), pj.getLat(), pj.getLng())/1000;
+					}else{
+						distancesTruck[pi.getID()][pj.getID()] = dis;
+					}
 				}
-				distancesDrone[pj.getID()][pi.getID()] = distancesDrone[pi.getID()][pj.getID()];
-				distancesTruck[pj.getID()][pi.getID()] = distancesTruck[pi.getID()][pj.getID()];
 			}
 		}
 		
-		
-//		System.out.println(name()+"::build_distances_array DONE ---------");
-//		System.out.println("distancesDrone");
-//		for(int i=0; i<nPoints ; i++){
-//			for(int j=0; j<nPoints; j++){
-//				System.out.print(distancesDrone[i][j]+" ");
-//			}
-//			System.out.println();
-//		}
-//		System.out.println("distancesTruck");
-//		for(int i=0; i<nPoints ; i++){
-//			for(int j=0; j<nPoints; j++){
-//				System.out.print(distancesTruck[i][j]+" ");
-//			}
-//			System.out.println();
-//		}
+		for(int i=0; i<clientPoints.size(); i++){
+			Point pi = clientPoints.get(i);
+			distancesDrone[startPoint.getID()][pi.getID()] = gmap.computeDistanceHaversine(startPoint.getLat(), startPoint.getLng(), pi.getLat(), pi.getLng());
+			double dis = gmap.getDistance(startPoint.getLat(), startPoint.getLng(), pi.getLat(), pi.getLng());
+			if(dis == -1){
+				distancesTruck[startPoint.getID()][pi.getID()] = gmap.computeDistanceHaversine(startPoint.getLat(), startPoint.getLng(), pi.getLat(), pi.getLng());
+			}else{
+				distancesTruck[startPoint.getID()][pi.getID()] = dis;
+			}
+			distancesDrone[pi.getID()][endPoint.getID()] = 0;
+			distancesTruck[pi.getID()][endPoint.getID()] = 0;
+		}
+		System.out.println(name()+"::build_distances_array DONE ---------");
+		System.out.println("distancesDrone");
+		for(int i=0; i<nPoints ; i++){
+			for(int j=0; j<nPoints; j++){
+				System.out.print(distancesDrone[i][j]+" ");
+			}
+			System.out.println();
+		}
+		System.out.println("distancesTruck");
+		for(int i=0; i<nPoints ; i++){
+			for(int j=0; j<nPoints; j++){
+				System.out.print(distancesTruck[i][j]+" ");
+			}
+			System.out.println();
+		}
 	}
 	
 	public void build_P(){
@@ -202,7 +219,7 @@ public class TSPD {
 				}
 			}
 		}
-		//System.out.println("build_P P="+P.toString());
+		System.out.println("build_P P="+P.toString());
 	}
 	
 	public boolean inP(Point i, Point j, Point k){
@@ -333,7 +350,6 @@ public class TSPD {
 	}
 	
 	public boolean checkConstraint(Tour tour){
-		//System.out.print(b);
 		ArrayList<Point> truckTour = tour.getTD().getTruck_tour();
 		ArrayList<DroneDelivery> dronDeliveries = tour.getDD();
 		
@@ -384,6 +400,29 @@ public class TSPD {
 		}
 		return 1;
 	}
+	public int checkOverQuantityDrone(DroneDelivery de, Tour tour,int K){
+		int d[]= new int[tour.getTD().getTruck_tour().size()];
+		for(int i=0;i<d.length-1;i++){
+			d[i]=0;
+		}
+		ArrayList<DroneDelivery> lde=tour.getDD();
+		ArrayList<Point> ltrt=tour.getTD().getTruck_tour();
+		for(int i=0;i<lde.size();i++){
+			DroneDelivery ide=lde.get(i);
+			System.out.println(name()+ide);
+			System.out.println(name()+ltrt);
+			for(int j=ltrt.indexOf(ide.getLauch_node())
+					;j<ltrt.indexOf(ide.getRendezvous_node())
+					;j++){
+				d[j]+=1;
+				if(d[j]>K) return -1;
+			}
+		}
+		for(int j=ltrt.indexOf(de.getLauch_node());j<ltrt.indexOf(de.getRendezvous_node());j++){
+			if(d[j]>K-1) return 0;
+		}
+		return 1;
+	}
 	String name(){
 		return "TSPD:: ";
 	}
@@ -396,5 +435,4 @@ public class TSPD {
 				+ ", distancesDrone=" + Arrays.toString(distancesDrone)
 				+ ", distancesTruck=" + Arrays.toString(distancesTruck) + "]";
 	}
-	
 }
