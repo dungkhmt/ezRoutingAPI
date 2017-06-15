@@ -3,6 +3,7 @@ package com.dailyopt.havestplanning.model;
 public class HavestPlanningSolution {
 	private HavestPlanningCluster[] clusters;
 	private double quality;
+	
 	public HavestPlanningCluster[] getClusters() {
 		return clusters;
 	}

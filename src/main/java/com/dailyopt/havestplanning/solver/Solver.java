@@ -49,10 +49,10 @@ public class Solver {
 		fields = new MField[input.getFields().length];
 		for(int i = 0; i < fields.length; i++){
 			Field F = input.getFields()[i];
-			Date mDate = DateTimeUtils.convertYYYYMMDD2Date(F.getDate());
+			Date mDate = DateTimeUtils.convertYYYYMMDD2Date(F.getPlant_date());
 			
 			fields[i] = new MField(F.getCode(), F.getDistrictCode(), 
-					F.getOwnerCode(), F.getArea(), F.getDate(), F.getQuantity(), 
+					F.getOwnerCode(), F.getArea(), F.getPlant_date(), F.getQuantity(), 
 					F.getDeltaDays(), mDate);
 			
 		}

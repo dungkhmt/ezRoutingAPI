@@ -9,7 +9,7 @@ public class Field {
 	private double area;
 	
 	//private Date date;// optimal havesting date
-	private String date;
+	private String plant_date;
 	
 	private int quantity;
 	private int deltaDays;
@@ -37,11 +37,11 @@ public class Field {
 	public void setArea(double area) {
 		this.area = area;
 	}
-	public String getDate() {
-		return date;
+	public String getPlant_date() {
+		return plant_date;
 	}
-	public void setDate(String date) {
-		this.date = date;
+	public void setPlant_date(String plant_date) {
+		this.plant_date = plant_date;
 	}
 	public int getQuantity() {
 		return quantity;
@@ -56,13 +56,13 @@ public class Field {
 		this.deltaDays = deltaDays;
 	}
 	public Field(String code, String districtCode, String ownerCode,
-			double area, String date, int quantity, int deltaDays) {
+			double area, String plant_date, int quantity, int deltaDays) {
 		super();
 		this.code = code;
 		this.districtCode = districtCode;
 		this.ownerCode = ownerCode;
 		this.area = area;
-		this.date = date;
+		this.plant_date = plant_date;
 		this.quantity = quantity;
 		this.deltaDays = deltaDays;
 	}
@@ -70,6 +70,6 @@ public class Field {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	
+
 	
 }
