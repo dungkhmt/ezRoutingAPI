@@ -6,7 +6,14 @@ public class RoutingLoad3DInput {
 	private DistanceElement[] distances;
 	private Depot depot;
 	
+	private ConfigParams configParams;
 	
+	public ConfigParams getConfigParams() {
+		return configParams;
+	}
+	public void setConfigParams(ConfigParams configParams) {
+		this.configParams = configParams;
+	}
 	public Depot getDepot() {
 		return depot;
 	}
@@ -32,12 +39,13 @@ public class RoutingLoad3DInput {
 		this.distances = distances;
 	}
 	public RoutingLoad3DInput(Request[] requests, Vehicle[] vehicles,
-			DistanceElement[] distances, Depot depot) {
+			DistanceElement[] distances, Depot depot, ConfigParams configParams) {
 		super();
 		this.requests = requests;
 		this.vehicles = vehicles;
 		this.distances = distances;
 		this.depot = depot;
+		this.configParams = configParams;
 	}
 	public RoutingLoad3DInput() {
 		super();

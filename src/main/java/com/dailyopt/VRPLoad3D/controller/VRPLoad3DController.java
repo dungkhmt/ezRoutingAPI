@@ -19,7 +19,7 @@ public class VRPLoad3DController {
 		return "VRPLoad3DController";
 	}
 
-/*
+
 	@RequestMapping(value = "/vrp-load3d", method = RequestMethod.POST)
 	public RoutingLoad3DSolution computeVRPLoad3DSolution(
 			HttpServletRequest request, @RequestBody RoutingLoad3DInput input) {
@@ -32,5 +32,5 @@ public class VRPLoad3DController {
 		return solver.solve(input);
 
 	}
-*/
+
 }

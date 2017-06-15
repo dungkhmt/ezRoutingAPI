@@ -102,7 +102,9 @@ public class RoutingLoad3DSolver {
 		}
 
 	}
-
+	public RoutingLoad3DInput getInput(){
+		return input;
+	}
 	public void solve() {
 		mapping();
 		stateModel();
@@ -116,7 +118,7 @@ public class RoutingLoad3DSolver {
 
 		for (int i = 0; i < loadModels.length; i++) {
 			GreedyConstructiveOrderLoadConstraint GCLC = new GreedyConstructiveOrderLoadConstraint(
-					loadModels[i]);
+					loadModels[i], this);
 			GCLC.init();
 
 			containerSolvers.add(GCLC);
@@ -285,10 +287,12 @@ public class RoutingLoad3DSolver {
 			ArrayList<Item3D> item3D = new ArrayList<Item3D>();
 			for(int j = 0; j < r.getItems().length; j++){
 				Item I = r.getItems()[j];
-				itemID++;
-				Item3D I3 = new Item3D(itemID,I.getW(),I.getL(),I.getH());
-				item3D.add(I3);
-				mID2Item.put(itemID, I);
+				for(int k = 0; k < I.getQuantity(); k++){
+					itemID++;
+					Item3D I3 = new Item3D(itemID,I.getW(),I.getL(),I.getH());
+					item3D.add(I3);
+					mID2Item.put(itemID, I);
+				}
 			}
 			mRequest2Item3D.put(r, item3D);
 			
