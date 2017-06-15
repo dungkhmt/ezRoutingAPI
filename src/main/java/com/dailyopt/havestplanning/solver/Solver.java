@@ -305,7 +305,7 @@ public class Solver {
 					String expected_havest_date_str = DateTimeUtils.date2YYYYMMDD(expected_havest_date);
 					
 					int days_late = Utility.distance(d, expected_havest_date);
-					HPF[j] = new HavestPlanningField(F, expected_havest_date_str, days_late);
+					HPF[j] = new HavestPlanningField(fields[fj], expected_havest_date_str, days_late);
 					quality += Utility.eval(input.getQualityFunction(), days_late);
 					qtt += F.getQuantity();
 				}
