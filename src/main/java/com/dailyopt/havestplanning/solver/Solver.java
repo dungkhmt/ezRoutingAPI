@@ -199,7 +199,7 @@ public class Solver {
 
 	public HavestPlanningSolution solve(HavestPlanningInput input){
 		this.input = input;
-		
+		this.DURATION = input.getGrowthDuration();
 		analyze();
 		mapDates();
 		
@@ -220,7 +220,9 @@ public class Solver {
 			
 				if(input.getMinP() <= S && S <= input.getMaxP() 
 						|| S > input.getMaxP() 
-						|| (j+1 < dates.length && mDate2Slot.get(dates[j+1]) - mDate2Slot.get(dates[i]) >= input.getClusterDuration())
+						|| (j+1 < dates.length && mDate2Slot.get(dates[j+1]) - mDate2Slot.get(dates[i]) 
+								>= input.getClusterDuration())
+								
 						){
 					break;
 				}
