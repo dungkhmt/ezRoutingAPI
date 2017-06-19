@@ -5,9 +5,17 @@ public class RoutingLoad3DInput {
 	private Vehicle[] vehicles;
 	private DistanceElement[] distances;
 	private Depot depot;
+	private int maxNbTrips;
 	
 	private ConfigParams configParams;
 	
+	
+	public int getMaxNbTrips() {
+		return maxNbTrips;
+	}
+	public void setMaxNbTrips(int maxNbTrips) {
+		this.maxNbTrips = maxNbTrips;
+	}
 	public ConfigParams getConfigParams() {
 		return configParams;
 	}
@@ -38,18 +46,22 @@ public class RoutingLoad3DInput {
 	public void setDistances(DistanceElement[] distances) {
 		this.distances = distances;
 	}
+	
+	
+	public RoutingLoad3DInput() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 	public RoutingLoad3DInput(Request[] requests, Vehicle[] vehicles,
-			DistanceElement[] distances, Depot depot, ConfigParams configParams) {
+			DistanceElement[] distances, Depot depot, int maxNbTrips,
+			ConfigParams configParams) {
 		super();
 		this.requests = requests;
 		this.vehicles = vehicles;
 		this.distances = distances;
 		this.depot = depot;
+		this.maxNbTrips = maxNbTrips;
 		this.configParams = configParams;
-	}
-	public RoutingLoad3DInput() {
-		super();
-		// TODO Auto-generated constructor stub
 	}
 	
 	

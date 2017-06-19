@@ -214,11 +214,18 @@ public class GreedyConstructiveOrderLoadConstraint {
 		}
 	}
 
+	public String name(){
+		return "GreedyConstructiveOrderLoadConstraint";
+	}
 	public void init() {
 		candidate_positions = new ArrayList<Position3D>();
 		// o = new int[model.getItems().length];
-		occ = new int[model.getContainer().getWidth()][model.getContainer()
-				.getLength()][model.getContainer().getHeight()];
+		int width = model.getContainer().getWidth();
+		int length = model.getContainer()
+						.getLength();
+		int height = model.getContainer().getHeight();
+		System.out.println(name() + "::init, width = " + width + ", length = " + length + ", height = " + height);
+		occ = new int[width][length][height];
 		for (int i = 0; i < model.getContainer().getWidth(); i++)
 			for (int j = 0; j < model.getContainer().getLength(); j++)
 				for (int k = 0; k < model.getContainer().getHeight(); k++)
