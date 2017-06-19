@@ -3,15 +3,15 @@ package com.dailyopt.havestplanning.model;
 import java.util.Date;
 
 public class HavestPlanningCluster {
-	private String dates;
+	private String date;
 	private HavestPlanningField[] fields;
 	private int quantity;
 	private int numberOfFields;
-	public String getDates() {
-		return dates;
+	public String getDate() {
+		return date;
 	}
-	public void setDates(String dates) {
-		this.dates = dates;
+	public void setDates(String date) {
+		this.date = date;
 	}
 	public HavestPlanningField[] getFields() {
 		return fields;
@@ -31,10 +31,10 @@ public class HavestPlanningCluster {
 	public void setNumberOfFields(int numberOfFields) {
 		this.numberOfFields = numberOfFields;
 	}
-	public HavestPlanningCluster(String dates, HavestPlanningField[] fields,
+	public HavestPlanningCluster(String date, HavestPlanningField[] fields,
 			int quantity, int numberOfFields) {
 		super();
-		this.dates = dates;
+		this.date = date;
 		this.fields = fields;
 		this.quantity = quantity;
 		this.numberOfFields = numberOfFields;
