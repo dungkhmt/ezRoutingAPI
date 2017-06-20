@@ -137,7 +137,7 @@ public class RoutingLoad3DSolver {
 		containerSolvers = new ArrayList<GreedyConstructiveOrderLoadConstraint>();
 
 		for (int i = 0; i < loadModels.length; i++) {
-			GreedyConstructiveOrderLoadConstraint GCLC = new GreedyConstructiveOrderLoadConstraint(
+			GreedyConstructiveOrderLoadConstraint GCLC = new GreedyConstructiveOrderLoadConstraintNotUseMark(
 					loadModels[i], this);
 			GCLC.init();
 
@@ -213,7 +213,7 @@ public class RoutingLoad3DSolver {
 					.get(i);
 			System.out.println("Xe " + (i + 1) + ":");
 			// gclc.printSolution();
-			ArrayList<Move3D> solution = gclc.solution;
+			ArrayList<Move3D> solution = gclc.getSolution();
 			// printSolutionLoad(solution);
 
 			System.out.println("------------------------------------");
@@ -355,7 +355,7 @@ public class RoutingLoad3DSolver {
 		for(int v = 0; v < loads.length; v++){
 			Vehicle vehicle = input.getVehicles()[v];
 			GreedyConstructiveOrderLoadConstraint GCLC = containerSolvers.get(v);
-			ArrayList<Move3D> moves = GCLC.solution;
+			ArrayList<Move3D> moves = GCLC.getSolution();
 			LoadingElement[] le = new LoadingElement[moves.size()];
 			for(int i = 0; i < moves.size(); i++){
 				Move3D m = moves.get(i);
