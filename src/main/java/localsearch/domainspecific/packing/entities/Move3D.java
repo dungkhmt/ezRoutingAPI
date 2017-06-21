@@ -46,5 +46,8 @@ public class Move3D {
 		this.itemID = itemID;
 	}
 	
+	public String toString(){
+		return "Pos " + position.toString() + ", sz(" + w + "," + l + "," + h + "), ID = " + itemID;
+	}
 	
 }

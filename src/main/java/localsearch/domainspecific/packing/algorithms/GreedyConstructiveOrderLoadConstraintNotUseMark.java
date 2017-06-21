@@ -12,6 +12,8 @@ import localsearch.domainspecific.packing.entities.Move3D;
 import localsearch.domainspecific.packing.entities.Position3D;
 import localsearch.domainspecific.packing.models.Model3D;
 
+import com.dailyopt.VRPLoad3D.model.Item;
+import com.dailyopt.VRPLoad3D.model.Request;
 import com.dailyopt.VRPLoad3D.service.RoutingLoad3DSolver;
 
 public class GreedyConstructiveOrderLoadConstraintNotUseMark implements GreedyConstructiveOrderLoadConstraint{
@@ -67,6 +69,7 @@ public class GreedyConstructiveOrderLoadConstraintNotUseMark implements GreedyCo
 		this.container = model.getContainer();
 		this.items = model.getItems();
 		this.solver = solver;
+		
 	}
 	public ArrayList<Move3D> getSolution(){
 		return solution;
@@ -148,6 +151,14 @@ public class GreedyConstructiveOrderLoadConstraintNotUseMark implements GreedyCo
 			System.out
 					.println(p.getX_w() + "," + p.getX_l() + "," + p.getX_h());
 		}
+	}
+	
+	public String candidatePositionStr(){
+		String s = "cand pos = ";
+		for(int i = 0; i < candidate_positions.size(); i++){
+			s += candidate_positions.get(i).toString() + "-";
+		}
+		return s;
 	}
 
 	public void readDataReal(String fn) {
@@ -317,9 +328,10 @@ public class GreedyConstructiveOrderLoadConstraintNotUseMark implements GreedyCo
 				restore();
 				return false;
 			} else {
-				Move3D sel_move = selectBest(moves);
+				//Move3D sel_move = selectBest(moves);
+				Move3D sel_move = trySelectBest(moves);
 				Position3D sel_p = sel_move.getPosition();
-				place(sel_move.getW(), sel_move.getL(), sel_move.getH(), sel_p);
+				tryPlace(sel_move.getW(), sel_move.getL(), sel_move.getH(), sel_p);
 				solution.add(sel_move);
 			}
 
@@ -335,8 +347,9 @@ public class GreedyConstructiveOrderLoadConstraintNotUseMark implements GreedyCo
 
 		for (int i = 0; i < tried_items.size(); i++) {
 			Item3D item = tried_items.get(i);
+			
 			ArrayList<Move3D> moves = new ArrayList<Move3D>();
-
+			
 			for (Position3D p : candidate_positions) {
 				int w = item.getWidth();
 				int l = item.getLength();
@@ -363,9 +376,19 @@ public class GreedyConstructiveOrderLoadConstraintNotUseMark implements GreedyCo
 				return false;
 			} else {
 				Move3D sel_move = selectBest(moves);
+				Item I = solver.getMapID2Item().get(sel_move.getItemID());
+				Request r = solver.getMapItem2Request().get(I);
+				
 				Position3D sel_p = sel_move.getPosition();
 				place(sel_move.getW(), sel_move.getL(), sel_move.getH(), sel_p);
 				solution.add(sel_move);
+				
+				if(i <= 5 && model.getCode().equals("Xe-3") && 
+						(r.getOrderID().equals("42525") || r.getOrderID().equals("42480"))){
+					solver.log.println(name() + "::load, sel_moves = " + sel_move.toString()
+							+ ", item " + I.getName() + ", new candidate = " + candidatePositionStr());
+				}
+				
 			}
 
 		}
@@ -429,29 +452,77 @@ public class GreedyConstructiveOrderLoadConstraintNotUseMark implements GreedyCo
 	public Move3D selectBest(ArrayList<Move3D> moves) {
 		int minH = Integer.MAX_VALUE;
 		int minL = Integer.MAX_VALUE;
+		Move3D am = moves.get(0);
+		int ID = am.getItemID();
+		Item I = solver.getMapID2Item().get(am.getItemID());
+		Request r = solver.getMapItem2Request().get(I);
+		
 		Move3D sel_move = null;
 		for (Move3D m : moves) {
-			// System.out.println("selectBest consider move " + m.getL() + "," +
-			// m.getH() + ", minL = " + minL + ", minH = " + minH);
+			if(model.getCode().equals("Xe-3") && r.getOrderID().equals("42525") && ID == 429)
+			solver.log.println(candidatePositionStr() + "\n" + solutionStr() + " : selectBest consider move " + m.toString() + ", minL = " + minL + ", minH = " + minH);
+			
 			if (m.getPosition().getX_l() + m.getL() < minL) {
 				sel_move = m;
 				minL = m.getL() + m.getPosition().getX_l();
 				minH = m.getPosition().getX_h();
-				// System.out.println("selectBest, update L move " + m.getL() +
-				// "," + m.getH() + ", minL = " + minL + ", minH = " + minH);
+				if(model.getCode().equals("Xe-3") && r.getOrderID().equals("42525") && ID == 429)
+					solver.log.println(candidatePositionStr() + "\n" + solutionStr() + " : selectBest, update L move " + m.toString() + ", minL = " + minL + ", minH = " + minH);
 			} else if (m.getL() + m.getPosition().getX_l() == minL) {
 				if (m.getPosition().getX_h() < minH) {
 					minH = m.getPosition().getX_h();
 					sel_move = m;
-					// System.out.println("selectBest, update H move " +
-					// m.getL() + "," + m.getH() + ", minL = " + minL +
-					// ", minH = " + minH);
+					if(model.getCode().equals("Xe-3") && r.getOrderID().equals("42525") && ID == 429)
+					solver.log.println(candidatePositionStr() + "\n" + solutionStr() + " : selectBest, update H move " +
+					m.toString() + ", minL = " + minL +
+					", minH = " + minH);
 				}
 			}
 		}
 		return sel_move;
 	}
 
+	public Move3D trySelectBest(ArrayList<Move3D> moves) {
+		int minH = Integer.MAX_VALUE;
+		int minL = Integer.MAX_VALUE;
+		Move3D am = moves.get(0);
+		int ID = am.getItemID();
+		Item I = solver.getMapID2Item().get(am.getItemID());
+		Request r = solver.getMapItem2Request().get(I);
+		
+		Move3D sel_move = null;
+		for (Move3D m : moves) {
+			//if(model.getCode().equals("Xe-3") && r.getOrderID().equals("42525") && ID == 429)
+			//solver.log.println(candidatePositionStr() + "\n" + solutionStr() + " : selectBest consider move " + m.toString() + ", minL = " + minL + ", minH = " + minH);
+			
+			if (m.getPosition().getX_l() + m.getL() < minL) {
+				sel_move = m;
+				minL = m.getL() + m.getPosition().getX_l();
+				minH = m.getPosition().getX_h();
+				//if(model.getCode().equals("Xe-3") && r.getOrderID().equals("42525") && ID == 429)
+				//	solver.log.println(candidatePositionStr() + "\n" + solutionStr() + " : selectBest, update L move " + m.toString() + ", minL = " + minL + ", minH = " + minH);
+			} else if (m.getL() + m.getPosition().getX_l() == minL) {
+				if (m.getPosition().getX_h() < minH) {
+					minH = m.getPosition().getX_h();
+					sel_move = m;
+					//if(model.getCode().equals("Xe-3") && r.getOrderID().equals("42525") && ID == 429)
+					//solver.log.println(candidatePositionStr() + "\n" + solutionStr() + " : selectBest, update H move " +
+					//m.toString() + ", minL = " + minL +
+					//", minH = " + minH);
+				}
+			}
+		}
+		return sel_move;
+	}
+
+	public String solutionStr(){
+		String s = "";
+		for(int i = 0; i < solution.size(); i++){
+			Move3D m = solution.get(i);
+			s += m.toString() + " -> \n";
+		}
+		return s;
+	}
 	public void solve(int[] o) {
 		this.o = o;
 		// this.x_w = model.getX_w();
@@ -635,7 +706,6 @@ public class GreedyConstructiveOrderLoadConstraintNotUseMark implements GreedyCo
 					}
 				}
 			}
-
 		}
 		if (!markL[il]) {
 			markL[il] = true;
@@ -657,8 +727,17 @@ public class GreedyConstructiveOrderLoadConstraintNotUseMark implements GreedyCo
 			// LH.add(ih);
 			for (int jw : LW) {
 				for (int jl : LL) {
+					if(model.getCode().equals("Xe-3")){
+						solver.log.println("place (" + w + "," + l + "," + h + " at pos " + p.toString() + 
+								" check cand(" + jw + "," + jl + "," + ih + ")");
+					}
 					if (checkCandidatePosition(jw, jl, ih)) {
 						Position3D cp = new Position3D(jw, jl, ih);
+						
+						if(model.getCode().equals("Xe-3"))
+						solver.log.println("place (" + w + "," + l + "," + h + " at pos " + p.toString() + 
+								" check and ACCEPT cand(" + jw + "," + jl + "," + ih + ")");
+						
 						candidate_positions.add(cp);
 					}
 				}
@@ -695,6 +774,7 @@ public class GreedyConstructiveOrderLoadConstraintNotUseMark implements GreedyCo
 					candidate_positions.add(cp);
 				}
 			}
+			
 		} else if (newW && !newL && newH) {
 			for (int jl : LL) {
 				if (checkCandidatePosition(iw, jl, ih)) {
@@ -702,8 +782,6 @@ public class GreedyConstructiveOrderLoadConstraintNotUseMark implements GreedyCo
 					candidate_positions.add(cp);
 				}
 			}
-		} else if (newW && !newL && !newH) {
-			// do nothing
 		} else if (!newW && newL && newH) {
 			for (int jw : LW) {
 				if (checkCandidatePosition(jw, il, ih)) {
@@ -711,6 +789,140 @@ public class GreedyConstructiveOrderLoadConstraintNotUseMark implements GreedyCo
 					candidate_positions.add(cp);
 				}
 			}
+		} else if (newW && !newL && !newH) {
+			// do nothing
+		} else if (!newW && newL && !newH) {
+			// do nothing
+		} else if (!newW && !newL && newH) {
+			// do nothing
+		} else if (!newW && !newL && !newH) {
+			// do nothing
+		}
+		if (newW)
+			LW.add(iw);
+		if (newL)
+			LL.add(il);
+		if (newH)
+			LH.add(ih);
+	}
+
+	public void tryPlace(int w, int l, int h, Position3D p) {
+		// place the ith items (items[i]) at position p w.r.t size (w,l,h),
+		// update candidate_positions
+		// x_w[i] = p.getX_w();
+		// x_l[i] = p.getX_l();
+		// x_h[i] = p.getX_h();
+
+		//for (int iw = p.getX_w(); iw < w + p.getX_w(); iw++) {
+		//	for (int il = p.getX_l(); il < l + p.getX_l(); il++) {
+		//		for (int ih = p.getX_h(); ih < h + p.getX_h(); ih++) {
+		//			occ[iw][il][ih]++;
+		//		}
+		//	}
+		//}
+
+		// update candidate_positions
+		int iw = p.getX_w() + w;
+		int il = p.getX_l() + l;
+		int ih = p.getX_h() + h;
+		boolean newW = false;
+		boolean newL = false;
+		boolean newH = false;
+		if (!markW[iw]) {
+			markW[iw] = true;
+			newW = true;
+			// LW.add(iw);
+			for (int jl : LL) {
+				for (int jh : LH) {
+					if (checkCandidatePosition(iw, jl, ih)) {
+
+						Position3D cp = new Position3D(iw, jl, jh);
+						candidate_positions.add(cp);
+					}
+				}
+			}
+		}
+		if (!markL[il]) {
+			markL[il] = true;
+			newL = true;
+			// LL.add(il);
+			for (int jw : LW) {
+				for (int jh : LH) {
+					if (checkCandidatePosition(jw, il, jh)) {
+
+						Position3D cp = new Position3D(jw, il, jh);
+						candidate_positions.add(cp);
+					}
+				}
+			}
+		}
+		if (!markH[ih]) {
+			markH[ih] = true;
+			newH = true;
+			// LH.add(ih);
+			for (int jw : LW) {
+				for (int jl : LL) {
+					//if(model.getCode().equals("Xe-3")){
+					//	solver.log.println("place (" + w + "," + l + "," + h + " at pos " + p.toString() + 
+					//			" check cand(" + jw + "," + jl + "," + ih + ")");
+					//}
+					if (checkCandidatePosition(jw, jl, ih)) {
+						Position3D cp = new Position3D(jw, jl, ih);
+						//solver.log.println("place (" + w + "," + l + "," + h + " at pos " + p.toString() + 
+						//		" check and ACCEPT cand(" + jw + "," + jl + "," + ih + ")");
+						candidate_positions.add(cp);
+					}
+				}
+			}
+		}
+		if (newW && newL && newH) {
+			for (int jh : LH) {
+				if (checkCandidatePosition(iw, il, jh)) {
+					Position3D cp = new Position3D(iw, il, jh);
+					candidate_positions.add(cp);
+				}
+			}
+			for (int jl : LL) {
+				if (checkCandidatePosition(iw, jl, ih)) {
+					Position3D cp = new Position3D(iw, jl, ih);
+					candidate_positions.add(cp);
+				}
+			}
+			for (int jw : LW) {
+				if (checkCandidatePosition(jw, il, ih)) {
+					Position3D cp = new Position3D(jw, il, ih);
+					candidate_positions.add(cp);
+				}
+			}
+			if (checkCandidatePosition(iw, il, ih)) {
+				Position3D cp = new Position3D(iw, il, ih);
+				candidate_positions.add(cp);
+			}
+
+		} else if (newW && newL && !newH) {
+			for (int jh : LH) {
+				if (checkCandidatePosition(iw, il, jh)) {
+					Position3D cp = new Position3D(iw, il, jh);
+					candidate_positions.add(cp);
+				}
+			}
+			
+		} else if (newW && !newL && newH) {
+			for (int jl : LL) {
+				if (checkCandidatePosition(iw, jl, ih)) {
+					Position3D cp = new Position3D(iw, jl, ih);
+					candidate_positions.add(cp);
+				}
+			}
+		} else if (!newW && newL && newH) {
+			for (int jw : LW) {
+				if (checkCandidatePosition(jw, il, ih)) {
+					Position3D cp = new Position3D(jw, il, ih);
+					candidate_positions.add(cp);
+				}
+			}
+		} else if (newW && !newL && !newH) {
+			// do nothing
 		} else if (!newW && newL && !newH) {
 			// do nothing
 		} else if (!newW && !newL && newH) {
@@ -738,15 +950,15 @@ public class GreedyConstructiveOrderLoadConstraintNotUseMark implements GreedyCo
 		for(int i = 0; i < solution.size(); i++){
 			Move3D m = solution.get(i);
 			if(m.getPosition().getX_l() >= xl && 
-					(m.getPosition().getX_w() <= xw && xw <= m.getPosition().getX_w() + m.getW())
-					&& (m.getPosition().getX_h() <= xh && xh <= m.getPosition().getX_h() + m.getH())
+					(m.getPosition().getX_w() < xw && xw < m.getPosition().getX_w() + m.getW())
+					&& (m.getPosition().getX_h() < xh && xh < m.getPosition().getX_h() + m.getH())
 					){
 				return false;
 			}
 			
 			if(m.getPosition().getX_h() >= xh && 
-					(m.getPosition().getX_w() <= xw && xw <= m.getPosition().getX_w() + m.getW())
-					&& (m.getPosition().getX_l() <= xl && xl <= m.getPosition().getX_l() + m.getL())
+					(m.getPosition().getX_w() < xw && xw < m.getPosition().getX_w() + m.getW())
+					&& (m.getPosition().getX_l() < xl && xl < m.getPosition().getX_l() + m.getL())
 					){
 				return false;
 			}

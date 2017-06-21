@@ -1,5 +1,6 @@
 package com.dailyopt.VRPLoad3D.service;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,6 +57,24 @@ public class RoutingLoad3DSolver {
 
 	ArrayList<GreedyConstructiveOrderLoadConstraint> containerSolvers;
 
+	public PrintWriter log = null;
+	
+	public void initLog(){
+		try{
+			log = new PrintWriter("C:/tmp/log.txt");
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+	}
+	public void finalize(){
+		log.close();
+	}
+	public HashMap<Item, Request> getMapItem2Request(){
+		return mItem2Request;
+	}
+	public HashMap<Integer, Item> getMapID2Item(){
+		return mID2Item;
+	}
 	public void mapping() {
 		repli_factor = input.getMaxNbTrips();
 		nbVehicles = input.getVehicles().length;
@@ -126,9 +145,11 @@ public class RoutingLoad3DSolver {
 		return input;
 	}
 	public void solve() {
+		initLog();
 		mapping();
 		stateModel();
 		search();
+		finalize();
 	}
 	public String name(){
 		return "RoutingLoad3DSolver";
@@ -194,7 +215,10 @@ public class RoutingLoad3DSolver {
 			Point p = clientPoints.get(sel_i);
 			Request r = requests[sel_i];
 			ArrayList<Item3D> items = getItems(r);
-			containerSolvers.get(sel_vehicle).load(items);
+			GreedyConstructiveOrderLoadConstraint GCLC = containerSolvers
+					.get(sel_vehicle);
+			GCLC.load(items);
+			//containerSolvers.get(sel_vehicle).load(items);
 			mgr.performAddOnePoint(p, sel_point);
 
 			System.out.println("addPoint " + p.ID + " after " + sel_point.ID
@@ -283,6 +307,7 @@ public class RoutingLoad3DSolver {
 					repli_vehicles[i].getHeight());
 
 			loadModels[i] = new Model3D(container, items);
+			loadModels[i].setCode(repli_vehicles[i].getCode());
 		}
 
 	}
@@ -351,9 +376,11 @@ public class RoutingLoad3DSolver {
 			routes[v] = new RoutingSolution(are);
 		}
 		
-		LoadingSolution[] loads = new LoadingSolution[input.getVehicles().length];
+		//LoadingSolution[] loads = new LoadingSolution[input.getVehicles().length];
+		LoadingSolution[] loads = new LoadingSolution[repli_vehicles.length];
 		for(int v = 0; v < loads.length; v++){
-			Vehicle vehicle = input.getVehicles()[v];
+			//Vehicle vehicle = input.getVehicles()[v];
+			Vehicle vehicle = repli_vehicles[v];
 			GreedyConstructiveOrderLoadConstraint GCLC = containerSolvers.get(v);
 			ArrayList<Move3D> moves = GCLC.getSolution();
 			LoadingElement[] le = new LoadingElement[moves.size()];
@@ -395,7 +422,7 @@ public class RoutingLoad3DSolver {
 
 				description = sw + ", " + sl + ", " + sh;
 				
-				LoadingElement e = new LoadingElement(I,m.getPosition().getX_w(),m.getPosition().getX_l(),
+				LoadingElement e = new LoadingElement(I,m.getItemID(),m.getPosition().getX_w(),m.getPosition().getX_l(),
 						m.getPosition().getX_h(),
 						description, r.getOrderID(), r.getAddr());
 				le[i] = e;

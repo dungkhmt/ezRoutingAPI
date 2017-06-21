@@ -2,7 +2,7 @@ package com.dailyopt.VRPLoad3D.model;
 
 public class LoadingElement {
 	private Item item;
-	
+	private int itemID;
 	private int posWidth;
 	private int posLength;
 	private int posHeight;
@@ -12,6 +12,12 @@ public class LoadingElement {
 	private String addr;
 	
 	
+	public int getItemID() {
+		return itemID;
+	}
+	public void setItemID(int itemID) {
+		this.itemID = itemID;
+	}
 	public String getOrderID() {
 		return orderID;
 	}
@@ -55,10 +61,12 @@ public class LoadingElement {
 		this.description = description;
 	}
 	
-	public LoadingElement(Item item, int posWidth, int posLength,
+	
+	public LoadingElement(Item item, int itemID, int posWidth, int posLength,
 			int posHeight, String description, String orderID, String addr) {
 		super();
 		this.item = item;
+		this.itemID = itemID;
 		this.posWidth = posWidth;
 		this.posLength = posLength;
 		this.posHeight = posHeight;
