@@ -452,6 +452,7 @@ public class GreedyConstructiveOrderLoadConstraintNotUseMark implements GreedyCo
 	public Move3D selectBest(ArrayList<Move3D> moves) {
 		int minH = Integer.MAX_VALUE;
 		int minL = Integer.MAX_VALUE;
+		int minW = Integer.MAX_VALUE;
 		Move3D am = moves.get(0);
 		int ID = am.getItemID();
 		Item I = solver.getMapID2Item().get(am.getItemID());
@@ -466,16 +467,28 @@ public class GreedyConstructiveOrderLoadConstraintNotUseMark implements GreedyCo
 				sel_move = m;
 				minL = m.getL() + m.getPosition().getX_l();
 				minH = m.getPosition().getX_h();
+				minW = m.getPosition().getX_w();
 				if(model.getCode().equals("Xe-3") && r.getOrderID().equals("42525") && ID == 429)
 					solver.log.println(candidatePositionStr() + "\n" + solutionStr() + " : selectBest, update L move " + m.toString() + ", minL = " + minL + ", minH = " + minH);
 			} else if (m.getL() + m.getPosition().getX_l() == minL) {
 				if (m.getPosition().getX_h() < minH) {
 					minH = m.getPosition().getX_h();
+					minW = m.getPosition().getX_w();
+					
 					sel_move = m;
 					if(model.getCode().equals("Xe-3") && r.getOrderID().equals("42525") && ID == 429)
 					solver.log.println(candidatePositionStr() + "\n" + solutionStr() + " : selectBest, update H move " +
 					m.toString() + ", minL = " + minL +
 					", minH = " + minH);
+				}else if(m.getPosition().getX_h() == minH){
+					if (m.getPosition().getX_w() < minW) {
+						minW = m.getPosition().getX_w();
+						sel_move = m;
+						if(model.getCode().equals("Xe-3") && r.getOrderID().equals("42525") && ID == 429)
+						solver.log.println(candidatePositionStr() + "\n" + solutionStr() + " : selectBest, update H move " +
+						m.toString() + ", minL = " + minL +
+						", minH = " + minH);
+					}
 				}
 			}
 		}
