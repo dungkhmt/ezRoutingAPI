@@ -338,7 +338,7 @@ public class TSPD {
 		ArrayList<DroneDelivery> dronDeliveries = tour.getDD();
 		
 		boolean checkWaitime = true;
-		boolean checkDroneEndurance = false;
+		boolean checkDroneEndurance = true;
 		for(int i=0; i<dronDeliveries.size(); i++){
 			DroneDelivery dd_tmp = dronDeliveries.get(i);
 			if(!checkWaitTime(dd_tmp.getLauch_node(), dd_tmp.getDrone_node(), dd_tmp.getRendezvous_node(), truckTour)){
@@ -346,8 +346,8 @@ public class TSPD {
 			}
 			double droneEndurance = d_drone(dd_tmp.getLauch_node(), dd_tmp.getDrone_node()) + d_drone(dd_tmp.getDrone_node(),dd_tmp.getRendezvous_node());
 			
-			if(droneEndurance <= e) 
-				checkDroneEndurance = true;
+			if(droneEndurance > e) 
+				checkDroneEndurance = false;
 		}
 		boolean check = checkWaitime && checkDroneEndurance;
 		//System.out.println("checkConstraint("+tour.toString()+") -> "+check);

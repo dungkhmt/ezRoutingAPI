@@ -2,11 +2,11 @@ package com.kse.ezRoutingAPI.tspd.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import localsearch.domainspecific.vehiclerouting.vrp.utils.googlemaps.GoogleMapsQuery;
 
 import com.kse.ezRoutingAPI.tspd.model.DroneDelivery;
-
 import com.kse.ezRoutingAPI.tspd.model.Point;
 import com.kse.ezRoutingAPI.tspd.model.Tour;
 import com.kse.ezRoutingAPI.tspd.model.TruckTour;
@@ -284,24 +284,88 @@ public class TSPDs {
 		return cost(td) + cost(dd); 
 	}
 	
-	public boolean checkWaitTime(Point i, Point j, Point k, ArrayList<Point> truckTour){
-		int iLaunchNode = truckTour.indexOf(i);
-		int irendezvousNode = truckTour.indexOf(k);
-//		System.out.println("TSPD::checkWaitTime("+i.getID()+","+j.getID()+","+k.getID()+")::index_i="+iLaunchNode+"  index_k="+irendezvousNode);
-//		System.out.println("TSPD::checkWaitTime::trunckTour: "+truckTour.toString());
-		double distanceTruck = 0;
-		//System.out.println(name()+"size "+truckTour.size());
-		for(int in=iLaunchNode; in<irendezvousNode; in++){
-			//System.out.println(name()+"in "+in);
-				distanceTruck += d_truck(truckTour.get(in),
-						truckTour.get(in+1));
+	public boolean checkWaitTime( ArrayList<Point> truckTour,ArrayList<DroneDelivery> droneList){
+		//HashMap<Point, Integer> p2i= new HashMap<Point, Integer>();
+		System.out.println(name()+truckTour);
+		System.out.println(name()+droneList);
+		HashMap<Point,ArrayList<Integer>> p2iDeliveryLaught= new HashMap<Point, ArrayList<Integer>>();
+		HashMap<Point, ArrayList<Integer>> p2iDeliveryRendezvous= new HashMap<Point, ArrayList<Integer>>();
+		for(int ii=0;ii<droneList.size();ii++){
+			if(p2iDeliveryLaught.containsKey(droneList.get(ii).getLauch_node())){
+				ArrayList<Integer> tmp=p2iDeliveryLaught.get(droneList.get(ii).getLauch_node());
+				tmp.add(ii);
+				p2iDeliveryLaught.put(droneList.get(ii).getLauch_node(), tmp);
+			} else {
+				ArrayList<Integer> tmp=new ArrayList<Integer>();
+				tmp.add(ii);
+				p2iDeliveryLaught.put(droneList.get(ii).getLauch_node(), tmp);
+			}
+			if(p2iDeliveryRendezvous.containsKey(droneList.get(ii).getRendezvous_node())){//here
+				ArrayList<Integer> tmp=p2iDeliveryRendezvous.get(droneList.get(ii).getRendezvous_node());
+				tmp.add(ii);
+				p2iDeliveryRendezvous.put(droneList.get(ii).getRendezvous_node(), tmp);
+			} else {
+				ArrayList<Integer> tmp=new ArrayList<Integer>();
+				tmp.add(ii);
+				p2iDeliveryRendezvous.put(droneList.get(ii).getRendezvous_node(), tmp);
+			}
+			
 		}
-		boolean check = Math.abs(distanceTruck/truckSpeed - (d_drone(i, j) + d_drone(j, k))/droneSpeed)*60 <= delta;
-		//System.out.println("checkWaitime("+i.getID()+", "+j.getID()+", "+k.getID()+") -> "+check);
-		return  check;//minitue;
+		System.out.println(name()+p2iDeliveryLaught);
+		System.out.println(name()+p2iDeliveryRendezvous);
+		//System.out.println(name()+"size "+truckTour.size());
+		double x[]= new double[truckTour.size()];
+		x[0]=0;
+		System.out.println(name()+truckTour.size()+" ");
+		for(int ii=1;ii<truckTour.size();ii++){
+			
+			x[ii] =x[ii-1]+ d_truck(truckTour.get(ii-1),
+					truckTour.get(ii))*60/truckSpeed;
+			//ArrayList<DroneDelivery> ldr= new ArrayList<DroneDelivery>();
+			ArrayList<Integer> li= p2iDeliveryRendezvous.get(truckTour.get(ii));
+			if (li==null||li.size()==0) continue;//here
+			double max=0;
+			double min=1000000000;
+			Point vtmax=null;
+			Point vtmin=null;
+			for(int jj=0;jj<li.size();jj++){
+				DroneDelivery dd= droneList.get(li.get(jj));
+				double time=(d_drone(dd.getLauch_node(), dd.getDrone_node())+d_drone(dd.getDrone_node(), dd.getRendezvous_node()))*60/droneSpeed;
+				if(time >=max ){
+					max=time;
+					vtmax=dd.getLauch_node();
+				}
+				if(time <=min ){
+					min=time;
+					vtmin=dd.getLauch_node();
+				}
+			}
+			System.out.print(" max ->"+max+" ");
+			if(x[ii]-x[truckTour.indexOf(vtmax)]> (max+delta)){
+				droneList.remove(droneList.size()-1);
+				return false;
+			}else if(x[ii]-x[truckTour.indexOf(vtmax)]+delta<max){
+				droneList.remove(droneList.size()-1);
+				return false;
+			} 
+			if(x[ii]-x[truckTour.indexOf(vtmin)]> (min+delta)){
+				droneList.remove(droneList.size()-1);
+				return false;
+			}else if(x[ii]-x[truckTour.indexOf(vtmin)]+delta<min){
+				droneList.remove(droneList.size()-1);
+				return false;
+			}if(x[ii]-x[truckTour.indexOf(vtmin)]<min) {
+				x[ii]+=min-(x[ii]-x[truckTour.indexOf(vtmin)]);
+			}
+			System.out.print(ii+"--"+(x[ii]-x[truckTour.indexOf(vtmin)])+" ");
+		}
+		System.out.println();
+		droneList.remove(droneList.size()-1);
+		System.out.println(name()+"true");
+		return  true;
 	}
 	
-	public boolean isDroneDelivery(Point i, Point j, Point k, ArrayList<Point> trucktour){
+	/*public boolean isDroneDelivery(Point i, Point j, Point k, ArrayList<Point> trucktour){
 		for(int index=0; index<P.size(); index++){
 			DroneDelivery tmp_dd = P.get(index);
 			boolean check = tmp_dd.getLauch_node().equals(i) && tmp_dd.getDrone_node().equals(j) && tmp_dd.getRendezvous_node().equals(k);
@@ -310,7 +374,7 @@ public class TSPDs {
 			}
 		}
 		return false;
-	}
+	}*/
 	
 	public ArrayList<Point> getTruckOnlyNodes(Tour tspd){
 		ArrayList<Point> TD = tspd.getTD().getTruck_tour();
@@ -353,17 +417,14 @@ public class TSPDs {
 		ArrayList<Point> truckTour = tour.getTD().getTruck_tour();
 		ArrayList<DroneDelivery> dronDeliveries = tour.getDD();
 		
-		boolean checkWaitime = true;
-		boolean checkDroneEndurance = false;
+		boolean checkWaitime = checkWaitTime( truckTour,dronDeliveries);
+		System.out.println(name()+"checkWaitime "+checkWaitime);
+		boolean checkDroneEndurance = true;
 		for(int i=0; i<dronDeliveries.size(); i++){
 			DroneDelivery dd_tmp = dronDeliveries.get(i);
-			if(!checkWaitTime(dd_tmp.getLauch_node(), dd_tmp.getDrone_node(), dd_tmp.getRendezvous_node(), truckTour)){
-				checkWaitime = false;
-			}
 			double droneEndurance = d_drone(dd_tmp.getLauch_node(), dd_tmp.getDrone_node()) + d_drone(dd_tmp.getDrone_node(),dd_tmp.getRendezvous_node());
-			
-			if(droneEndurance <= e) 
-				checkDroneEndurance = true;
+			if(droneEndurance > e) 
+				checkDroneEndurance = false;
 		}
 		boolean check = checkWaitime && checkDroneEndurance;
 		//System.out.println("checkConstraint("+tour.toString()+") -> "+check);
@@ -409,8 +470,6 @@ public class TSPDs {
 		ArrayList<Point> ltrt=tour.getTD().getTruck_tour();
 		for(int i=0;i<lde.size();i++){
 			DroneDelivery ide=lde.get(i);
-			System.out.println(name()+ide);
-			System.out.println(name()+ltrt);
 			for(int j=ltrt.indexOf(ide.getLauch_node())
 					;j<ltrt.indexOf(ide.getRendezvous_node())
 					;j++){
