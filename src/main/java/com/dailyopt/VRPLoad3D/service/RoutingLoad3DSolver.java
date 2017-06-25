@@ -1,5 +1,6 @@
 package com.dailyopt.VRPLoad3D.service;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,7 +13,9 @@ import localsearch.domainspecific.vehiclerouting.vrp.entities.ArcWeightsManager;
 import localsearch.domainspecific.vehiclerouting.vrp.entities.Point;
 import localsearch.domainspecific.vehiclerouting.vrp.functions.TotalCostVR;
 import localsearch.domainspecific.vehiclerouting.vrp.utils.googlemaps.GoogleMapsQuery;
+
 import com.dailyopt.VRPLoad3D.model.*;
+
 import localsearch.domainspecific.packing.entities.*;
 import localsearch.domainspecific.packing.models.*;
 import localsearch.domainspecific.packing.algorithms.*;
@@ -28,6 +31,11 @@ public class RoutingLoad3DSolver {
 	HashMap<Integer, Item> mID2Item;
 	HashMap<String, Integer> mCode2Index;
 
+	HashMap<Item, Request> mItem2Request;
+	
+	Vehicle[] repli_vehicles;// replicating vehicles
+	int nb_repli_vehicles;
+	int repli_factor = 10;
 	RoutingLoad3DInput input;
 
 	// modelling
@@ -49,10 +57,40 @@ public class RoutingLoad3DSolver {
 
 	ArrayList<GreedyConstructiveOrderLoadConstraint> containerSolvers;
 
+	public PrintWriter log = null;
+	
+	public void initLog(){
+		try{
+			log = new PrintWriter("C:/tmp/log.txt");
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+	}
+	public void finalize(){
+		log.close();
+	}
+	public HashMap<Item, Request> getMapItem2Request(){
+		return mItem2Request;
+	}
+	public HashMap<Integer, Item> getMapID2Item(){
+		return mID2Item;
+	}
 	public void mapping() {
-		
+		repli_factor = input.getMaxNbTrips();
 		nbVehicles = input.getVehicles().length;
 
+		nb_repli_vehicles = nbVehicles * repli_factor;
+		repli_vehicles = new Vehicle[nb_repli_vehicles];
+		int idxVehicle = -1;
+		for(int i = 0; i < repli_factor; i++){
+			for(int j = 0; j < nbVehicles; j++){
+				idxVehicle++;
+				repli_vehicles[idxVehicle] = new Vehicle(input.getVehicles()[j].getWidth(), 
+						input.getVehicles()[j].getLength(), 
+						input.getVehicles()[j].getHeight(), input.getVehicles()[j].getCode());
+			}
+		}
+		
 		mPoint2Request = new HashMap<Point, Request>();
 
 		this.nbVehicles = nbVehicles;
@@ -68,7 +106,8 @@ public class RoutingLoad3DSolver {
 		}
 
 		int iddepot = requests.length;
-		for (int k = 1; k <= nbVehicles; k++) {
+		//for (int k = 1; k <= nbVehicles; k++) {
+		for(int k = 1; k <= nb_repli_vehicles; k++){
 			Point s = new Point(iddepot);
 			Point e = new Point(iddepot);
 			startPoints.add(s);
@@ -102,11 +141,15 @@ public class RoutingLoad3DSolver {
 		}
 
 	}
-
+	public RoutingLoad3DInput getInput(){
+		return input;
+	}
 	public void solve() {
+		initLog();
 		mapping();
 		stateModel();
 		search();
+		finalize();
 	}
 	public String name(){
 		return "RoutingLoad3DSolver";
@@ -115,8 +158,8 @@ public class RoutingLoad3DSolver {
 		containerSolvers = new ArrayList<GreedyConstructiveOrderLoadConstraint>();
 
 		for (int i = 0; i < loadModels.length; i++) {
-			GreedyConstructiveOrderLoadConstraint GCLC = new GreedyConstructiveOrderLoadConstraint(
-					loadModels[i]);
+			GreedyConstructiveOrderLoadConstraint GCLC = new GreedyConstructiveOrderLoadConstraintNotUseMark(
+					loadModels[i], this);
 			GCLC.init();
 
 			containerSolvers.add(GCLC);
@@ -141,10 +184,12 @@ public class RoutingLoad3DSolver {
 				Request r = requests[i];
 				ArrayList<Item3D> items = getItems(r);
 
-				for (int v = 0; v < input.getVehicles().length; v++) {
+				boolean useEmptyVehicle = false;
+				//for (int v = 0; v < input.getVehicles().length; v++) {
+				for(int v = 0; v < nb_repli_vehicles; v++){	
 					GreedyConstructiveOrderLoadConstraint GCLC = containerSolvers
 							.get(v);
-
+					
 					Point lastPoint = XR.prev(XR.endPoint(v+1));
 					if (GCLC.tryLoad(items)) {
 						double d = awm.getDistance(lastPoint, p);
@@ -153,10 +198,12 @@ public class RoutingLoad3DSolver {
 							sel_i = i;
 							sel_vehicle = v;
 							sel_point = lastPoint;
+							if(lastPoint == XR.startPoint(v+1)) useEmptyVehicle = true;
 						}
 					} else {
 
 					}
+					if(useEmptyVehicle) break;
 				}
 			}
 			if (sel_i == -1) {
@@ -168,7 +215,10 @@ public class RoutingLoad3DSolver {
 			Point p = clientPoints.get(sel_i);
 			Request r = requests[sel_i];
 			ArrayList<Item3D> items = getItems(r);
-			containerSolvers.get(sel_vehicle).load(items);
+			GreedyConstructiveOrderLoadConstraint GCLC = containerSolvers
+					.get(sel_vehicle);
+			GCLC.load(items);
+			//containerSolvers.get(sel_vehicle).load(items);
 			mgr.performAddOnePoint(p, sel_point);
 
 			System.out.println("addPoint " + p.ID + " after " + sel_point.ID
@@ -187,7 +237,7 @@ public class RoutingLoad3DSolver {
 					.get(i);
 			System.out.println("Xe " + (i + 1) + ":");
 			// gclc.printSolution();
-			ArrayList<Move3D> solution = gclc.solution;
+			ArrayList<Move3D> solution = gclc.getSolution();
 			// printSolutionLoad(solution);
 
 			System.out.println("------------------------------------");
@@ -213,7 +263,8 @@ public class RoutingLoad3DSolver {
 		mgr = new VRManager();
 		XR = new VarRoutesVR(mgr);
 		CS = new ConstraintSystemVR(mgr);
-		for (int k = 1; k <= nbVehicles; k++) {
+		//for (int k = 1; k <= nbVehicles; k++) {
+		for(int k = 1; k <= nb_repli_vehicles; k++){
 			Point s = startPoints.get(k - 1);
 			Point e = endPoints.get(k - 1);
 			XR.addRoute(s, e);
@@ -243,14 +294,20 @@ public class RoutingLoad3DSolver {
 				items[idx] = I3D.get(j);
 			}
 		}
-		loadModels = new Model3D[input.getVehicles().length];
+		//loadModels = new Model3D[input.getVehicles().length];
+		loadModels = new Model3D[nb_repli_vehicles];
+		
 		for (int i = 0; i < loadModels.length; i++) {
 			Container3D container = new Container3D(
-					input.getVehicles()[i].getWidth(),
-					input.getVehicles()[i].getLength(),
-					input.getVehicles()[i].getHeight());
+					//input.getVehicles()[i].getWidth(),
+					//input.getVehicles()[i].getLength(),
+					//input.getVehicles()[i].getHeight());
+					repli_vehicles[i].getWidth(),
+					repli_vehicles[i].getLength(),
+					repli_vehicles[i].getHeight());
 
 			loadModels[i] = new Model3D(container, items);
+			loadModels[i].setCode(repli_vehicles[i].getCode());
 		}
 
 	}
@@ -261,7 +318,8 @@ public class RoutingLoad3DSolver {
 		int n = requests.length;
 		distance = new double[n + 1][n + 1];
 		mCode2Index = new HashMap<String, Integer>();
-
+		mItem2Request = new HashMap<Item, Request>();
+		
 		for (int i = 0; i < n; i++) {
 			Request r = requests[i];
 			mCode2Index.put(r.getOrderID(), i);
@@ -285,10 +343,13 @@ public class RoutingLoad3DSolver {
 			ArrayList<Item3D> item3D = new ArrayList<Item3D>();
 			for(int j = 0; j < r.getItems().length; j++){
 				Item I = r.getItems()[j];
-				itemID++;
-				Item3D I3 = new Item3D(itemID,I.getW(),I.getL(),I.getH());
-				item3D.add(I3);
-				mID2Item.put(itemID, I);
+				mItem2Request.put(I, r);
+				for(int k = 0; k < I.getQuantity(); k++){
+					itemID++;
+					Item3D I3 = new Item3D(itemID,I.getW(),I.getL(),I.getH());
+					item3D.add(I3);
+					mID2Item.put(itemID, I);
+				}
 			}
 			mRequest2Item3D.put(r, item3D);
 			
@@ -315,15 +376,18 @@ public class RoutingLoad3DSolver {
 			routes[v] = new RoutingSolution(are);
 		}
 		
-		LoadingSolution[] loads = new LoadingSolution[input.getVehicles().length];
+		//LoadingSolution[] loads = new LoadingSolution[input.getVehicles().length];
+		LoadingSolution[] loads = new LoadingSolution[repli_vehicles.length];
 		for(int v = 0; v < loads.length; v++){
-			Vehicle vehicle = input.getVehicles()[v];
+			//Vehicle vehicle = input.getVehicles()[v];
+			Vehicle vehicle = repli_vehicles[v];
 			GreedyConstructiveOrderLoadConstraint GCLC = containerSolvers.get(v);
-			ArrayList<Move3D> moves = GCLC.solution;
+			ArrayList<Move3D> moves = GCLC.getSolution();
 			LoadingElement[] le = new LoadingElement[moves.size()];
 			for(int i = 0; i < moves.size(); i++){
 				Move3D m = moves.get(i);
 				Item I = mID2Item.get(m.getItemID());
+				Request r = mItem2Request.get(I);
 				String description = "";
 				String sw = "Sat mep trai";
 				if (m.getPosition().getX_w() > 0) {
@@ -358,8 +422,9 @@ public class RoutingLoad3DSolver {
 
 				description = sw + ", " + sl + ", " + sh;
 				
-				LoadingElement e = new LoadingElement(I,m.getPosition().getX_w(),m.getPosition().getX_l(),m.getPosition().getX_h(),
-						description);
+				LoadingElement e = new LoadingElement(I,m.getItemID(),m.getPosition().getX_w(),m.getPosition().getX_l(),
+						m.getPosition().getX_h(),
+						description, r.getOrderID(), r.getAddr());
 				le[i] = e;
 			}
 			LoadingSolution ld = new LoadingSolution(vehicle,le);

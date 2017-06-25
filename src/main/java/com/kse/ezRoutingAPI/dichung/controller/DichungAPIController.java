@@ -497,17 +497,5 @@ public class DichungAPIController {
 		 */
 	}
 
-	@RequestMapping(value = "/vrp-load3d", method = RequestMethod.POST)
-	public RoutingLoad3DSolution computeVRPLoad3DSolution(
-			HttpServletRequest request, @RequestBody RoutingLoad3DInput input) {
-		String path = request.getServletContext().getRealPath(
-				"ezRoutingAPIROOT");
-		System.out.println(name() + "::computeVRP3DSolution, path = "
-				+ path);
-		
-		RoutingLoad3DSolver solver = new RoutingLoad3DSolver();
-		return solver.solve(input);
-
-	}
 	
 }
