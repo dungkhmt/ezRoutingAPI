@@ -1,9 +1,11 @@
 package com.dailyopt.havestplanning.solver;
 
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+
 
 
 
@@ -25,16 +27,16 @@ import com.dailyopt.havestplanning.utils.Utility;
 
 
 public class Solver {
-	private int DURATION = 355;
-	private HavestPlanningInput input;
-	private HashMap<Date, Integer> mDate2Slot;
-	private HashMap<Date, Integer> mDate2Quantity;
-	private HashMap<Date, ArrayList<Integer>> mDate2ListFields;
-	private Date[] dates;
-	private MField[] fields;
-	private int[] expected_slot;
+	protected int DURATION = 355;
+	protected HavestPlanningInput input;
+	protected HashMap<Date, Integer> mDate2Slot;
+	protected HashMap<Date, Integer> mDate2Quantity;
+	protected HashMap<Date, ArrayList<Integer>> mDate2ListFields;
+	protected Date[] dates;
+	protected MField[] fields;
+	protected int[] expected_slot;
 	
-	private Date[] date_sequence;
+	protected Date[] date_sequence;
 	
 	ArrayList<FieldClusterIndices> clusterIndices;
 	HashMap<FieldCluster, Integer> mCluster2Slot;
@@ -42,8 +44,19 @@ public class Solver {
 	int startSlot;
 	int endSlot;
 	
+	protected PrintWriter log = null;
 	public String name(){
 		return "api.solver.solve";
+	}
+	public void initLog(){
+		try{
+			log = new PrintWriter("C:/tmp/havest-planning-log.txt");
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+	}
+	public void finalize(){
+		log.close();
 	}
 	public void analyze(){
 		fields = new MField[input.getFields().length];

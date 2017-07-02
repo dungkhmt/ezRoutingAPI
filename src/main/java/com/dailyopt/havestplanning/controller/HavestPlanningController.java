@@ -13,6 +13,7 @@ import com.dailyopt.VRPLoad3D.service.RoutingLoad3DSolver;
 import com.dailyopt.havestplanning.model.HavestPlanningInput;
 import com.dailyopt.havestplanning.model.HavestPlanningSolution;
 import com.dailyopt.havestplanning.solver.Solver;
+import com.dailyopt.havestplanning.solver.multistepsplitfield.SolverMultiStepSplitFields;
 
 
 @RestController
@@ -28,7 +29,8 @@ public class HavestPlanningController {
 		System.out.println(name() + "::computeVRP3DSolution, path = "
 				+ path);
 		
-		Solver solver = new Solver();
+		//Solver solver = new Solver();
+		SolverMultiStepSplitFields solver = new SolverMultiStepSplitFields();
 		return solver.solve(input);
 
 	}
