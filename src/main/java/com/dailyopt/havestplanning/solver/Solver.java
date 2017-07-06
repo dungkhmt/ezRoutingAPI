@@ -112,7 +112,7 @@ public class Solver {
 
 	public void mapDates() {
 		mDate2Slot = new HashMap<Date, Integer>();
-		int start = 20;
+		int start = 200;
 		mDate2Slot.put(dates[0], start);
 		date_sequence = new Date[2000];
 		date_sequence[0] = Utility.next(dates[0],-start);

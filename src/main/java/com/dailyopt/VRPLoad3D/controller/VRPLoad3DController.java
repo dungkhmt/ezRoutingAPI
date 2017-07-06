@@ -28,8 +28,15 @@ public class VRPLoad3DController {
 		System.out.println(name() + "::computeVRP3DSolution, path = "
 				+ path);
 		
+		double t0 = System.currentTimeMillis();
 		RoutingLoad3DSolver solver = new RoutingLoad3DSolver();
-		return solver.solve(input);
+		//return solver.solve(input);
+		RoutingLoad3DSolution sol =  solver.solveBig(input);
+		t0 = System.currentTimeMillis() - t0;
+		t0 = t0*0.001;
+		
+		System.out.println("time = " + t0);
+		return sol;
 
 	}
 

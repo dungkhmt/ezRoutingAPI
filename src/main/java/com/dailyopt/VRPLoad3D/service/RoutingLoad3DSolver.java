@@ -15,6 +15,8 @@ import localsearch.domainspecific.vehiclerouting.vrp.functions.TotalCostVR;
 import localsearch.domainspecific.vehiclerouting.vrp.utils.googlemaps.GoogleMapsQuery;
 
 import com.dailyopt.VRPLoad3D.model.*;
+import com.dailyopt.VRPLoad3D.utils.clustering.Cluster;
+import com.dailyopt.VRPLoad3D.utils.clustering.VRPBasedClustering;
 
 import localsearch.domainspecific.packing.entities.*;
 import localsearch.domainspecific.packing.models.*;
@@ -165,6 +167,8 @@ public class RoutingLoad3DSolver {
 			containerSolvers.add(GCLC);
 		}
 
+		System.out.println(name() + "::solve, containerSolvers.sz = " + containerSolvers.size());
+		
 		HashSet<Integer> cand_requests = new HashSet<Integer>();
 		for (int i = 0; i < requests.length; i++)
 			cand_requests.add(i);
@@ -312,6 +316,99 @@ public class RoutingLoad3DSolver {
 
 	}
 
+	public RoutingLoad3DSolution solveBig(RoutingLoad3DInput input) {
+		int n = input.getRequests().length + 1;
+		double[][] d = new double[n][n];
+		HashMap<String, Integer> mCode2Index = new HashMap<String, Integer>();
+		mCode2Index.put(input.getDepot().getCode(), 0);
+		for(int i = 0; i < input.getRequests().length; i++){
+			Request r = input.getRequests()[i];
+			mCode2Index.put(r.getOrderID(), i+1);
+		}
+		
+		for(int k = 0; k < input.getDistances().length; k++){
+			String src = input.getDistances()[k].getSrcCode();
+			String dest = input.getDistances()[k].getDestCode();
+			int i = mCode2Index.get(src);
+			int j = mCode2Index.get(dest);
+			d[i][j] = input.getDistances()[k].getDistance();
+		}
+		VRPBasedClustering clusterSolver = new VRPBasedClustering();
+		Cluster[] C = clusterSolver.cluster(d, 20);
+		
+		RoutingLoad3DSolution[] O = new RoutingLoad3DSolution[C.length];
+		ArrayList<RoutingSolution> l_routes = new ArrayList<RoutingSolution>();
+		ArrayList<LoadingSolution> l_loads = new ArrayList<LoadingSolution>();
+		
+		// establishing sub-input
+		for(int k = 0; k < C.length; k++){
+			int nbReq = C[k].size();
+			Request[] R = new Request[nbReq];
+			int idx = -1;
+			for(int i = 0; i < C[k].size(); i++){
+				int e = C[k].get(i);
+				e = e - 1;
+				idx++;
+				//System.out.println(name() + "::solveBig, cluster " + k + ", C.sz = " + C[k].size() + ", e = " + e + 
+				//		", requests.sz = " + input.getRequests().length);
+				
+				R[idx] = input.getRequests()[e];
+			}
+			Vehicle[] vehicles = new Vehicle[input.getVehicles().length];
+			for(int i = 0; i < input.getVehicles().length; i++)
+				vehicles[i] = input.getVehicles()[i];
+			
+			System.out.println(name() + "::solverBig, input.vehicles.length = " + 
+			input.getVehicles().length + ", nbClusters = " + C.length);
+			
+			int N = nbReq + 1;
+			DistanceElement[] distances = new DistanceElement[N*(N-1)];
+			idx = -1;
+			for(int i = 0; i < R.length; i++){
+				for(int j = 0; j < R.length; j++)if(i != j){
+					idx++;
+					int ii = mCode2Index.get(R[i].getOrderID());
+					int jj = mCode2Index.get(R[j].getOrderID());
+					distances[idx] = new DistanceElement(R[i].getOrderID(),R[j].getOrderID(),d[ii][jj]);
+				}
+			}
+			String depotCode = input.getDepot().getCode();
+			for(int i = 0; i < R.length; i++){
+				int ii = mCode2Index.get(R[i].getOrderID());
+				int jj = mCode2Index.get(depotCode);
+				idx++;
+				distances[idx] = new DistanceElement(R[i].getOrderID(),depotCode,d[ii][jj]);
+				
+				idx++;
+				distances[idx] = new DistanceElement(depotCode,R[i].getOrderID(),d[jj][ii]);
+			}
+			
+			RoutingLoad3DInput I = new RoutingLoad3DInput(R, vehicles, distances, 
+					input.getDepot(), input.getMaxNbTrips(), input.getConfigParams());
+			
+			System.out.println(name() + "::solveBig, start to solve cluster " + k + 
+					", nbReq = " + I.getRequests().length + ", nbVehicles = " + I.getVehicles().length);
+			
+			O[k] = solve(I);
+			for(int i = 0; i < O[k].getRoutes().length; i++){
+				l_routes.add(O[k].getRoutes()[i]);
+			}
+			for(int i = 0; i < O[k].getLoads().length; i++){
+				l_loads.add(O[k].getLoads()[i]);
+			}
+		}
+		
+		RoutingSolution[] routes = new RoutingSolution[l_routes.size()];
+		LoadingSolution[] loads = new LoadingSolution[l_loads.size()];
+		for(int i = 0; i < l_routes.size(); i++)
+			routes[i] = l_routes.get(i);
+		for(int i = 0; i < l_loads.size(); i++)
+			loads[i] = l_loads.get(i);
+				
+		
+		return new RoutingLoad3DSolution(routes, loads);
+	}
+	
 	public RoutingLoad3DSolution solve(RoutingLoad3DInput input) {
 		this.input = input;
 		requests = input.getRequests();
