@@ -1,6 +1,7 @@
 package com.dailyopt.havestplanning.solver.multistepsplitfield;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -117,9 +118,90 @@ public class ConstrainedMultiKnapsackSolver {
 			}
 		}
 
-		return null;
-	}
+		int[] xd = new int[x.length];
+		int[] quantity = new int[x.length];
 
+		for(int d = 0; d < m; d++){
+			ArrayList<Integer> I = getItemsOfBin(d);
+			int[] q = new int[I.size()];
+			for(int i = 0; i < I.size(); i++) q[i] = qtt[I.get(i)];
+			double[] sq = selectQuantity(q, minLoad, maxLoad);
+			for(int i = 0; i < I.size(); i++){
+				int f = I.get(i);
+				quantity[f] = (int)sq[i];
+				xd[f] = d;
+			}
+		}
+		
+		
+		return new LeveledHavestPlanSolution(xd, quantity);
+	}
+	public double[] selectQuantity(int[] q, int minQ, int maxQ){
+		double[] sq = new double[q.length];
+		int k = 0;
+		int s = 0;
+		int maxQ1 = maxQ;
+		for(int i = 0; i < q.length; i++) s = s + q[i];
+		
+		if(s <= minQ){
+			for(int i = 0; i < q.length; i++)
+				sq[i] = q[i];
+			return sq;
+		}
+		
+		//for(int i = 0; i < q.length; i++) System.out.print(q[i] + " "); System.out.println();
+		
+		int[] idx = new int[q.length];
+		for(int i = 0; i < q.length; i++) idx[i] = i;
+		for(int i = 0; i < q.length-1;i++){
+			for(int j = i+1; j < q.length; j++){
+				if(q[i] > q[j]){
+					int tmp = q[i]; q[i] = q[j]; q[j] = tmp;
+					tmp = idx[i]; idx[i] = idx[j]; idx[j] = tmp;
+				}
+			}
+		}
+		//for(int i = 0; i < q.length; i++) System.out.print(q[i] + " "); System.out.println();
+		//for(int i = 0; i < q.length; i++) System.out.print(idx[i] + " "); System.out.println();
+		
+		while(k < q.length-1){
+			s = s - q[k];
+			maxQ1 = maxQ1 - q[k];
+			int r = s - maxQ1;
+			//System.out.println("k = " + k + ", s = " + s + ", maxQ1 = " + maxQ1 + ", r = " + r + 
+			//		", q[k] = " + q[k] + ", next = " + (q[k+1]*(1-r*1.0/s)));
+			if(q[k] > q[k+1]*(1-r*1.0/s)){
+				s += q[k];
+				maxQ1 += q[k];
+				//System.out.println("BREAK recover s = " + s + ", maxQ1 = " + maxQ1 + ", k = " + k);
+				break;
+			}else{
+				sq[idx[k]] = q[k];
+				//System.out.println("k = " + k + ", idx[" + k + "] = " + idx[k] + 
+				//		" ACCEPT sq[" + idx[k] + "] = " + q[k] + ", s = " + s + ", maxQ1 = " + maxQ1);
+			}
+			k++;
+		}
+		double r = (s - maxQ1)*1.0/s;
+		
+		for(int i = k; i < q.length; i++){
+			sq[idx[i]] = q[i]*(1-r);
+			//System.out.println("i = " + i + ", idx[" + i + "] = " + idx[i] + ", q[idx[i]] = " + q[idx[i]] +
+			//		", r = " + r + ", ACCEPT sq[" + idx[i] + "] = " + sq[idx[i]]);
+		}
+		double t = 0;
+		for(int i = 0; i < sq.length; i++) t = t + sq[i];
+	//	System.out.println("check t = " + t );
+		
+		return sq;
+	}
+	private HashMap<Integer, Integer> selectQuantity(int d){
+		// return foreach field i, the quantity to be havested
+		HashMap<Integer, Integer> havestQuantity = new HashMap<Integer, Integer>();
+		ArrayList<Integer> I = getItemsOfBin(d);
+		
+		return havestQuantity;
+	}
 	public void stateModel() {
 		x = new int[n];
 		load = new int[m];
@@ -693,6 +775,7 @@ public class ConstrainedMultiKnapsackSolver {
 	}
 
 	public static void main(String[] args) {
+		/*
 		int[] qtt = new int[] { 3, 7, 9, 2, 6, 4, 4, 8, 5, 10, 3, 12, 6, 6, 7 };
 		int minLoad = 10;
 		int maxLoad = 18;
@@ -703,6 +786,12 @@ public class ConstrainedMultiKnapsackSolver {
 		ConstrainedMultiKnapsackSolver solver = new ConstrainedMultiKnapsackSolver(
 				null);
 		solver.solve(preload, qtt, minDate, maxDate, minLoad, maxLoad);
-
+		*/
+		int[] q = new int[]{30, 5, 45, 20, 10, 35};
+		int maxQ = 130;
+		ConstrainedMultiKnapsackSolver S = new ConstrainedMultiKnapsackSolver(null);
+		double[] sq = S.selectQuantity(q, 100, maxQ);
+		for(int i = 0; i < sq.length; i++)
+			System.out.println(sq[i] + " ");
 	}
 }

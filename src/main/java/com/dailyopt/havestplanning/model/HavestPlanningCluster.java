@@ -4,9 +4,10 @@ import java.util.Date;
 
 public class HavestPlanningCluster {
 	private String date;
-	private HavestPlanningField[] fields;
 	private int quantity;
 	private int numberOfFields;
+	private HavestPlanningField[] fields;
+	
 	public String getDate() {
 		return date;
 	}

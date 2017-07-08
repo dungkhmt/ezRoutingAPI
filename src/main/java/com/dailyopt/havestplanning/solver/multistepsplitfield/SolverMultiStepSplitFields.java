@@ -17,11 +17,14 @@ import localsearch.model.VarIntLS;
 import org.apache.poi.ss.usermodel.DateUtil;
 
 import com.dailyopt.havestplanning.model.Field;
+import com.dailyopt.havestplanning.model.HavestPlanningCluster;
+import com.dailyopt.havestplanning.model.HavestPlanningField;
 import com.dailyopt.havestplanning.model.HavestPlanningInput;
 import com.dailyopt.havestplanning.model.HavestPlanningSolution;
 import com.dailyopt.havestplanning.solver.MField;
 import com.dailyopt.havestplanning.solver.Solver;
 import com.dailyopt.havestplanning.utils.DateTimeUtils;
+import com.dailyopt.havestplanning.utils.Utility;
 
 public class SolverMultiStepSplitFields extends Solver{
 	/*
@@ -31,8 +34,9 @@ public class SolverMultiStepSplitFields extends Solver{
 	protected ConditionalSum[] load;
 	*/
 	
-	protected int[] w;// quantity of field i
-	
+	//protected int[] w;// quantity of field i
+	protected LeveledHavestPlanSolution sol;
+	protected ConstrainedMultiKnapsackSolver S;
 	//protected int[] x;// x[i] is the date field i is allocated
 	//protected int[] load;// load[i] is the total quantity of fields allocated in date i
 	
@@ -98,7 +102,7 @@ public class SolverMultiStepSplitFields extends Solver{
 		int[] minDate = new int[n];
 		int[] maxDate = new int[n];
 		
-		int deltaDay = 30;
+		//int deltaDay = 30;
 		for(int i = 0; i < n; i++){
 			MField f = fields[i];
 			int sl = mDate2Slot.get(f.getmDate());
@@ -106,8 +110,10 @@ public class SolverMultiStepSplitFields extends Solver{
 			maxDate[i] = sl + input.getFields()[i].getDeltaDays();
 		}
 		
-		ConstrainedMultiKnapsackSolver S = new ConstrainedMultiKnapsackSolver(this);
-		S.solve(preload, qtt, minDate, maxDate, minLoad, maxLoad);
+		S = new ConstrainedMultiKnapsackSolver(this);
+	
+		sol = S.solve(preload, qtt, minDate, maxDate, minLoad, maxLoad);
+		
 		
 	}
 	public HavestPlanningSolution solve(HavestPlanningInput input){
@@ -142,7 +148,47 @@ public class SolverMultiStepSplitFields extends Solver{
 		
 		finalize();
 		System.out.println("finished");
-		return null;
+		
+		int[] xd = sol.getXd();
+		int[] sq = sol.getQuantity();
+		ArrayList<HavestPlanningCluster> cluster = new ArrayList<HavestPlanningCluster>();
+		int quality = 0;
+		for(int i = 0; i < date_sequence.length; i++){
+			ArrayList<Integer> F = new ArrayList<Integer>();
+			for(int j = 0; j < xd.length; j++)
+				if(xd[j] == i) F.add(j);
+			
+			if(F.size() > 0){
+				Date currentDate = Utility.next(date_sequence[i],DURATION);
+				
+				HavestPlanningField[] HPF = new HavestPlanningField[F.size()];
+				int qtt = 0;
+				for(int j = 0; j < F.size(); j++){
+					int fid = F.get(j);
+					MField f = fields[fid];
+					//MField mf = fields[fid];
+					//int sl = mDate2Slot.get(f.getmDate());
+					Date expected_havest_date = Utility.next(f.getmDate(),DURATION);
+					String expected_havest_date_str = DateTimeUtils.date2YYYYMMDD(expected_havest_date);
+					Date d = date_sequence[xd[fid]];
+					d = Utility.next(d,DURATION);
+					int days_late = Utility.distance(expected_havest_date,d);
+					HPF[j] = new HavestPlanningField(f, expected_havest_date_str, sq[fid], days_late);
+					quality += Utility.eval(input.getQualityFunction(), days_late);
+					qtt += f.getQuantity();
+				}
+				String date = DateTimeUtils.date2YYYYMMDD(currentDate);
+				HavestPlanningCluster C = new HavestPlanningCluster(date, HPF, qtt, F.size());
+				cluster.add(C);
+			}
+		}
+		
+		HavestPlanningCluster[] a_cluster = new HavestPlanningCluster[cluster.size()];
+		for(int i = 0; i < cluster.size(); i++)
+			a_cluster[i] = cluster.get(i);
+		
+		HavestPlanningSolution solution = new HavestPlanningSolution(a_cluster, quality);
+		return solution;
 	}
 	
 	public String name(){

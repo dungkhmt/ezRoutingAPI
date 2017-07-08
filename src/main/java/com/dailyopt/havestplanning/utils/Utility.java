@@ -28,6 +28,11 @@ public class Utility {
 		cal.add(Calendar.DATE, nbDays);
 		return cal.getTime();
 	}
+	public static int distance(String s_date1, String s_date2){
+		Date d1 = DateTimeUtils.convertYYYYMMDD2Date(s_date1);
+		Date d2 = DateTimeUtils.convertYYYYMMDD2Date(s_date2);
+		return distance(d1,d2);
+	}
 	public static int distance(Date d1, Date d2){
 		int d = 0;
 		if(d1.compareTo(d2) > 0){
@@ -48,5 +53,9 @@ public class Utility {
 	}
 	public static String dateMonthYear(Date d){
 		return d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getYear();
+	}
+	
+	public static void main(String[] args){
+		System.out.println(distance("2015-12-22","2015-12-21"));
 	}
 }
