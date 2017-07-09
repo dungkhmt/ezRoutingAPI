@@ -176,7 +176,8 @@ public class SolverMultiStepSplitFields extends Solver{
 				int qtt = 0;
 				for(int j = 0; j < F.size(); j++){
 					int fid = F.get(j);
-					MField f = fields[fid];
+					//MField f = fields[fid];
+					Field f = input.getFields()[fid];
 					//MField mf = fields[fid];
 					//int sl = mDate2Slot.get(f.getmDate());
 					//Date expected_havest_date = Utility.next(f.getmDate(),DURATION);

@@ -2,9 +2,16 @@ package com.dailyopt.havestplanning.model;
 
 public class HavestPlanningSolution {
 	private double quality;
+	private String description;
 	private HavestPlanningCluster[] clusters;
 	
 	
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
 	public HavestPlanningCluster[] getClusters() {
 		return clusters;
 	}
@@ -22,6 +29,15 @@ public class HavestPlanningSolution {
 		super();
 		this.clusters = clusters;
 		this.quality = quality;
+	}
+	
+	
+	public HavestPlanningSolution(double quality, String description,
+			HavestPlanningCluster[] clusters) {
+		super();
+		this.quality = quality;
+		this.description = description;
+		this.clusters = clusters;
 	}
 	public HavestPlanningSolution() {
 		super();

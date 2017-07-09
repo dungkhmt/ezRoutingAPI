@@ -21,6 +21,7 @@ import com.dailyopt.VRPLoad3D.model.RoutingLoad3DSolution;
 import com.dailyopt.VRPLoad3D.service.RoutingLoad3DSolver;
 import com.dailyopt.havestplanning.model.Field;
 import com.dailyopt.havestplanning.model.FieldList;
+import com.dailyopt.havestplanning.model.FieldSolutionList;
 import com.dailyopt.havestplanning.model.HavestPlanningInput;
 import com.dailyopt.havestplanning.model.HavestPlanningSolution;
 import com.dailyopt.havestplanning.model.MachineSetting;
@@ -29,6 +30,7 @@ import com.dailyopt.havestplanning.model.ReturnAddFields;
 import com.dailyopt.havestplanning.model.ReturnSetPlantStandard;
 import com.dailyopt.havestplanning.model.ReturnStart;
 import com.dailyopt.havestplanning.solver.Solver;
+import com.dailyopt.havestplanning.solver.multistepsplitfield.SolutionChecker;
 import com.dailyopt.havestplanning.solver.multistepsplitfield.SolverMultiStepSplitFields;
 import com.fasterxml.jackson.core.JsonParser;
 import com.google.gson.Gson;
@@ -236,4 +238,35 @@ public class HavestPlanningController {
 		return null;
 	}
 
+	@RequestMapping(value = "/havest-plan/check-solution", method = RequestMethod.POST)
+	public HavestPlanningSolution checkSolution(
+			HttpServletRequest request
+			, @RequestBody FieldSolutionList input_solution
+			) {
+		String path = request.getServletContext().getRealPath(
+				"ezRoutingAPIROOT");
+		
+		String fieldFilename = ROOT + "/fields.json";
+		String setPlatStandardFilename = ROOT + "/plant-standard.json";
+		String machineSettingFilename = ROOT + "/machine-setting.json";
+		
+		Gson gson = new Gson();
+		try{
+			FieldList fieldList = gson.fromJson(new FileReader(fieldFilename), FieldList.class);
+			PlantStandard ps = gson.fromJson(new FileReader(setPlatStandardFilename),PlantStandard.class);
+			MachineSetting ms = gson.fromJson(new FileReader(machineSettingFilename), MachineSetting.class);
+			
+			//HavestPlanningInput input = new HavestPlanningInput(fieldList.getFields(),ps,ms);
+			HavestPlanningInput input = new HavestPlanningInput(input_solution.getFields(),ps,ms);
+			
+			SolutionChecker checker = new SolutionChecker();
+			
+			return checker.checkSolution(input, input_solution);
+			
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+		return null;
+	}
+		
 }

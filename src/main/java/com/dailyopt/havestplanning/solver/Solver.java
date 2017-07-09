@@ -122,7 +122,7 @@ public class Solver {
 		mDate2Slot = new HashMap<Date, Integer>();
 		int start = 200;
 		mDate2Slot.put(dates[0], start);
-		date_sequence = new Date[2000];
+		date_sequence = new Date[5000];
 		date_sequence[0] = Utility.next(dates[0],-start);
 		for(int i = 1; i < date_sequence.length; i++){
 			date_sequence[i] = Utility.next(date_sequence[i-1],1);
@@ -198,7 +198,9 @@ public class Solver {
 		MultiKnapsackSolver solver = new MultiKnapsackSolver();
 		int[] aw = new int[w.size()];
 		for(int i = 0; i < w.size(); i++) aw[i] = w.get(i);
-		FieldCluster[] C = solver.solve(aw,input.getMinP(),input.getMaxP());
+		//FieldCluster[] C = solver.solve(aw,input.getMinP(),input.getMaxP());
+		FieldCluster[] C = solver.solve(aw,input.getMachineSetting().getMinLoad(),
+				input.getMachineSetting().getMaxLoad());
 		FieldCluster[] rC = new FieldCluster[C.length];
 		for(int i = 0; i < C.length; i++){
 			rC[i] = new FieldCluster();
@@ -220,7 +222,8 @@ public class Solver {
 
 	public HavestPlanningSolution solve(HavestPlanningInput input){
 		this.input = input;
-		this.DURATION = input.getGrowthDuration();
+		//this.DURATION = input.getGrowthDuration();
+		this.DURATION = 355;
 		analyze();
 		mapDates();
 		
@@ -239,10 +242,12 @@ public class Solver {
 					L.add(Lj.get(k));
 				}
 			
-				if(input.getMinP() <= S && S <= input.getMaxP() 
-						|| S > input.getMaxP() 
+				//if(input.getMinP() <= S && S <= input.getMaxP()
+				if(input.getMachineSetting().getMinLoad() <= S && S <= input.getMachineSetting().getMaxLoad()
+						|| S > input.getMachineSetting().getMaxLoad() 
 						|| (j+1 < dates.length && mDate2Slot.get(dates[j+1]) - mDate2Slot.get(dates[i]) 
-								>= input.getClusterDuration())
+								//>= input.getClusterDuration())
+								>= 14)
 								
 						){
 					break;
@@ -251,7 +256,8 @@ public class Solver {
 			}
 			if(j >= dates.length) j--;// border case
 			
-			if(input.getMinP() <= S && S <= input.getMaxP() 
+			//if(input.getMinP() <= S && S <= input.getMaxP()
+			if(input.getMachineSetting().getMinLoad() <= S && S <= input.getMachineSetting().getMaxLoad()
 					|| S <= 7000 
 					){
 				FieldCluster[] clusters = new FieldCluster[1];
@@ -330,7 +336,9 @@ public class Solver {
 					int days_late = Utility.distance(d, expected_havest_date);
 					HPF[j] = new HavestPlanningField(fields[fj], expected_havest_date_str, 
 							fields[fj].getQuantity(),days_late);
-					quality += Utility.eval(input.getQualityFunction(), days_late);
+					
+					//quality += Utility.eval(input.getQualityFunction(), days_late);
+					
 					qtt += F.getQuantity();
 				}
 				HavestPlanningCluster hpc = new HavestPlanningCluster(date_str, HPF, qtt, C.size());
