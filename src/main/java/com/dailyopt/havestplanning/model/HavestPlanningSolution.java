@@ -1,8 +1,9 @@
 package com.dailyopt.havestplanning.model;
 
 public class HavestPlanningSolution {
-	private HavestPlanningCluster[] clusters;
 	private double quality;
+	private HavestPlanningCluster[] clusters;
+	
 	
 	public HavestPlanningCluster[] getClusters() {
 		return clusters;

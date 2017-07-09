@@ -15,6 +15,7 @@ import java.util.HashMap;
 
 
 
+
 import com.dailyopt.havestplanning.model.Field;
 import com.dailyopt.havestplanning.model.HavestPlanningCluster;
 import com.dailyopt.havestplanning.model.HavestPlanningField;
@@ -22,6 +23,7 @@ import com.dailyopt.havestplanning.model.HavestPlanningInput;
 import com.dailyopt.havestplanning.model.FieldClusterIndices;
 import com.dailyopt.havestplanning.model.FieldCluster;
 import com.dailyopt.havestplanning.model.HavestPlanningSolution;
+import com.dailyopt.havestplanning.model.PlantStandard;
 import com.dailyopt.havestplanning.utils.DateTimeUtils;
 import com.dailyopt.havestplanning.utils.Utility;
 
@@ -110,6 +112,12 @@ public class Solver {
 		System.out.println("total : " + dates.length);
 	}
 
+	public int getBestHavestDate(Field f){
+		int sl = mDate2Slot.get(DateTimeUtils.convertYYYYMMDD2Date(f.getPlant_date()));
+		int minP = input.getPlantStandard().getMinPeriod(f.getCategory(), f.getPlantType());
+		int maxP = input.getPlantStandard().getMaxPeriod(f.getCategory(), f.getPlantType());
+		return (sl + (minP + maxP)/2);
+	}
 	public void mapDates() {
 		mDate2Slot = new HashMap<Date, Integer>();
 		int start = 200;

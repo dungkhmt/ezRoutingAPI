@@ -21,6 +21,7 @@ import com.dailyopt.havestplanning.model.HavestPlanningCluster;
 import com.dailyopt.havestplanning.model.HavestPlanningField;
 import com.dailyopt.havestplanning.model.HavestPlanningInput;
 import com.dailyopt.havestplanning.model.HavestPlanningSolution;
+import com.dailyopt.havestplanning.model.PlantStandard;
 import com.dailyopt.havestplanning.solver.MField;
 import com.dailyopt.havestplanning.solver.Solver;
 import com.dailyopt.havestplanning.utils.DateTimeUtils;
@@ -93,8 +94,8 @@ public class SolverMultiStepSplitFields extends Solver{
 		int n = input.getFields().length;
 		int[] qtt = new int[n];
 		for(int i = 0; i < n; i++) qtt[i] = input.getFields()[i].getQuantity();
-		int minLoad = 5000;
-		int maxLoad = 6000;
+		int minLoad = input.getMachineSetting().getMinLoad();// 5000;
+		int maxLoad = input.getMachineSetting().getMaxLoad();//6000;
 		
 		int m = date_sequence.length;
 		int[] preload = new int[m];
@@ -105,9 +106,18 @@ public class SolverMultiStepSplitFields extends Solver{
 		//int deltaDay = 30;
 		for(int i = 0; i < n; i++){
 			MField f = fields[i];
+			/*
 			int sl = mDate2Slot.get(f.getmDate());
 			minDate[i] = sl - input.getFields()[i].getDeltaDays();
 			maxDate[i] = sl + input.getFields()[i].getDeltaDays();
+			*/
+			Date d = DateTimeUtils.convertYYYYMMDD2Date(f.getPlant_date());
+			int plantStart = mDate2Slot.get(d);
+			System.out.println(name() + "::search, field[" + i + "], plantStart = " + plantStart + 
+					", category = " + f.getCategory() + ", plantType = " + f.getPlantType());
+			System.out.println(name() + "::search, plantStandard = " + input.getPlantStandard());
+			minDate[i] = plantStart + input.getPlantStandard().getMinPeriod(f.getCategory(), f.getPlantType());
+			maxDate[i] = plantStart + input.getPlantStandard().getMaxPeriod(f.getCategory(), f.getPlantType());
 		}
 		
 		S = new ConstrainedMultiKnapsackSolver(this);
@@ -120,7 +130,7 @@ public class SolverMultiStepSplitFields extends Solver{
 		initLog();
 		
 		this.input = input;
-		this.DURATION = input.getGrowthDuration();
+		//this.DURATION = input.getGrowthDuration();
 		analyze();
 		mapDates();
 		
@@ -159,7 +169,8 @@ public class SolverMultiStepSplitFields extends Solver{
 				if(xd[j] == i) F.add(j);
 			
 			if(F.size() > 0){
-				Date currentDate = Utility.next(date_sequence[i],DURATION);
+				//Date currentDate = Utility.next(date_sequence[i],DURATION);
+				Date currentDate = date_sequence[i];
 				
 				HavestPlanningField[] HPF = new HavestPlanningField[F.size()];
 				int qtt = 0;
@@ -168,13 +179,22 @@ public class SolverMultiStepSplitFields extends Solver{
 					MField f = fields[fid];
 					//MField mf = fields[fid];
 					//int sl = mDate2Slot.get(f.getmDate());
-					Date expected_havest_date = Utility.next(f.getmDate(),DURATION);
+					//Date expected_havest_date = Utility.next(f.getmDate(),DURATION);
+					int bestDate = getBestHavestDate(f);
+					Date expected_havest_date = date_sequence[bestDate];
+					
 					String expected_havest_date_str = DateTimeUtils.date2YYYYMMDD(expected_havest_date);
 					Date d = date_sequence[xd[fid]];
-					d = Utility.next(d,DURATION);
+					//d = Utility.next(d,DURATION);
 					int days_late = Utility.distance(expected_havest_date,d);
 					HPF[j] = new HavestPlanningField(f, expected_havest_date_str, sq[fid], days_late);
-					quality += Utility.eval(input.getQualityFunction(), days_late);
+					
+					int period = xd[fid] - mDate2Slot.get(DateTimeUtils.convertYYYYMMDD2Date(f.getPlant_date()));
+					
+					//quality += Utility.eval(input.getQualityFunction(), days_late);
+					quality += sq[fid] * input.getPlantStandard().evaluateQuality(f.getCategory(),
+							f.getPlantType(), period);
+							
 					qtt += f.getQuantity();
 				}
 				String date = DateTimeUtils.date2YYYYMMDD(currentDate);

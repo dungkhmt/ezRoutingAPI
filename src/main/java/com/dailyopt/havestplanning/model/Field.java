@@ -12,7 +12,26 @@ public class Field {
 	private String plant_date;
 	
 	private int quantity;
+	
+	private String category;
+	private String plantType;
+	
 	private int deltaDays;
+	
+	
+	public String getCategory() {
+		return category;
+	}
+	public void setCategory(String category) {
+		this.category = category;
+	}
+	public String getPlantType() {
+		return plantType;
+	}
+	public void setPlantType(String plantType) {
+		this.plantType = plantType;
+	}
+	
 	public String getCode() {
 		return code;
 	}
@@ -65,7 +84,26 @@ public class Field {
 		this.plant_date = plant_date;
 		this.quantity = quantity;
 		this.deltaDays = deltaDays;
+		
+		this.category = "-";
+		this.plantType = "-";
 	}
+	
+	public Field(String code, String districtCode, String ownerCode,
+			double area, String plant_date, int quantity, String category,
+			String plantType, int deltaDays) {
+		super();
+		this.code = code;
+		this.districtCode = districtCode;
+		this.ownerCode = ownerCode;
+		this.area = area;
+		this.plant_date = plant_date;
+		this.quantity = quantity;
+		this.category = category;
+		this.plantType = plantType;
+		this.deltaDays = deltaDays;
+	}
+	
 	public Field() {
 		super();
 		// TODO Auto-generated constructor stub
