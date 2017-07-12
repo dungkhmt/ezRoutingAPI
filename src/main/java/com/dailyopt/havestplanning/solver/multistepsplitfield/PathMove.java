@@ -47,14 +47,18 @@ public class PathMove {
 	}
 	public void findOptimalMovePath(boolean maxLength){
 		global_best = Integer.MAX_VALUE;
-		int maxV = 0;
+		moved_items.clear();
+		
+		int maxV = -1;
 		int sel_d = -1;
 		for(int d = 0; d < solver.m; d++){
-			if(maxV < solver.violations_packing[d]){
+			if(maxV < solver.violations_packing[d] && solver.violations_packing[d] > 0){
 				maxV = solver.violations_packing[d];
 				sel_d = d;
 			}
 		}
+		if(sel_d < 0) return;
+		
 		int d = sel_d;
 		
 		System.out.println(name() + "::findOptimalMovePath(" + maxLength + "), start date = " + d + 
@@ -66,7 +70,7 @@ public class PathMove {
 			findOptimalMovePathPrivate(d, inc, maxLength);
 			if(global_best > local_best){
 				global_best = local_best;
-				System.out.println(name() + "::findOptimalMovePath(" + maxLength + "), inc = 1, UPDATE global_best = " + global_best);
+				//System.out.println(name() + "::findOptimalMovePath(" + maxLength + "), inc = 1, UPDATE global_best = " + global_best);
 				solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + maxLength + "), inc = 1, UPDATE global_best = " + global_best);
 				global_final_date = local_final_date;
 				moved_items.clear();
@@ -78,7 +82,7 @@ public class PathMove {
 			findOptimalMovePathPrivate(d, inc, maxLength);
 			if(global_best > local_best){
 				global_best = local_best;
-				System.out.println(name() + "::findOptimalMovePath(" + maxLength + "), inc = -1, UPDATE global_best = " + global_best);
+				//System.out.println(name() + "::findOptimalMovePath(" + maxLength + "), inc = -1, UPDATE global_best = " + global_best);
 				solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + maxLength + "), inc = -1, UPDATE global_best = " + global_best);
 				
 				global_final_date = local_final_date;
@@ -118,6 +122,12 @@ public class PathMove {
 		local_moved_items.clear();
 		//moved_items.clear();
 		ArrayList<Integer> L = solver.getItemsOfBin(d);
+		
+		if(L.size() == 1){
+			int f = L.get(0);
+			//if(solver.qtt[f] >= solver.maxLoad)
+				return ;
+		}
 		
 		//solver.getSolver().getLog().println(name() + "::findOptimalMovePath(" + i_d + "," + inc + "," + maxLength
 		//		+ "), START, L.sz = " + L.size());

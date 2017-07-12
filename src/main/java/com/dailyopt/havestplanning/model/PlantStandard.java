@@ -36,6 +36,15 @@ public class PlantStandard {
 		}
 		return minPeriod;
 	}
+	public int getMinPeriod(){
+		int minPeriod = Integer.MAX_VALUE;
+		for(int i = 0; i < plantStandards.length; i++){
+			PlantStandardElement e = plantStandards[i];
+			if(minPeriod > e.getPlantPeriod()) minPeriod = e.getPlantPeriod();
+		}
+		return minPeriod;
+	}
+
 	public int getMaxPeriod(String category, String plantType){
 		int maxPeriod = 1-Integer.MAX_VALUE;
 		for(int i = 0; i < plantStandards.length; i++){
@@ -46,7 +55,32 @@ public class PlantStandard {
 		}
 		return maxPeriod;
 	}
+	public int getMaxPeriod(){
+		int maxPeriod = 1-Integer.MAX_VALUE;
+		for(int i = 0; i < plantStandards.length; i++){
+			PlantStandardElement e = plantStandards[i];
+			if(maxPeriod < e.getPlantPeriod()) maxPeriod = e.getPlantPeriod();
+		}
+		return maxPeriod;
+	}
 	
+	public int getMaxRange(){
+		return getMaxPeriod() - getMinPeriod();
+	}
+	public int getBestPeriod(String category, String plantType){
+		int bestPeriod = -1;
+		double best_result = -1;
+		for(int i = 0; i < plantStandards.length; i++){
+			PlantStandardElement e = plantStandards[i];
+			if(e.getCategory().equals(category) && e.getPlantType().equals(plantType)){
+				if(best_result < e.getResult()){
+					best_result = e.getResult();
+					bestPeriod = e.getPlantPeriod();
+				}
+			}
+		}
+		return bestPeriod;
+	}
 
 	public double evaluateQuality(String category, String plantType, int period){
 		// return the quality of category/plantType with period

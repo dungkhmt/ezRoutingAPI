@@ -26,5 +26,13 @@ public class LeveledHavestPlanSolution {
 		this.quantity = quantity;
 	}
 	
+	public String toString(){
+		String s = "";
+		for(int i = 0; i < xd.length; i++){
+			s += "(xd[" + i + "] = " + xd[i] + ", qtt = " + quantity[i] + ") ";
+		}
+		
+		return s;
+	}
 	
 }

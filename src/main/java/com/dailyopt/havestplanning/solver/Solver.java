@@ -101,6 +101,7 @@ public class Solver {
 				if(dates[i].compareTo(dates[j]) > 0){
 					Date tmp = dates[i]; dates[i] = dates[j]; dates[j] = tmp;
 				}
+		/*
 		for(int i = 0; i < dates.length; i++){
 			String items = "";
 			ArrayList<Integer> L = mDate2ListFields.get(dates[i]);
@@ -110,13 +111,16 @@ public class Solver {
 					"\t" + dates[i] + "\t" + mDate2Quantity.get(dates[i]) + "\t" + items);
 		}
 		System.out.println("total : " + dates.length);
+		*/
 	}
 
 	public int getBestHavestDate(Field f){
 		int sl = mDate2Slot.get(DateTimeUtils.convertYYYYMMDD2Date(f.getPlant_date()));
-		int minP = input.getPlantStandard().getMinPeriod(f.getCategory(), f.getPlantType());
-		int maxP = input.getPlantStandard().getMaxPeriod(f.getCategory(), f.getPlantType());
-		return (sl + (minP + maxP)/2);
+		//int minP = input.getPlantStandard().getMinPeriod(f.getCategory(), f.getPlantType());
+		//int maxP = input.getPlantStandard().getMaxPeriod(f.getCategory(), f.getPlantType());
+		//return (sl + (minP + maxP)/2);
+		int p = input.getPlantStandard().getBestPeriod(f.getCategory(), f.getPlantType());
+		return sl + p;
 	}
 	public void mapDates() {
 		mDate2Slot = new HashMap<Date, Integer>();
@@ -127,9 +131,11 @@ public class Solver {
 		for(int i = 1; i < date_sequence.length; i++){
 			date_sequence[i] = Utility.next(date_sequence[i-1],1);
 		}
-		for(int i = 0; i < date_sequence.length; i++){
-			System.out.println(i + " : " + Utility.dateMonthYear(date_sequence[i]));
-		}
+		
+		//for(int i = 0; i < date_sequence.length; i++){
+		//	System.out.println(i + " : " + Utility.dateMonthYear(date_sequence[i]));
+		//}
+		
 		//System.exit(-1);
 		/*
 		 * Calendar cal = Calendar.getInstance(); cal.setTime(dates[0]); for(int

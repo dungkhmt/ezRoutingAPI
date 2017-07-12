@@ -48,7 +48,7 @@ public class ConstrainedMultiKnapsackSolver {
 	}
 
 	public LeveledHavestPlanSolution solve(int[] preload, int[] qtt,
-			int[] minDate, int[] maxDate, int minLoad, int maxLoad) {
+			int[] minDate, int[] maxDate, int[] expected_date, int minLoad, int maxLoad) {
 
 		/*
 		 * m = preload.length: number of bins (days), bins are numbered 0, 1,
@@ -71,10 +71,13 @@ public class ConstrainedMultiKnapsackSolver {
 		this.m = preload.length;
 		this.n = qtt.length;
 
+		expectedHavestDate = expected_date;
+		/*
 		expectedHavestDate = new int[minDate.length];
 		for (int i = 0; i < expectedHavestDate.length; i++)
 			expectedHavestDate[i] = (minDate[i] + maxDate[i]) / 2;
-
+		*/
+		
 		startDate = 10000000;
 		endDate = -10000000;
 		for (int i = 0; i < n; i++) {
@@ -89,7 +92,7 @@ public class ConstrainedMultiKnapsackSolver {
 				.println(name() + "::solve start.... n = " + n + ", m = " + m);
 
 		stateModel();
-		search(5);
+		search(0);
 
 		getSolver().getLog().println("SOLUTION:");
 	
@@ -143,9 +146,13 @@ public class ConstrainedMultiKnapsackSolver {
 		int maxQ1 = maxQ;
 		for(int i = 0; i < q.length; i++) s = s + q[i];
 		
-		if(s <= minQ){
+		if(s <= maxQ){
 			for(int i = 0; i < q.length; i++)
 				sq[i] = q[i];
+			return sq;
+		}
+		if(q.length == 1){// take full (maximum) quantity
+			sq[0] = maxQ;
 			return sq;
 		}
 		
@@ -182,10 +189,19 @@ public class ConstrainedMultiKnapsackSolver {
 			}
 			k++;
 		}
-		double r = (s - maxQ1)*1.0/s;
+		//double r = (s - maxQ1)*1.0/s;
 		
 		for(int i = k; i < q.length; i++){
+			double r = (s - maxQ1)*1.0/s;
 			sq[idx[i]] = q[i]*(1-r);
+			/*
+			int a = (int)sq[idx[i]];
+			if(a == q[i] - 1) a = q[i];// rounding
+			s = s - a;
+			maxQ1 = maxQ1 - a;
+			sq[idx[i]] = a;
+			*/
+			
 			//System.out.println("i = " + i + ", idx[" + i + "] = " + idx[i] + ", q[idx[i]] = " + q[idx[i]] +
 			//		", r = " + r + ", ACCEPT sq[" + idx[i] + "] = " + sq[idx[i]]);
 		}
@@ -339,7 +355,7 @@ public class ConstrainedMultiKnapsackSolver {
 			for (int j = minDate[i]; j <= maxDate[i]; j++)
 				if (preload[j] < maxLoad)
 					S.add(j);
-
+			
 			int minD = Integer.MAX_VALUE;
 			int sel_j = -1;
 			for (int j : S) {
@@ -397,16 +413,19 @@ public class ConstrainedMultiKnapsackSolver {
 
 	public void print() {
 		for (int i = 0; i < m; i++) {
-			System.out.print("Bin " + i + " : ");
+			ArrayList<Integer> L = getItemsOfBin(i);
+			if(L.size() > 0){
+			System.out.print(name() + "::print, Bin " + i + " : ");
 			for (int j = 0; j < n; j++)
 				if (x[j] == i)
 					System.out.print(j + "(" + qtt[j] + ") ");
 			System.out.println("load = " + load[i] + ", violations_packing = "
 					+ violations_packing[i]);
+			}
 		}
 
 		for (int i = 0; i < n; i++) {
-			System.out.println("x[" + i + "] = " + x[i] + ", expectedDate[" + i
+			System.out.println(name() + "::print, x[" + i + "] = " + x[i] + ", expectedDate[" + i
 					+ "] = " + expectedHavestDate[i] + ", violations_havest["
 					+ i + "] = " + violations_havest[i]);
 		}
@@ -434,6 +453,7 @@ public class ConstrainedMultiKnapsackSolver {
 	}
 
 	public void moveSequence(int maxIter) {
+		maxIter = 1;
 		PathMove PM = new PathMove(this);
 		int count = 0;
 		while (true) {
@@ -441,20 +461,21 @@ public class ConstrainedMultiKnapsackSolver {
 			ArrayList<Integer> moves = PM.getMovedItems();
 			int d = PM.getGlobalFinalDate();
 			int best = PM.getGlobalBest();
+			if(moves.size() <= 0) break;
+			
 			// if (best >= 0) break;
-			System.out.print(name() + "::moveSequence, step " + count
-					+ ", d = " + d + ", moves = ");
+			//System.out.print(name() + "::moveSequence, step " + count + ", d = " + d + ", moves = ");
 			getSolver().getLog().print(
 					name() + "::moveSequence, step " + count + ", d = " + d
 							+ ", moves = ");
 			for (int k = moves.size() - 1; k >= 0; k--) {
 				int i = moves.get(k);
 				int bi = x[i];
-				System.out.print(i + "[q-" + qtt[i] + ", d-" + bi + "], ");
+				//System.out.print(i + "[q-" + qtt[i] + ", d-" + bi + "], ");
 				getSolver().getLog().print(
 						i + "[q-" + qtt[i] + ", d-" + bi + "], ");
 			}
-			System.out.println();
+			//System.out.println();
 			getSolver().getLog().println();
 			/*
 			 * for (int k = moves.size() - 1; k >= 0; k--) { int i =
@@ -469,8 +490,8 @@ public class ConstrainedMultiKnapsackSolver {
 
 			performMoveSequence(moves, d);
 
-			System.out.println(name() + "::moveSequence FINISH A LOOP best = "
-					+ best + " -------------------------");
+			//System.out.println(name() + "::moveSequence FINISH A LOOP best = "
+			//		+ best + " -------------------------");
 			getSolver().getLog().println(
 					name() + "::moveSequence FINISH A LOOP best = " + best
 							+ " -------------------------");
@@ -487,12 +508,15 @@ public class ConstrainedMultiKnapsackSolver {
 
 	public void search(int maxIter) {
 		initSolution();
-		print();
-
+		
+		System.out.println(name() + "::search, initial solution: "); print();
+		
 		moveSequence(200);
 
+		System.out.println(name() + "::search, after moveSequence solution: "); print();
+		
 		// if(true)return;
-		maxIter = 0;
+		//maxIter = 0;
 
 		ArrayList<AssignMove> moves = new ArrayList<AssignMove>();
 		for (int it = 0; it < maxIter; it++) {
@@ -575,7 +599,16 @@ public class ConstrainedMultiKnapsackSolver {
 		searchAggregateDates(1000);
 		searchReduceTotalPackingViolations(10000);
 		
+		/*
+		searchReduceTotalPackingViolations(10);
+		System.out.println(name() + "::search, after searchReduceTotalPackingViolations: "); print();
+		searchAggregateDates(10);
+		System.out.println(name() + "::search, after searchAggregateDates: "); print();
+		searchReduceTotalPackingViolations(10);
+		System.out.println(name() + "::search, after searchReduceTotalPackingViolations: "); print();
 		
+		System.out.println(name() + "::search END ------------------------------------------------------");
+		*/
 	}
 
 	private int sumQTT(ArrayList<Integer> I) {
@@ -586,6 +619,7 @@ public class ConstrainedMultiKnapsackSolver {
 	}
 
 	private boolean canMove(ArrayList<Integer> I, int d) {
+		if(I == null || I.size() == 0) return false;
 		for (int i : I)
 			if (!acceptDate(i, d))
 				return false;
@@ -597,19 +631,30 @@ public class ConstrainedMultiKnapsackSolver {
 		for (int it = 0; it < maxIter; it++) {
 			moves.clear();
 			int min_delta_violations_packing = Integer.MAX_VALUE;
-
+			int min_delta_violations_havest = Integer.MAX_VALUE;
 			for (int i = 0; i < n; i++) {
 				for (int j = minDate[i]; j <= maxDate[i]; j++) {
 					if (preload[j] == maxLoad)
 						continue;// ignore full date (bin)
 
 					int delta_violations_packing = getAssignDeltaPacking(i, j);
-
+					int delta_violations_havest = getAssignDeltaHavest(i, j);
+					
 					if (min_delta_violations_packing > delta_violations_packing) {
 						min_delta_violations_packing = delta_violations_packing;
+						min_delta_violations_havest = delta_violations_havest;
 						moves.clear();
 						moves.add(new AssignMove(i, j));
-					} else if (min_delta_violations_packing == delta_violations_packing) {
+					} else if (min_delta_violations_packing == delta_violations_packing
+							&& min_delta_violations_havest > delta_violations_havest
+							) {
+						min_delta_violations_havest = delta_violations_havest;
+						moves.clear();
+						
+						moves.add(new AssignMove(i, j));
+					} else if (min_delta_violations_packing == delta_violations_packing
+							&& min_delta_violations_havest == delta_violations_havest
+							) {
 						moves.add(new AssignMove(i, j));
 					}
 				}
@@ -617,7 +662,7 @@ public class ConstrainedMultiKnapsackSolver {
 
 			// perform the move
 			if (moves.size() <= 0 || min_delta_violations_packing >= 0) {
-				System.out.println(name() + "::search, NO MOVE --> BREAK");
+				System.out.println(name() + "::searchReduceTotalPackingViolations, NO MOVE --> BREAK");
 				break;
 			} else {
 				AssignMove m = moves.get(R.nextInt(moves.size()));
@@ -654,16 +699,25 @@ public class ConstrainedMultiKnapsackSolver {
 	
 	
 	public void searchAggregateDates(int maxIter) {
-
+		//maxIter = 1;
 		for (int it = 0; it < maxIter; it++) {
 			int minDelta = Integer.MAX_VALUE;
+			int min_delta_havest = Integer.MAX_VALUE;
+			
 			AggregateDatesMove sel_move = null;
 			int sel_date = -1;
 			for (int d = startDate; d <= endDate; d++) {
 				AggregateDatesMove m = evaluateAggregateMove(d);
-				//System.out.println(name() + "::searchAggregateDates, d = " + d + ", delta = " + m.getDelta() + ", sz = " + m.getDates().size());
-				if (minDelta > m.getDelta()) {
+				
+				//if(d >= 550 && d <= 560 )
+				//System.out.println(name() + "::searchAggregateDates, d = " + d + ", delta = " + m.getDelta() + 
+				//		", delta_havest = " + m.getDelta_havest() + ", minDelta = " + minDelta + ", min_delta_havest = " + 
+				//		min_delta_havest + ", sz = " + m.getDates().size());
+				if(m.getDates().size() > 0)if (minDelta > m.getDelta() ||
+						minDelta == m.getDelta() && min_delta_havest > m.getDelta_havest()
+						) {
 					minDelta = m.getDelta();
+					min_delta_havest = m.getDelta_havest();
 					sel_move = m;
 					sel_date = d;
 					//System.out.println(name() + "::searchAggregateDates, UPDATE sel_date = " + d + 
@@ -712,12 +766,19 @@ public class ConstrainedMultiKnapsackSolver {
 		int dl = d - 1;
 		int dr = d + 1;
 		int reducedViolations = 0;
+		
+		/*
 		maxDeltaDay = 0;
 		for (int i = 0; i < getSolver().getInput().getFields().length; i++) {
 			int del = getSolver().getInput().getFields()[i].getDeltaDays();
 			maxDeltaDay = maxDeltaDay > del ? maxDeltaDay : del;
 		}
+		*/
+		
+		maxDeltaDay = getSolver().getInput().getPlantStandard().getMaxRange();
+		
 		ArrayList<Integer> agg_dates = new ArrayList<Integer>();
+		ArrayList<Integer> items = new ArrayList<Integer>();
 		boolean hasLeft = true;
 		boolean hasRight = true;
 		while (hasLeft && hasRight) {
@@ -730,6 +791,9 @@ public class ConstrainedMultiKnapsackSolver {
 							loadd += l;
 							reducedViolations += (minLoad - l);
 							agg_dates.add(dl);
+							
+							for(int i: I) items.add(i);
+							
 							if (loadd >= minLoad)
 								break;
 						}
@@ -747,6 +811,9 @@ public class ConstrainedMultiKnapsackSolver {
 							loadd += l;
 							reducedViolations += (minLoad - l);
 							agg_dates.add(dr);
+							
+							for(int i: I) items.add(i);
+							
 							if (loadd >= minLoad)
 								break;
 						}
@@ -759,10 +826,22 @@ public class ConstrainedMultiKnapsackSolver {
 			turn = 1 - turn;
 		}
 
+		
 		int vd = violations_packing(loadd);
 
 		int delta = (vd - reducedViolations - violations_packing[d]);
-		return new AggregateDatesMove(agg_dates, delta);
+		
+		// compute delta_violations_havest
+		int delta_violations_havest = 0;
+		for(int i: items){
+			int di = getAssignDeltaHavest(i, d);
+			delta_violations_havest += di;
+			System.out.println(name() + "::getDeltaAggregate, violations_havest = " + violations_havest[i] +
+					", delta_violations_havest = " + delta_violations_havest);
+		}
+		
+		
+		return new AggregateDatesMove(agg_dates, delta, delta_violations_havest);
 	}
 
 	public String eval() {
