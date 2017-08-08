@@ -38,6 +38,7 @@ public class SolverMultiStepSplitFields extends Solver {
 	protected LeveledHavestPlanSolution sol;
 	protected ArrayList<LeveledHavestPlanSolution> solutions;
 
+	
 	protected ConstrainedMultiKnapsackSolver S;
 
 	// protected int[] x;// x[i] is the date field i is allocated
@@ -83,7 +84,10 @@ public class SolverMultiStepSplitFields extends Solver {
 
 	}
 
+	
 	public void search() {
+		
+		
 		int n = input.getFields().length;
 		int[] qtt = new int[n];
 		for (int i = 0; i < n; i++)
@@ -128,8 +132,39 @@ public class SolverMultiStepSplitFields extends Solver {
 
 		S = new ConstrainedMultiKnapsackSolver(this);
 
+		// analyze min-max Quantity of days
+		S.setInput(preload, qtt, minDate, maxDate, expected_dates, minLoad, maxLoad);
+		S.stateModel();
+		S.initSolutionExpectedDate();
+		
+		int[] load = S.getLoads();
+		initMinQuantityDay = Integer.MAX_VALUE;
+		initMaxQuantityDay = 1-initMinQuantityDay;
+		numberOfDaysOverLoad = 0;
+		numberOfDaysUnderLoad = 0;
+		for(int i = 0; i < load.length; i++)if(load[i] > 0){
+			if(initMinQuantityDay > load[i]) initMinQuantityDay = load[i];
+			if(initMaxQuantityDay < load[i]) initMaxQuantityDay = load[i];
+			if(load[i] < input.getMachineSetting().getMinLoad()) numberOfDaysUnderLoad++;
+			if(load[i] > input.getMachineSetting().getMaxLoad()) numberOfDaysOverLoad++;
+		}
+		int[] b = new int[m];
+		for(int i = 0; i < b.length; i++) b[i] = 0;
+		int[] x = S.getX();
+		for(int i = 0; i < x.length; i++) b[x[i]] = 1;
+		numberOfDaysHarvestExact = 0;
+		for(int i = 0; i < b.length; i++) numberOfDaysHarvestExact += b[i];
+		
+		// end of analyze min-max Quantity of days
+		
+		
 		solutions = new ArrayList<LeveledHavestPlanSolution>();
 
+		numberOfFieldsCompleted = 0;
+		
+		// reset b: b[i] = 1 if day i is planner (harvest)
+		for(int i = 0; i < b.length; i++) b[i] = 0;
+		
 		int nbSteps = 0;
 		while (true) {
 			// check feasibility for before solving
@@ -156,6 +191,7 @@ public class SolverMultiStepSplitFields extends Solver {
 			if (!feasible)
 				break;
 
+			S.name = "ConstraintMultiKnapsackSolver[" + (solutions.size() + 1) + "]";
 			// solve the problem
 			LeveledHavestPlanSolution s = S.solve(preload, qtt, minDate,
 					maxDate, expected_dates, minLoad, maxLoad);
@@ -166,10 +202,14 @@ public class SolverMultiStepSplitFields extends Solver {
 			int[] xd = s.getXd();
 			int[] sq = s.getQuantity();
 
+			for(int i = 0; i < xd.length; i++) b[xd[i]] = 1;
+			
 			for (int i = 0; i < n; i++) {
 				qtt[i] = qtt[i] - sq[i];
+			
+				if(qtt[i] == 0) numberOfFieldsCompleted += 1;
 			}
-
+			
 			for (int d = 0; d < m; d++) {
 				for (int i = 0; i < n; i++) {
 					if (xd[i] == d) {
@@ -178,11 +218,15 @@ public class SolverMultiStepSplitFields extends Solver {
 				}
 			}
 			
-			//if(solutions.size() > 3){
-			//	break;
-			//}
+			if(solutions.size() >= 1) break;
+			
+			
 		}
 
+		numberOfDaysPlanned = 0;
+		for(int i = 0; i < m; i++) numberOfDaysPlanned += b[i];
+		
+		
 	}
 
 	public HavestPlanningSolution solve(HavestPlanningInput input) {
@@ -192,7 +236,7 @@ public class SolverMultiStepSplitFields extends Solver {
 		// this.DURATION = input.getGrowthDuration();
 		analyze();
 		mapDates();
-
+		
 		System.out.println(name() + "::solve date_sequence = "
 				+ date_sequence.length + " ...");
 		for (int i = 0; i < date_sequence.length; i++) {
@@ -204,7 +248,7 @@ public class SolverMultiStepSplitFields extends Solver {
 				// System.out.print("date " + i + "(" +
 				// DateTimeUtils.date2YYYYMMDD(d) + "), sz = " + L.size() +
 				// " : ");
-				log.print("date " + i + "(" + DateTimeUtils.date2YYYYMMDD(d)
+				if(getDEBUG()) log.print("date " + i + "(" + DateTimeUtils.date2YYYYMMDD(d)
 						+ "), sz = " + L.size() + ", total = "
 						+ mDate2Quantity.get(d) + " : ");
 				// for(int j: L){
@@ -212,7 +256,7 @@ public class SolverMultiStepSplitFields extends Solver {
 				// System.out.print(j + " ");
 				// }
 				// System.out.println();
-				log.println();
+				if(getDEBUG()) log.println();
 			}
 		}
 
@@ -224,11 +268,20 @@ public class SolverMultiStepSplitFields extends Solver {
 		finalize();
 		System.out.println("finished, number of levels = " + solutions.size());
 
+		numberLevels = solutions.size();
+		
 		ArrayList<HavestPlanningCluster> cluster = new ArrayList<HavestPlanningCluster>();
 		int quality = 0;
 
 		HashMap<Integer, HavestPlanningCluster> mDate2Cluster = new HashMap<Integer, HavestPlanningCluster>();
 		HashMap<Integer, Integer> mDate2Quantity = new HashMap<Integer, Integer>();
+		
+		numberOfDaysPlanned = 0;
+		int[] day_planned = new int[date_sequence.length];
+		for(int i = 0; i < day_planned.length; i++) day_planned[i] = 0;
+		
+		maxDaysEarly = 0;
+		maxDaysLate = 0;
 		
 		for (int k = 0; k < solutions.size(); k++) {
 			sol = solutions.get(k);
@@ -236,6 +289,8 @@ public class SolverMultiStepSplitFields extends Solver {
 			int[] xd = sol.getXd();
 			int[] sq = sol.getQuantity();
 
+			for(int i = 0; i < xd.length; i++) day_planned[xd[i]] = 1;
+			
 			for (int i = 0; i < date_sequence.length; i++) {
 				ArrayList<Integer> F = new ArrayList<Integer>();
 				for (int j = 0; j < xd.length; j++)
@@ -270,6 +325,13 @@ public class SolverMultiStepSplitFields extends Solver {
 						HPF[j] = new HavestPlanningField(f,
 								expected_havest_date_str, sq[fid], days_late);
 
+						
+						if(days_late < 0){
+							if(maxDaysEarly < (-days_late)) maxDaysEarly = -days_late;
+						}else{
+							if(maxDaysLate < days_late) maxDaysLate = days_late;
+						}
+						
 						int period = xd[fid]
 								- mDate2Slot
 										.get(DateTimeUtils
@@ -301,13 +363,40 @@ public class SolverMultiStepSplitFields extends Solver {
 			}
 		}
 
+		computedMinQuantityDay = Integer.MAX_VALUE;
+		computedMaxQuantityDay = 1-computedMinQuantityDay;
+		quantityPlanned = 0;
+		totalQuantity = 0;
+		numberOfDaysPlanned = 0;
+		for(int i = 0; i < day_planned.length; i++) numberOfDaysPlanned += day_planned[i];
+		
+		for(int i = 0; i < fields.length; i++)
+			totalQuantity += fields[i].getQuantity();
+		
+		for (int i = 0; i < cluster.size(); i++)if(cluster.get(i).getQuantity() > 0){
+			quantityPlanned += cluster.get(i).getQuantity();
+			
+			if(computedMinQuantityDay > cluster.get(i).getQuantity()) 
+				computedMinQuantityDay = cluster.get(i).getQuantity();
+			if(computedMaxQuantityDay < cluster.get(i).getQuantity()) 
+				computedMaxQuantityDay = cluster.get(i).getQuantity();
+			
+		}
+			
+		quantityNotPlanned = totalQuantity - quantityPlanned;
+		
 		HavestPlanningCluster[] a_cluster = new HavestPlanningCluster[cluster
 				.size()];
 		for (int i = 0; i < cluster.size(); i++)
 			a_cluster[i] = cluster.get(i);
 
-		HavestPlanningSolution solution = new HavestPlanningSolution(a_cluster,
-				quality);
+		//HavestPlanningSolution solution = new HavestPlanningSolution(a_cluster,	quality);
+		HavestPlanningSolution solution = new HavestPlanningSolution(quality,"success",numberOfFieldsInPlan,
+				numberOfDatesInPlan, numberOfDatesInPlantStandard, initMinQuantityDay, initMaxQuantityDay,
+				computedMinQuantityDay, computedMaxQuantityDay, 0, quantityNotPlanned, quantityPlanned, totalQuantity,
+				numberLevels,numberOfDaysHarvestExact,numberOfDaysPlanned,numberOfFieldsCompleted,
+				maxDaysLate, maxDaysEarly,numberOfDaysOverLoad, numberOfDaysUnderLoad);
+		
 		return solution;
 	}
 

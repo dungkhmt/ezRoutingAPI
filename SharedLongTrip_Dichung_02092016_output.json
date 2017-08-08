@@ -1,0 +1,326 @@
+{  
+   "nbRequests":17,
+   "routes":[  
+      {  
+         "routeElements":[  
+            {  
+               "ticketCode":"10013.0",
+               "departTime":"",
+               "pickupAddress":"Ngô Gia Tự, Long Biên, Hà Nội, Việt Nam×",
+               "pickupPosition":"21.0627468,105.895303",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10009.0",
+               "departTime":"",
+               "pickupAddress":"phố Thịnh Liệt, Thịnh Liệt, Hoàng Mai, Hà Nội, Việt Nam",
+               "pickupPosition":"20.9721797,105.8468233",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10009.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"Phạm Thế Hiển, tp. Thái Bình, Thái Bình, Việt Nam",
+               "deliveryPosition":"20.4428574,106.3308392"
+            },
+            {  
+               "ticketCode":"10013.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"tp. Thái Bình, Thái Bình, Việt Nam×",
+               "deliveryPosition":"20.4463471,106.3365828"
+            }
+         ],
+         "taxiType":"6",
+         "nbPeople":5,
+         "nbRequests":2
+      },
+      {  
+         "routeElements":[  
+            {  
+               "ticketCode":"10000.0",
+               "departTime":"",
+               "pickupAddress":"Hà Đông, Hà Nội, Việt Nam×",
+               "pickupPosition":"20.955835,105.7563658",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10002.0",
+               "departTime":"",
+               "pickupAddress":"Đức Thượng, Hoài Đức, Hà Nội, Việt Nam×",
+               "pickupPosition":"21.0776081,105.6911121",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10005.0",
+               "departTime":"",
+               "pickupAddress":"N3B, 125 Lê Văn Lương, Trung Hòa Nhân Chính, Nhân Chính, Thanh Xuân, Hà Nội, Việt Nam×",
+               "pickupPosition":"21.0040579,105.8018324",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10002.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"Hồng Lĩnh, Thái Bình, Việt Nam×",
+               "deliveryPosition":"20.5670299,106.2492724"
+            },
+            {  
+               "ticketCode":"10005.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"tp. Thái Bình, Thái Bình, Việt Nam×",
+               "deliveryPosition":"20.4463471,106.3365828"
+            },
+            {  
+               "ticketCode":"10000.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"Quang Bình, Kiến Xương, Thái Bình, Việt Nam×",
+               "deliveryPosition":"20.3936299,106.3993658"
+            }
+         ],
+         "taxiType":"11",
+         "nbPeople":8,
+         "nbRequests":3
+      },
+      {  
+         "routeElements":[  
+            {  
+               "ticketCode":"10007.0",
+               "departTime":"",
+               "pickupAddress":"Hapulico Complex, Nguyễn Huy Tưởng, Thanh Xuân Trung, Thanh Xuân, Hà Nội, Việt Nam×",
+               "pickupPosition":"20.9996721,105.807678",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10003.0",
+               "departTime":"",
+               "pickupAddress":"Chùa Láng, Láng Thượng, Đống Đa, Hà Nội, Việt Nam×",
+               "pickupPosition":"21.0235598,105.8049116",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10008.0",
+               "departTime":"",
+               "pickupAddress":"Chùa Láng, Láng Thượng, Đống Đa, Hà Nội, Việt Nam×",
+               "pickupPosition":"21.0235598,105.8049116",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10010.0",
+               "departTime":"",
+               "pickupAddress":"Văn Phú, Hà Đông, Hà Nội, Việt Nam×",
+               "pickupPosition":"20.9623313,105.7684372",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10004.0",
+               "departTime":"",
+               "pickupAddress":"Lê Trọng Tấn, Thanh Xuân Trung, Hà Đông, Hà Nội, Việt Nam×",
+               "pickupPosition":"20.9686805,105.7541035",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10010.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"Vũ An, Kiến Xương, Thái Bình, Việt Nam×",
+               "deliveryPosition":"20.4204865,106.3905338"
+            },
+            {  
+               "ticketCode":"10007.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"Bến xe khách Quỳnh Côi, 217, tt. Quỳnh Côi, Quỳnh Phụ, Thái Bình, Việt Nam×",
+               "deliveryPosition":"20.650184,106.3260006"
+            },
+            {  
+               "ticketCode":"10003.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"Thái Hồng, Thái Thụy, Thái Bình, Việt Nam×",
+               "deliveryPosition":"20.5142556,106.4965434"
+            },
+            {  
+               "ticketCode":"10008.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"tp. Thái Bình, Thái Bình, Việt Nam×",
+               "deliveryPosition":"20.4463471,106.3365828"
+            },
+            {  
+               "ticketCode":"10004.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"Quỳnh Phụ, Thái Bình, Việt Nam×",
+               "deliveryPosition":"20.6608254,106.3276864"
+            }
+         ],
+         "taxiType":"11",
+         "nbPeople":7,
+         "nbRequests":5
+      },
+      {  
+         "routeElements":[  
+            {  
+               "ticketCode":"10006.0",
+               "departTime":"",
+               "pickupAddress":"Phú Diễn, Từ Liêm, Hà Nội, Việt Nam×",
+               "pickupPosition":"21.047768,105.7615252",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10012.0",
+               "departTime":"",
+               "pickupAddress":"Cầu Noi, Cổ Nhuế 2, Từ Liêm, Hà Nội, Việt Nam×",
+               "pickupPosition":"21.0617421,105.7762911",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10011.0",
+               "departTime":"",
+               "pickupAddress":"Phạm Văn Đồng, Hà Nội, Việt Nam",
+               "pickupPosition":"21.0600537,105.7833884",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10006.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"Quỳnh Côi, Quỳnh Hồng, huyện Quỳnh Phụ, Thái Bình, Việt Nam×",
+               "deliveryPosition":"20.65469,106.3196149"
+            },
+            {  
+               "ticketCode":"10011.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"bến xe thành phố , Thái Bình, Việt Nam",
+               "deliveryPosition":"20.3949788,106.3552092"
+            },
+            {  
+               "ticketCode":"10012.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"Tân Lập, Vũ Thư, Thái Bình, Việt Nam×",
+               "deliveryPosition":"20.4335502,106.2389759"
+            }
+         ],
+         "taxiType":"11",
+         "nbPeople":7,
+         "nbRequests":3
+      },
+      {  
+         "routeElements":[  
+            {  
+               "ticketCode":"10001.0",
+               "departTime":"",
+               "pickupAddress":"Đặng Xá, Gia Lâm, Hà Nội, Việt Nam×",
+               "pickupPosition":"21.0287612,105.9611748",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10001.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"tp. Thái Bình, Thái Bình, Việt Nam×",
+               "deliveryPosition":"20.4463471,106.3365828"
+            }
+         ],
+         "taxiType":"6",
+         "nbPeople":4,
+         "nbRequests":1
+      },
+      {  
+         "routeElements":[  
+            {  
+               "ticketCode":"10014.0",
+               "departTime":"",
+               "pickupAddress":"Láng Hạ, Đống Đa, Hà Nội, Việt Nam",
+               "pickupPosition":"21.0153717,105.8128851",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10014.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"Phan Bá Vành, tp. Thái Bình, Thái Bình, Việt Nam",
+               "deliveryPosition":"20.4334734,106.3271895"
+            }
+         ],
+         "taxiType":"6",
+         "nbPeople":1,
+         "nbRequests":1
+      },
+      {  
+         "routeElements":[  
+            {  
+               "ticketCode":"10016.0",
+               "departTime":"",
+               "pickupAddress":"Hoàng Quốc Việt, Hà Nội, Việt Nam×",
+               "pickupPosition":"21.0460568,105.7933163",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10015.0",
+               "departTime":"",
+               "pickupAddress":"An Trạch, Cát Linh, Đống Đa, Hà Nội, Việt Nam×",
+               "pickupPosition":"21.027708,105.829839",
+               "deliveryAddress":"",
+               "deliveryPosition":""
+            },
+            {  
+               "ticketCode":"10016.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"Bến xe khách Thái Bình, ĐT223, Bồ Xuyên, tp. Thái Bình, Thái Bình, Việt Nam×",
+               "deliveryPosition":"20.4490529,106.3344812"
+            },
+            {  
+               "ticketCode":"10015.0",
+               "departTime":"",
+               "pickupAddress":"",
+               "pickupPosition":"",
+               "deliveryAddress":"Đông Động, Đông Hưng, Thái Bình, Việt Nam×",
+               "deliveryPosition":"20.5263478,106.356681"
+            }
+         ],
+         "taxiType":"6",
+         "nbPeople":6,
+         "nbRequests":2
+      }
+   ]
+}

@@ -1,0 +1,1502 @@
+{
+  "routes": [
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10000.0",
+          "address": "nhà hh 1c linh đàm, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 04:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "3934",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10004.0",
+          "address": "Nhà K5 - Tập thể Bách khoa - Quận Hai Bà Trưng - Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 04:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10001.0",
+          "address": "hh4b linh đàm, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 04:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "3346",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10003.0",
+          "address": "Số 66 đường kim giang, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 04:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10018.0",
+          "address": "Số 17,Ngõ 150 Triều Khúc,Thanh Xuân, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 06:15:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "4000",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10016.0",
+          "address": "136 nguyen an ninh, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 06:15:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10017.0",
+          "address": "Ngõ 96, khách sạn Riverside, Nguyễn Đình Hoàn, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 06:15:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "5200",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10019.0",
+          "address": "Chung cư 789, Mỹ Đình 1, Nam Từ Liêm, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 06:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10012.0",
+          "address": "50 Hàng Bạc, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 05:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "2400",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10013.0",
+          "address": "17t5 hoang dao thuy, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 05:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10009.0",
+          "address": "KS Mariot Đỗ Đức Dục Nam Từ Liêm, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 04:45:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "5084",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10006.0",
+          "address": "84 ngõ 214 nguyễn xiển thanh xuân hà nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 04:45:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10008.0",
+          "address": "R2 royal city, hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 04:45:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "4567",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10005.0",
+          "address": "đầu phố triều khúc, thanh xuân, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 04:45:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10002.0",
+          "address": "Chung Cư Bộ Khoa học công nghệ, đường Nguyễn Văn Huyên mới, (cạnh Công đoàn vc VN), Cầu giấy, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 04:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10007.0",
+          "address": "17T1 Trung Hòa Nhân Chính, hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 04:45:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10010.0",
+          "address": "Chung cư 249 A Thụy khuê - Tây Hồ - Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 05:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10011.0",
+          "address": "số 145 An Xá, Phúc Xá, Ba Đình, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 05:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10014.0",
+          "address": "Số 22, ngõ 24/83 đường Kim Đồng, Giáp Bát, Hoàng Mai, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 06:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10015.0",
+          "address": "CT 15, Khu đô thị Tứ Hiệp, Thanh Trì, Hà Nội ",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 06:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10020.0",
+          "address": "Số nhà 108, Khu tập thể I 16B, Ngách 27, Ngõ 161 Thái Hà, Láng Hạ, Đống Đa, Hà Nôị",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 07:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10022.0",
+          "address": "48 Tô Vĩnh Diện, Thanh Xuân, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 08:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "5198",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10024.0",
+          "address": "245 Đường Nguyễn Khang - Yên Hòa - Cầu Giấy - Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 08:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10027.0",
+          "address": "Ngõ 132 Cầu Giấy, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 09:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "1286",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10028.0",
+          "address": "139 đường Cầu Giấy, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 10:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10025.0",
+          "address": "kđt mỹ đình 2, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 08:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "2900",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10026.0",
+          "address": "Đường số 2 Trần Thái Tông, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 09:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10021.0",
+          "address": "công an phường quỳnh lôi , Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 07:45:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10023.0",
+          "address": "KTX Ngoại ngữ, ĐH Ngoại ngữ, 1 Phạm Văn Đồng, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 08:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10029.0",
+          "address": "Ngõ 358 ngách 25 sn 64 bùi xương trạch, thanh xuân, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 10:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10030.0",
+          "address": "Sân bay nội bài",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 11:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "0",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10031.0",
+          "address": "Sân bay nội bài",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 11:15:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10034.0",
+          "address": "Sân bay nội bài, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 12:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10032.0",
+          "address": "Số 46, ngõ 134 Lê Trọng Tấn, phường Khương Mai, quận Thanh Xuân, tp Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 12:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "5174",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10037.0",
+          "address": "111 Triều Khúc, Thanh Xuân, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 12:15:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10035.0",
+          "address": "21 cát Linh , Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 12:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "2700",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10033.0",
+          "address": "60 ngõ  huyện , Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 12:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10036.0",
+          "address": "SN 38 ngõ 29 Phố Trích Sài, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 12:15:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10038.0",
+          "address": "f4 TRUNG Kính, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 12:45:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10039.0",
+          "address": "169 doãn kế thiện -mai dịch -Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 14:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "5372",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10040.0",
+          "address": "470 Láng, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 14:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10045.0",
+          "address": "Toà nhà Charmvit - 117 Trần Duy Hưng, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 15:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "2950",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10044.0",
+          "address": "73 Nguyễn Trãi (Ngã Tư Sở), Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 15:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10042.0",
+          "address": "31 hàng chuối , Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 15:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "1600",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10047.0",
+          "address": "41A Lý Thái Tổ, Hoàn Kiếm, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 15:15:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10041.0",
+          "address": "Ngõ 8 phố Hoa Lư, Hai Bà Trưng, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 14:15:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10046.0",
+          "address": "Sân bay nội bài",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 15:15:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "1",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10048.0",
+          "address": "Sân bay nội bài",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 15:15:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10043.0",
+          "address": "Sân bay nội bài",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 14:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10049.0",
+          "address": "NAM ĐỊNH",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 15:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10053.0",
+          "address": "Phó đức chính, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 16:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "1800",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10055.0",
+          "address": "só 1 nguyễn tri phương , Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 17:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10050.0",
+          "address": "Trường Cấp 1 Vạn Phúc - Hà Đông - Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 16:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10051.0",
+          "address": "Bến xe mỹ đình, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 16:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10052.0",
+          "address": "Ngõ 124 Âu Cơ, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 16:15:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10056.0",
+          "address": "156 Triệu Việt Vương, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 17:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10057.0",
+          "address": "36 bà triệu, hà đông, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 18:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10054.0",
+          "address": "Sân bay nội bài",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 17:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10058.0",
+          "address": "147 Ô Chợ Dừa, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 19:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10059.0",
+          "address": "Cafe 84 hồ đền lừ, hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 20:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10060.0",
+          "address": "số 1 trung hòa , hà nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 20:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10061.0",
+          "address": "Sân bay nội bài",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-08 21:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10064.0",
+          "address": "202 định công, Hoàng Mai , Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 04:15:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "907",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10066.0",
+          "address": "Số 7 ngõ 322 lê trọng tấn - Phường khương mai - Quận Thanh Xuân - Thành phố Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 04:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10077.0",
+          "address": "29 Ngo 8b Vu Thanh, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 07:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "155",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10076.0",
+          "address": "Vu thanh, hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 07:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10073.0",
+          "address": "Toà C nhà Udic complex đường Hoàng Đạo Thuý, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 06:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "5792",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10072.0",
+          "address": "Ngõ 102 yên hòa-cầu giấy-hà nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 06:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10065.0",
+          "address": "số 21 ngõ 183A Lĩnh Nam - Hoàng Mai - HÀ Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 04:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "2450",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10069.0",
+          "address": "Ngõ 670/32 Nguyễn Khoái, Hoàng Mai, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 05:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10062.0",
+          "address": "Ngõ 92 Đào Tấn, Phường Cống Vị, Ba Đình, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 03:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10067.0",
+          "address": "ks mariot Đố đức dục, hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 04:45:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10068.0",
+          "address": "Số 18 ngách 85/2 tư đình Long biên Hà nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 05:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10070.0",
+          "address": "Ngõ 670/32 Nguyễn Khoái, Hoàng Mai, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 05:45:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10071.0",
+          "address": "SN27, ngách 76/18, ngõ 322 đường Mỹ Đình, Q. Nam Từ Liêm, HN",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 06:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10074.0",
+          "address": "Hòa Bình Green City, 505 Minh Khai, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 06:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10075.0",
+          "address": "47 ngõ 548 Nguyễn Văn Cừ, Gia Lâm, hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 07:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10078.0",
+          "address": "Hồ đền lừ. Hoàng mai. Hà nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 07:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10063.0",
+          "address": "số 10 ngõ 11 TDP Ngọc Đại, Đại Mỗ, Nam Từ Liêm, HN. (Gần ngã tư Tố Hữu - Vạn Phúc)",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 04:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10079.0",
+          "address": "số 21 ngõ 183A Lĩnh Nam - Hoàng Mai - HÀ Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 08:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10080.0",
+          "address": "Sân bay nội bài",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 09:15:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10083.0",
+          "address": "Sân bay nội bài",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 10:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10081.0",
+          "address": "Ngõ 445 nguyễn khang cầu giấy , hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 09:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "5738",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10082.0",
+          "address": "Ngõ 8 đường Lê Quang Đạo, phường Phú Đô, quận Nam Từ Liêm, thành phố Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 10:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10084.0",
+          "address": "Số nhà 22 (số 58 cũ) đường Hoàng Công Chất (K3), hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 10:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10085.0",
+          "address": "Ngõ 358/55/20 phố Bùi Xương Trạch, Thanh Xuân, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 10:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10089.0",
+          "address": "chung cư 11 tầng  bộ kế hoạch đầu tư quan hoa, gần đường đông quan , Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 11:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "1234",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10088.0",
+          "address": "61 nguyen van huyen  Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 11:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10086.0",
+          "address": "42 Cầu Gỗ, Hoàn Kiếm, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 11:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10087.0",
+          "address": "khu do thị van quan, Hà Đông",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 11:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10090.0",
+          "address": "Sân bay nội bài",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 13:15:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10091.0",
+          "address": "R4 Royal city, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 14:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10092.0",
+          "address": "Siêu thị Vinmart, khu đô thị Xa La, Hà Đông. ",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 14:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10095.0",
+          "address": "Sân bay nội bài",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 16:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10097.0",
+          "address": "Sân bay nội bài",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 16:45:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10096.0",
+          "address": "33B Phạm Ngũ Lão Phan Chu Trinh, Hoàn Kiếm, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 16:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10098.0",
+          "address": "Ngõ 110 đường Phú Diễn Phường Phú Diễn Bắc Từ Liêm HN",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 19:15:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10099.0",
+          "address": "nhà số 10, ngõ 16, định công, hoàng mai, hà nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 20:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10100.0",
+          "address": "Lô 236 khu dịch vụ xa la - phường phúc la - quận hà đông - tp hà nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 20:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10101.0",
+          "address": "Sân bay nội bài",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 21:45:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "1",
+          "maxTravelTimeToDestinationAllowed": "-"
+        },
+        {
+          "ticketCode": "10102.0",
+          "address": "Sân bay nội bài",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 22:00:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 2,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10104.0",
+          "address": "Sân bay nội bài",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 22:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    },
+    {
+      "ticketCodes": [
+        {
+          "ticketCode": "10103.0",
+          "address": "Chung cư Ban Tổ Chức Trung Ương, Ngõ 267, Hoàng Hoa Thám, Ba Đình, Hà Nội",
+          "pickupDateTime": "-",
+          "expectedPickupDateTime": "2016-09-09 22:30:00",
+          "travelTimeToDestination": "-",
+          "travelTimeToNext": "-",
+          "distanceToNext": "-",
+          "maxTravelTimeToDestinationAllowed": "-"
+        }
+      ],
+      "nbPeople": 1,
+      "arrTimeDestination": "-"
+    }
+  ]
+}

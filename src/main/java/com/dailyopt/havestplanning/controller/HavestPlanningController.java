@@ -28,6 +28,9 @@ import com.dailyopt.havestplanning.model.HavestPlanningSolution;
 import com.dailyopt.havestplanning.model.MachineSetting;
 import com.dailyopt.havestplanning.model.PlantStandard;
 import com.dailyopt.havestplanning.model.ReturnAddFields;
+import com.dailyopt.havestplanning.model.ReturnFields;
+import com.dailyopt.havestplanning.model.ReturnMachineSetting;
+import com.dailyopt.havestplanning.model.ReturnPlantStandard;
 import com.dailyopt.havestplanning.model.ReturnSetPlantStandard;
 import com.dailyopt.havestplanning.model.ReturnStart;
 import com.dailyopt.havestplanning.solver.Solver;
@@ -66,6 +69,87 @@ public class HavestPlanningController {
 		String path = request.getServletContext().getRealPath(
 				"ezRoutingAPIROOT");
 
+		return null;
+	}
+
+	@RequestMapping(value = "/havest-plan/get-fields", method = RequestMethod.POST)
+	public ReturnFields getFields(HttpServletRequest request) {
+		String path = request.getServletContext().getRealPath(
+				"ezRoutingAPIROOT");
+
+		// path = "C:/ezRoutingAPIROOT/havestplanning/fields.json";
+		path = ROOT + "/fields.json";
+		try {
+			String fieldFilename = path;
+			Gson gson = new Gson();
+
+			FieldList FL = gson.fromJson(new FileReader(fieldFilename),
+					FieldList.class);
+
+			System.out.println(name() + "::getFields, fieldList.sz = "
+					+ FL.getFields().length);
+
+
+
+			return new ReturnFields(FL.getFields().length,
+					"successful", FL);
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return null;
+	}
+
+	@RequestMapping(value = "/havest-plan/get-plant-standard", method = RequestMethod.POST)
+	public ReturnPlantStandard getPlantStandard(HttpServletRequest request) {
+		String path = request.getServletContext().getRealPath(
+				"ezRoutingAPIROOT");
+
+		// path = "C:/ezRoutingAPIROOT/havestplanning/fields.json";
+		path = ROOT + "/plant-standard.json";
+		try {
+			String fieldFilename = path;
+			Gson gson = new Gson();
+
+			PlantStandard ps = gson.fromJson(new FileReader(fieldFilename),
+					PlantStandard.class);
+
+			System.out.println(name() + "::getPlantStandard, ps = " + ps.toString());
+
+
+
+			return new ReturnPlantStandard("successful", ps);
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return null;
+	}
+
+	@RequestMapping(value = "/havest-plan/get-machine-setting", method = RequestMethod.POST)
+	public ReturnMachineSetting getMachineSetting(HttpServletRequest request) {
+		String path = request.getServletContext().getRealPath(
+				"ezRoutingAPIROOT");
+
+		// path = "C:/ezRoutingAPIROOT/havestplanning/fields.json";
+		path = ROOT + "/machine-setting.json";
+		try {
+			String fieldFilename = path;
+			Gson gson = new Gson();
+
+			MachineSetting ms = gson.fromJson(new FileReader(fieldFilename),
+					MachineSetting.class);
+
+			System.out.println(name() + "::getMachineSetting, machine setting = "
+					+ ms.toString());
+
+
+
+			return new ReturnMachineSetting("successful", ms);
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 		return null;
 	}
 
@@ -161,7 +245,7 @@ public class HavestPlanningController {
 			out.close();
 
 			return new ReturnAddFields(newFieldList.getFields().length,
-					"suucessful", newFieldList);
+					"successful", newFieldList);
 			// return newFieldList;
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -214,7 +298,7 @@ public class HavestPlanningController {
 			out.close();
 
 			return new ReturnAddFields(newFieldList.getFields().length,
-					"suucessful", newFieldList);
+					"successful", newFieldList);
 			// return newFieldList;
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -333,8 +417,12 @@ public class HavestPlanningController {
 			if (input.getPlantStandard() == null)
 				input.initDefaultPlantStandard();
 
-			return solver.solve(input);
-
+			HavestPlanningSolution sol = solver.solve(input);
+			String json = gson.toJson(sol);
+			System.out.println(name() + "::compute, RETURN " + json);
+			
+			return sol;
+			
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

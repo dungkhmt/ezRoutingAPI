@@ -46,9 +46,41 @@ public class Solver {
 	int startSlot;
 	int endSlot;
 	
+	// computed statistic information
+	protected int numberOfFieldsInPlan;
+	protected int numberOfDatesInPlan;
+	protected int numberOfDatesInPlantStandard;
+	protected int initMinQuantityDay;
+	protected int initMaxQuantityDay;
+	protected int computedMinQuantityDay;
+	protected int computedMaxQuantityDay;
+	protected int numberFieldsNotPlanned;
+	protected int quantityNotPlanned;
+	protected int quantityPlanned;
+	protected int totalQuantity;
+	protected int numberLevels;
+	protected int numberOfDaysHarvestExact;
+	protected int numberOfDaysPlanned;
+	protected int numberOfFieldsCompleted;
+	protected int maxDaysLate;
+	protected int maxDaysEarly;
+	protected int numberOfDaysOverLoad;
+	protected int numberOfDaysUnderLoad;
+	
+	
+	
+	protected Date startHarvestDate;
+	protected Date endHarvestDate;
+
+	// end of computed statistic information
+	protected boolean DEBUG = false;
+	
 	protected PrintWriter log = null;
 	public String name(){
 		return "api.solver.solve";
+	}
+	public boolean getDEBUG(){
+		return DEBUG;
 	}
 	public void initLog(){
 		try{
@@ -61,6 +93,7 @@ public class Solver {
 		log.close();
 	}
 	public void analyze(){
+		
 		fields = new MField[input.getFields().length];
 		for(int i = 0; i < fields.length; i++){
 			Field F = input.getFields()[i];
@@ -123,14 +156,44 @@ public class Solver {
 		return sl + p;
 	}
 	public void mapDates() {
+		System.out.println(name() + "::mapDates, dates.length = " + dates.length + ", dates[0] = " + 
+	Utility.dateMonthYear(dates[0]) + ", dates[" + (dates.length-1) + "] = " + Utility.dateMonthYear(dates[dates.length-1]));
+		Date lastDate = Utility.next(dates[dates.length-1],input.getPlantStandard().getMaxPeriod() + 1);
+		ArrayList<Date> dateList = new ArrayList<Date>();
+		dateList.add(dates[0]);
+		Date curDate = dates[0];
+		startHarvestDate = Utility.next(dates[0],input.getPlantStandard().getMinPeriod());
+		endHarvestDate = lastDate;
+		while(true){
+			Date d = Utility.next(curDate,1);
+			dateList.add(d);
+			System.out.println(name() + "::mapDates, dateList[" + (dateList.size()-1) + "] = " + Utility.dateMonthYear(d)
+					+ ", lastDate = " + Utility.dateMonthYear(lastDate));
+			if(d.compareTo(lastDate) == 0) break;
+			curDate = d;
+		}
+		//for(int i = 0; i < dateList.size(); i++){
+			//System.out.println(name() + "::mapDates, dateList[" + i + "] = " + Utility.dateMonthYear(dateList.get(i)));
+		//}
+		numberOfDatesInPlan = Utility.distance(startHarvestDate, endHarvestDate);
+		numberOfFieldsInPlan = fields.length;
+		numberOfDatesInPlantStandard = input.getPlantStandard().getMaxRange();
+		System.out.println(name() + "::mapDates, numberOfDatesInPlan = " + numberOfDatesInPlan);
+		//System.exit(-1);
+		
 		mDate2Slot = new HashMap<Date, Integer>();
-		int start = 200;
+		int start = 0;//200;
 		mDate2Slot.put(dates[0], start);
-		date_sequence = new Date[5000];
+		date_sequence = new Date[dateList.size()];//new Date[5000];
+		for(int i = 0; i < dateList.size(); i++)
+			date_sequence[i] = dateList.get(i);
+		
+		/*
 		date_sequence[0] = Utility.next(dates[0],-start);
 		for(int i = 1; i < date_sequence.length; i++){
 			date_sequence[i] = Utility.next(date_sequence[i-1],1);
 		}
+		*/
 		
 		//for(int i = 0; i < date_sequence.length; i++){
 		//	System.out.println(i + " : " + Utility.dateMonthYear(date_sequence[i]));
