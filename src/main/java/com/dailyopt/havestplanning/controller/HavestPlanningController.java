@@ -153,6 +153,33 @@ public class HavestPlanningController {
 		return null;
 	}
 
+	@RequestMapping(value = "/havest-plan/get-solution", method = RequestMethod.POST)
+	public HavestPlanningSolution getSolution(HttpServletRequest request) {
+		String path = request.getServletContext().getRealPath(
+				"ezRoutingAPIROOT");
+
+		// path = "C:/ezRoutingAPIROOT/havestplanning/fields.json";
+		path = ROOT + "/harvest-plan-solution.json";
+		try {
+			String fieldFilename = path;
+			Gson gson = new Gson();
+
+			HavestPlanningSolution sol = gson.fromJson(new FileReader(fieldFilename),
+					HavestPlanningSolution.class);
+
+			System.out.println(name() + "::getSolution, solution = "
+					+ sol.toString());
+
+
+
+			return sol;
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return null;
+	}
+
 	@RequestMapping(value = "/havest-plan/add-fields", method = RequestMethod.POST)
 	public ReturnAddFields addFields(HttpServletRequest request,
 			@RequestBody FieldList fieldList) {
@@ -421,7 +448,30 @@ public class HavestPlanningController {
 			String json = gson.toJson(sol);
 			System.out.println(name() + "::compute, RETURN " + json);
 			
-			return sol;
+			
+			path = ROOT + "/harvest-plan-solution.json";
+
+			try {
+				PrintWriter out = new PrintWriter(path);
+				out.print(gson.toJson(sol));
+				out.close();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			
+			HavestPlanningSolution ret_sol = new HavestPlanningSolution(sol.getQuality(), 
+					sol.getDescription(), sol.getNumberOfFieldsInPlan(), 
+					sol.getNumberOfDatesInPlan(), sol.getNumberOfDatesInPlantStandard(), 
+					sol.getInitMinQuantityDay(), sol.getInitMaxQuantityDay(), 
+					sol.getComputedMinQuantityDay(), sol.getComputedMaxQuantityDay(), 
+					sol.getNumberFieldsNotPlanned(), sol.getQuantityNotPlanned(), 
+					sol.getQuantityPlanned(), sol.getTotalQuantity(), sol.getNumberOfLevels(), 
+					sol.getNumberOfDaysHarvestExact(), sol.getNumberOfDaysPlanned(), 
+					sol.getNumberOfFieldsCompleted(), sol.getMaxDaysLate(), sol.getMaxDaysEarly(), 
+					sol.getNumberOfDaysOverLoad(), 
+					sol.getNumberOfDaysUnderLoad());
+			
+			return ret_sol;
 			
 		} catch (Exception ex) {
 			ex.printStackTrace();

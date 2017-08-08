@@ -397,6 +397,7 @@ public class SolverMultiStepSplitFields extends Solver {
 				numberLevels,numberOfDaysHarvestExact,numberOfDaysPlanned,numberOfFieldsCompleted,
 				maxDaysLate, maxDaysEarly,numberOfDaysOverLoad, numberOfDaysUnderLoad);
 		
+		solution.setClusters(a_cluster);
 		return solution;
 	}
 
