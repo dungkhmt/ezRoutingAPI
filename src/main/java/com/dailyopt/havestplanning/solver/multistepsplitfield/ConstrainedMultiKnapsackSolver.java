@@ -5,8 +5,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
+import localsearch.constraints.multiknapsack.MultiKnapsack;
+import localsearch.model.ConstraintSystem;
+import localsearch.model.LocalSearchManager;
+import localsearch.model.VarIntLS;
+import localsearch.search.TabuSearch;
+
 public class ConstrainedMultiKnapsackSolver {
 	public String name;
+	public static double EPS = -0.0001;
+	
+	protected double[][] p;// p[i,d] is the amount of sugar gained per unit quantity if field i is planned on day d
 	
 	protected int[] preload;// preload[i] is the pre-load in date i
 	protected int[] qtt;// qtt[i] is the remain quantity of field i
@@ -37,6 +46,9 @@ public class ConstrainedMultiKnapsackSolver {
 										// of the havest date of field i
 	protected int total_violations_havest;
 
+	protected double[] amount_sugar_gained;
+	protected double total_amount_sugar_gained;
+	
 	protected Random R;
 
 	private SolverMultiStepSplitFields solver;
@@ -49,8 +61,8 @@ public class ConstrainedMultiKnapsackSolver {
 		this.solver = solver;
 	}
 
-	public void setInput(int[] preload, int[] qtt,
-			int[] minDate, int[] maxDate, int[] expected_date, int minLoad, int maxLoad) {
+	public void setInput(int[] preload, int[] qtt, int[] minDate,
+			int[] maxDate, int[] expected_date, int minLoad, int maxLoad, double[][] productivity) {
 
 		/*
 		 * m = preload.length: number of bins (days), bins are numbered 0, 1,
@@ -72,41 +84,61 @@ public class ConstrainedMultiKnapsackSolver {
 		this.maxLoad = maxLoad;
 		this.m = preload.length;
 		this.n = qtt.length;
+		this.p = productivity;
 		expectedHavestDate = expected_date;
-	}	
-	
-	
-	public LeveledHavestPlanSolution solve(int[] preload, int[] qtt,
-			int[] minDate, int[] maxDate, int[] expected_date, int minLoad, int maxLoad) {
+	}
 
-		/*
-		 * m = preload.length: number of bins (days), bins are numbered 0, 1,
-		 * ..., m-1 n = qtt.length: number of items (fields), items are numbered
-		 * 0, 1, ..., n-1 preload[i]: pre-load of bin i qtt[j]: quantity
-		 * (weight) of item j minDate[j], maxDate[j]: item j can be loaded in
-		 * bins minDate[j],...,maxDate[j] The total load of a bin is between
-		 * [minLoad..maxLoad] or the load of a bin is 0 Bin i s.t. load[i] =
-		 * maxLoad is forbidden to load other items objective: allocate each
-		 * item i in a bin from {minDate[j],...,maxDate[j]} minimizing
-		 * violations
-		 */
-
-		this.preload = preload;
-		this.qtt = qtt;
-		this.minDate = minDate;
-		this.maxDate = maxDate;
-		this.minLoad = minLoad;
-		this.maxLoad = maxLoad;
-		this.m = preload.length;
-		this.n = qtt.length;
-
-		expectedHavestDate = expected_date;
-		/*
-		expectedHavestDate = new int[minDate.length];
-		for (int i = 0; i < expectedHavestDate.length; i++)
-			expectedHavestDate[i] = (minDate[i] + maxDate[i]) / 2;
-		*/
+	public int[] cbls(int maxTime, int maxIter){
+		LocalSearchManager mgr = new LocalSearchManager();
+		VarIntLS[] y = new VarIntLS[n];
+		for(int i = 0; i < n; i++) 
+			y[i] = new VarIntLS(mgr,minDate[i],maxDate[i]);
+		ConstraintSystem CS = new ConstraintSystem(mgr);
+		int[] cap = new int[m];
+		for(int i = 0; i < m; i++)
+			cap[i] = maxLoad - preload[i];
+		CS.post(new MultiKnapsack(y, qtt, cap));
+		mgr.close();
 		
+		TabuSearch ts = new TabuSearch();
+		ts.search(CS, 50, maxTime, maxIter, 200);
+		int[] sol = new int[n];
+		for(int i = 0; i < n; i++)
+			sol[i] = y[i].getValue();
+		return sol;
+	}
+	public LeveledHavestPlanSolution solve(int[] preload, int[] qtt,
+			int[] minDate, int[] maxDate, int[] expected_date, int minLoad,
+			int maxLoad) {
+
+		/*
+		 * m = preload.length: number of bins (days), bins are numbered 0, 1,
+		 * ..., m-1 n = qtt.length: number of items (fields), items are numbered
+		 * 0, 1, ..., n-1 preload[i]: pre-load of bin i qtt[j]: quantity
+		 * (weight) of item j minDate[j], maxDate[j]: item j can be loaded in
+		 * bins minDate[j],...,maxDate[j] The total load of a bin is between
+		 * [minLoad..maxLoad] or the load of a bin is 0 Bin i s.t. load[i] =
+		 * maxLoad is forbidden to load other items objective: allocate each
+		 * item i in a bin from {minDate[j],...,maxDate[j]} minimizing
+		 * violations
+		 */
+
+		this.preload = preload;
+		this.qtt = qtt;
+		this.minDate = minDate;
+		this.maxDate = maxDate;
+		this.minLoad = minLoad;
+		this.maxLoad = maxLoad;
+		this.m = preload.length;
+		this.n = qtt.length;
+
+		expectedHavestDate = expected_date;
+		/*
+		 * expectedHavestDate = new int[minDate.length]; for (int i = 0; i <
+		 * expectedHavestDate.length; i++) expectedHavestDate[i] = (minDate[i] +
+		 * maxDate[i]) / 2;
+		 */
+
 		startDate = 10000000;
 		endDate = -10000000;
 		for (int i = 0; i < n; i++) {
@@ -123,8 +155,9 @@ public class ConstrainedMultiKnapsackSolver {
 		stateModel();
 		search(0);
 
-		if(getSolver().getDEBUG()) getSolver().getLog().println("SOLUTION:");
-	
+		if (getSolver().getDEBUG())
+			getSolver().getLog().println("SOLUTION:");
+
 		for (int i = 0; i < m; i++) {
 
 			int sz = 0;
@@ -137,127 +170,145 @@ public class ConstrainedMultiKnapsackSolver {
 				}
 			}
 			if (sz > 0) {
-				System.out.print("date " + i + " : ");
+				System.out.print(name() + "::solve, date " + i + " : ");
 				System.out.println("sz = " + sz + ", load = " + load[i]
 						+ ", violations_packing = " + violations_packing[i]
 						+ ", des = " + des);
-				
-				if(getSolver().getDEBUG()){
-					getSolver().getLog().print("date " + i + " : ");
-					getSolver().getLog().println("sz = " + sz + ", load = " + load[i]
-						+ ", violations_packing = " + violations_packing[i]
-						+ ", des = ");// + des);
+
+				if (getSolver().getDEBUG()) {
+					getSolver().getLog().print(name() + "::solve, date " + i + " : ");
+					getSolver().getLog().println(
+							"sz = " + sz + ", load = " + load[i]
+									+ ", violations_packing = "
+									+ violations_packing[i] + ", des = ");// +
+																			// des);
 				}
-				
+
 			}
 		}
 
 		int[] xd = new int[x.length];
 		int[] quantity = new int[x.length];
 
-		for(int d = 0; d < m; d++){
+		for (int d = 0; d < m; d++) {
 			ArrayList<Integer> I = getItemsOfBin(d);
 			int[] q = new int[I.size()];
-			for(int i = 0; i < I.size(); i++) q[i] = qtt[I.get(i)];
+			for (int i = 0; i < I.size(); i++)
+				q[i] = qtt[I.get(i)];
 			double[] sq = selectQuantity(q, minLoad, maxLoad);
-			for(int i = 0; i < I.size(); i++){
+			for (int i = 0; i < I.size(); i++) {
 				int f = I.get(i);
-				quantity[f] = (int)sq[i];
+				quantity[f] = (int) sq[i];
 				xd[f] = d;
 			}
 		}
-		
-		
+
 		return new LeveledHavestPlanSolution(xd, quantity);
 	}
-	
-	public int[] getX(){
+
+	public int[] getX() {
 		return x;
 	}
-	public double[] selectQuantity(int[] q, int minQ, int maxQ){
+
+	public double[] selectQuantity(int[] q, int minQ, int maxQ) {
 		double[] sq = new double[q.length];
 		int k = 0;
 		int s = 0;
 		int maxQ1 = maxQ;
-		for(int i = 0; i < q.length; i++) s = s + q[i];
-		
-		if(s <= maxQ){
-			for(int i = 0; i < q.length; i++)
+		for (int i = 0; i < q.length; i++)
+			s = s + q[i];
+
+		if (s <= maxQ) {
+			for (int i = 0; i < q.length; i++)
 				sq[i] = q[i];
 			return sq;
 		}
-		if(q.length == 1){// take full (maximum) quantity
+		if (q.length == 1) {// take full (maximum) quantity
 			sq[0] = maxQ;
 			return sq;
 		}
-		
-		//for(int i = 0; i < q.length; i++) System.out.print(q[i] + " "); System.out.println();
-		
+
+		// for(int i = 0; i < q.length; i++) System.out.print(q[i] + " ");
+		// System.out.println();
+
 		int[] idx = new int[q.length];
-		for(int i = 0; i < q.length; i++) idx[i] = i;
-		for(int i = 0; i < q.length-1;i++){
-			for(int j = i+1; j < q.length; j++){
-				if(q[i] > q[j]){
-					int tmp = q[i]; q[i] = q[j]; q[j] = tmp;
-					tmp = idx[i]; idx[i] = idx[j]; idx[j] = tmp;
+		for (int i = 0; i < q.length; i++)
+			idx[i] = i;
+		for (int i = 0; i < q.length - 1; i++) {
+			for (int j = i + 1; j < q.length; j++) {
+				if (q[i] > q[j]) {
+					int tmp = q[i];
+					q[i] = q[j];
+					q[j] = tmp;
+					tmp = idx[i];
+					idx[i] = idx[j];
+					idx[j] = tmp;
 				}
 			}
 		}
-		//for(int i = 0; i < q.length; i++) System.out.print(q[i] + " "); System.out.println();
-		//for(int i = 0; i < q.length; i++) System.out.print(idx[i] + " "); System.out.println();
-		
-		while(k < q.length-1){
+		// for(int i = 0; i < q.length; i++) System.out.print(q[i] + " ");
+		// System.out.println();
+		// for(int i = 0; i < q.length; i++) System.out.print(idx[i] + " ");
+		// System.out.println();
+
+		while (k < q.length - 1) {
 			s = s - q[k];
 			maxQ1 = maxQ1 - q[k];
 			int r = s - maxQ1;
-			//System.out.println("k = " + k + ", s = " + s + ", maxQ1 = " + maxQ1 + ", r = " + r + 
-			//		", q[k] = " + q[k] + ", next = " + (q[k+1]*(1-r*1.0/s)));
-			if(q[k] > q[k+1]*(1-r*1.0/s)){
+			// System.out.println("k = " + k + ", s = " + s + ", maxQ1 = " +
+			// maxQ1 + ", r = " + r +
+			// ", q[k] = " + q[k] + ", next = " + (q[k+1]*(1-r*1.0/s)));
+			if (q[k] > q[k + 1] * (1 - r * 1.0 / s)) {
 				s += q[k];
 				maxQ1 += q[k];
-				//System.out.println("BREAK recover s = " + s + ", maxQ1 = " + maxQ1 + ", k = " + k);
+				// System.out.println("BREAK recover s = " + s + ", maxQ1 = " +
+				// maxQ1 + ", k = " + k);
 				break;
-			}else{
+			} else {
 				sq[idx[k]] = q[k];
-				//System.out.println("k = " + k + ", idx[" + k + "] = " + idx[k] + 
-				//		" ACCEPT sq[" + idx[k] + "] = " + q[k] + ", s = " + s + ", maxQ1 = " + maxQ1);
+				// System.out.println("k = " + k + ", idx[" + k + "] = " +
+				// idx[k] +
+				// " ACCEPT sq[" + idx[k] + "] = " + q[k] + ", s = " + s +
+				// ", maxQ1 = " + maxQ1);
 			}
 			k++;
 		}
-		//double r = (s - maxQ1)*1.0/s;
-		
-		for(int i = k; i < q.length; i++){
-			double r = (s - maxQ1)*1.0/s;
-			sq[idx[i]] = q[i]*(1-r);
+		// double r = (s - maxQ1)*1.0/s;
+
+		for (int i = k; i < q.length; i++) {
+			double r = (s - maxQ1) * 1.0 / s;
+			sq[idx[i]] = q[i] * (1 - r);
 			/*
-			int a = (int)sq[idx[i]];
-			if(a == q[i] - 1) a = q[i];// rounding
-			s = s - a;
-			maxQ1 = maxQ1 - a;
-			sq[idx[i]] = a;
-			*/
-			
-			//System.out.println("i = " + i + ", idx[" + i + "] = " + idx[i] + ", q[idx[i]] = " + q[idx[i]] +
-			//		", r = " + r + ", ACCEPT sq[" + idx[i] + "] = " + sq[idx[i]]);
+			 * int a = (int)sq[idx[i]]; if(a == q[i] - 1) a = q[i];// rounding s
+			 * = s - a; maxQ1 = maxQ1 - a; sq[idx[i]] = a;
+			 */
+
+			// System.out.println("i = " + i + ", idx[" + i + "] = " + idx[i] +
+			// ", q[idx[i]] = " + q[idx[i]] +
+			// ", r = " + r + ", ACCEPT sq[" + idx[i] + "] = " + sq[idx[i]]);
 		}
 		double t = 0;
-		for(int i = 0; i < sq.length; i++) t = t + sq[i];
-	//	System.out.println("check t = " + t );
-		
+		for (int i = 0; i < sq.length; i++)
+			t = t + sq[i];
+		// System.out.println("check t = " + t );
+
 		return sq;
 	}
-	private HashMap<Integer, Integer> selectQuantity(int d){
+
+	private HashMap<Integer, Integer> selectQuantity(int d) {
 		// return foreach field i, the quantity to be havested
 		HashMap<Integer, Integer> havestQuantity = new HashMap<Integer, Integer>();
 		ArrayList<Integer> I = getItemsOfBin(d);
-		
+
 		return havestQuantity;
 	}
+
 	public void stateModel() {
 		x = new int[n];
 		load = new int[m];
 		violations_packing = new int[m];
 		violations_havest = new int[n];
+		amount_sugar_gained = new double[n];
 	}
 
 	public void initPropagate() {
@@ -284,6 +335,12 @@ public class ConstrainedMultiKnapsackSolver {
 			violations_havest[i] = qtt[i]
 					* (Math.abs(x[i] - expectedHavestDate[i]));
 			total_violations_havest += violations_havest[i];
+		}
+		
+		total_amount_sugar_gained = 0;
+		for(int i = 0; i < n; i++){
+			amount_sugar_gained[i] = -qtt[i]*p[i][x[i]];
+			total_amount_sugar_gained += amount_sugar_gained[i];
 		}
 	}
 
@@ -332,6 +389,11 @@ public class ConstrainedMultiKnapsackSolver {
 		violations_havest[i] = qtt[i] * (Math.abs(expectedHavestDate[i] - j));
 		total_violations_havest += violations_havest[i];
 
+		// update amount_augar
+		total_amount_sugar_gained -= amount_sugar_gained[i];
+		amount_sugar_gained[i] = -qtt[i]*p[i][j];
+		total_amount_sugar_gained += amount_sugar_gained[i];
+		
 		computeMaxViolationsPacking();
 
 		x[i] = j;
@@ -361,6 +423,36 @@ public class ConstrainedMultiKnapsackSolver {
 		return nv - max_violations_packing;
 	}
 
+	public int getSwapDeltaPacking(int i, int j) {
+		if (x[i] == x[j])
+			return 0;
+		int pi = x[i];
+		int pj = x[j];
+		int loadbi = load[pi] - qtt[i] + qtt[j];
+		int loadbj = load[pj] - qtt[j] + qtt[i];
+		int vi = violations_packing(loadbi);
+		int vj = violations_packing(loadbj);
+		int new_violations = total_violations_packing - violations_packing[pi]
+				+ vi - violations_packing[pj] + vj;
+		return new_violations - total_violations_packing;
+	}
+
+	public int getSwapDeltaHavest(int i, int j) {
+		if (x[i] == x[j])
+			return 0;
+		int pi = x[i];
+		int pj = x[j];
+		int vi = qtt[i] * (Math.abs(expectedHavestDate[i] - pj));
+		int vj = qtt[j] * (Math.abs(expectedHavestDate[j] - pi));
+		return vi - violations_havest[i] + vj - violations_havest[j];
+	}
+
+	public double getSwapDeltaAmountSugar(int i, int j){
+		if(x[i] == x[j]) return 0;
+		double new_i = -qtt[i]*p[i][x[j]];
+		double new_j = -qtt[j]*p[j][x[i]];
+		return new_i + new_j - amount_sugar_gained[i] - amount_sugar_gained[j];
+	}
 	public int getAssignDeltaPacking(int i, int j) {
 		// return the difference between old evaluation and new evaluation
 		// (after assign item i to bin j)
@@ -382,9 +474,17 @@ public class ConstrainedMultiKnapsackSolver {
 		int h = qtt[i] * (Math.abs(expectedHavestDate[i] - j));
 		return h - violations_havest[i];
 	}
-	public int[] getLoads(){
+
+	public double getAssignDeltaAmountSugar(int i, int j){
+		if(x[i] == j) return 0;
+		double new_i = -qtt[i]*p[i][j];
+		return new_i - amount_sugar_gained[i];
+	}
+	
+	public int[] getLoads() {
 		return load;
 	}
+
 	public void initSolutionExpectedDate() {
 		for (int i = 0; i < n; i++) {
 			// assign(i,expectedHavestDate[i]);
@@ -392,7 +492,7 @@ public class ConstrainedMultiKnapsackSolver {
 			for (int j = minDate[i]; j <= maxDate[i]; j++)
 				if (preload[j] < maxLoad)
 					S.add(j);
-			
+
 			int minD = Integer.MAX_VALUE;
 			int sel_j = -1;
 			for (int j : S) {
@@ -405,6 +505,7 @@ public class ConstrainedMultiKnapsackSolver {
 		}
 		initPropagate();
 	}
+
 	public void initSolution() {
 		for (int i = 0; i < n; i++) {
 			// assign(i,expectedHavestDate[i]);
@@ -412,7 +513,7 @@ public class ConstrainedMultiKnapsackSolver {
 			for (int j = minDate[i]; j <= maxDate[i]; j++)
 				if (preload[j] < maxLoad)
 					S.add(j);
-			
+
 			int minD = Integer.MAX_VALUE;
 			int sel_j = -1;
 			for (int j : S) {
@@ -471,20 +572,21 @@ public class ConstrainedMultiKnapsackSolver {
 	public void print() {
 		for (int i = 0; i < m; i++) {
 			ArrayList<Integer> L = getItemsOfBin(i);
-			if(L.size() > 0){
-			System.out.print(name() + "::print, Bin " + i + " : ");
-			for (int j = 0; j < n; j++)
-				if (x[j] == i)
-					System.out.print(j + "(" + qtt[j] + ") ");
-			System.out.println("load = " + load[i] + ", violations_packing = "
-					+ violations_packing[i]);
+			if (L.size() > 0) {
+				System.out.print(name() + "::print, Bin " + i + " : ");
+				for (int j = 0; j < n; j++)
+					if (x[j] == i)
+						System.out.print(j + "(" + qtt[j] + ") ");
+				System.out.println("load = " + load[i]
+						+ ", violations_packing = " + violations_packing[i]);
 			}
 		}
 
 		for (int i = 0; i < n; i++) {
-			System.out.println(name() + "::print, x[" + i + "] = " + x[i] + ", expectedDate[" + i
-					+ "] = " + expectedHavestDate[i] + ", violations_havest["
-					+ i + "] = " + violations_havest[i]);
+			System.out.println(name() + "::print, x[" + i + "] = " + x[i]
+					+ ", expectedDate[" + i + "] = " + expectedHavestDate[i]
+					+ ", violations_havest[" + i + "] = "
+					+ violations_havest[i]);
 		}
 
 		System.out.println("eval = " + eval());
@@ -499,15 +601,16 @@ public class ConstrainedMultiKnapsackSolver {
 			}
 			int ob = x[i];
 			assign(i, j);
-			
-			if(getSolver().getDEBUG())
+
+			if (getSolver().getDEBUG())
 				getSolver().getLog().println(
-					name() + "::performMoveSequence, assign(" + i + "(code-"
-							+ solver.getInput().getFields()[i].getCode()
-							+ ", qtt-" + qtt[i] + ")  from " + ob + " -> " + j
-							+ ") " + "eval = " + eval() + ", load[" + j
-							+ "] = " + load[j] + ", violations_packing[" + j
-							+ "] = " + violations_packing[j]);
+						name() + "::performMoveSequence, assign(" + i
+								+ "(code-"
+								+ solver.getInput().getFields()[i].getCode()
+								+ ", qtt-" + qtt[i] + ")  from " + ob + " -> "
+								+ j + ") " + "eval = " + eval() + ", load[" + j
+								+ "] = " + load[j] + ", violations_packing["
+								+ j + "] = " + violations_packing[j]);
 		}
 	}
 
@@ -520,23 +623,27 @@ public class ConstrainedMultiKnapsackSolver {
 			ArrayList<Integer> moves = PM.getMovedItems();
 			int d = PM.getGlobalFinalDate();
 			int best = PM.getGlobalBest();
-			if(moves.size() <= 0) break;
-			
+			if (moves.size() <= 0)
+				break;
+
 			// if (best >= 0) break;
-			//System.out.print(name() + "::moveSequence, step " + count + ", d = " + d + ", moves = ");
-			if(getSolver().getDEBUG())
+			// System.out.print(name() + "::moveSequence, step " + count +
+			// ", d = " + d + ", moves = ");
+			if (getSolver().getDEBUG())
 				getSolver().getLog().print(
-					name() + "::moveSequence, step " + count + ", d = " + d
-							+ ", moves = ");
+						name() + "::moveSequence, step " + count + ", d = " + d
+								+ ", moves = ");
 			for (int k = moves.size() - 1; k >= 0; k--) {
 				int i = moves.get(k);
 				int bi = x[i];
-				//System.out.print(i + "[q-" + qtt[i] + ", d-" + bi + "], ");
-				if(getSolver().getDEBUG()) getSolver().getLog().print(
-						i + "[q-" + qtt[i] + ", d-" + bi + "], ");
+				// System.out.print(i + "[q-" + qtt[i] + ", d-" + bi + "], ");
+				if (getSolver().getDEBUG())
+					getSolver().getLog().print(
+							i + "[q-" + qtt[i] + ", d-" + bi + "], ");
 			}
-			//System.out.println();
-			if(getSolver().getDEBUG()) getSolver().getLog().println();
+			// System.out.println();
+			if (getSolver().getDEBUG())
+				getSolver().getLog().println();
 			/*
 			 * for (int k = moves.size() - 1; k >= 0; k--) { int i =
 			 * moves.get(k); int j = d; if (k > 0) { j = x[moves.get(k - 1)]; }
@@ -550,16 +657,19 @@ public class ConstrainedMultiKnapsackSolver {
 
 			performMoveSequence(moves, d);
 
-			//System.out.println(name() + "::moveSequence FINISH A LOOP best = "
-			//		+ best + " -------------------------");
-			if(getSolver().getDEBUG()) getSolver().getLog().println(
-					name() + "::moveSequence FINISH A LOOP best = " + best
-							+ " -------------------------");
+			// System.out.println(name() +
+			// "::moveSequence FINISH A LOOP best = "
+			// + best + " -------------------------");
+			if (getSolver().getDEBUG())
+				getSolver().getLog().println(
+						name() + "::moveSequence FINISH A LOOP best = " + best
+								+ " -------------------------");
 			count++;
 			if (count >= maxIter)
 				break;
 		}
-		if(getSolver().getDEBUG()) getSolver().getLog().println(name() + "::moveSequence, POST");
+		if (getSolver().getDEBUG())
+			getSolver().getLog().println(name() + "::moveSequence, POST");
 		for (int i = 1; i <= 50; i++) {
 			PM.findOptimalMovePath(20, -1, false);
 			performMoveSequence(PM.getMovedItems(), PM.getGlobalFinalDate());
@@ -567,115 +677,127 @@ public class ConstrainedMultiKnapsackSolver {
 	}
 
 	public void search(int maxIter) {
-		initSolution();
+		int[] sol = cbls(120,100000);
+		for(int i = 0; i < n; i++) x[i] = sol[i];
+		initPropagate();
 		
-		System.out.println(name() + "::search, initial solution: eval = " + eval()); //print();
-		
-		moveSequence(200);
-
-		System.out.println(name() + "::search, after moveSequence solution: eval = " + eval());// print();
-		
-		// if(true)return;
-		//maxIter = 0;
 		/*
-		ArrayList<AssignMove> moves = new ArrayList<AssignMove>();
-		for (int it = 0; it < maxIter; it++) {
-			moves.clear();
-			int min_delta_violations_packing = Integer.MAX_VALUE;
-			int min_delta_violations_havest = Integer.MAX_VALUE;
-			int min_delta_max_violations_packing = Integer.MAX_VALUE;
-
-			for (int i = 0; i < n; i++) {
-				for (int j = minDate[i]; j <= maxDate[i]; j++) {
-					if (preload[j] == maxLoad)
-						continue;// ignore full date (bin)
-
-					int delta_violations_packing = getAssignDeltaPacking(i, j);
-					int delta_violations_havest = getAssignDeltaHavest(i, j);
-					int delta_max_violations_packing = getAssignDeltaMaxViolationsPacking(
-							i, j);
-
-					if (min_delta_max_violations_packing > delta_max_violations_packing) {
-						min_delta_max_violations_packing = delta_max_violations_packing;
-						min_delta_violations_packing = delta_violations_packing;
-						min_delta_violations_havest = delta_violations_havest;
-
-						moves.clear();
-						moves.add(new AssignMove(i, j));
-					} else if (min_delta_max_violations_packing == delta_max_violations_packing
-							&& min_delta_violations_packing > delta_violations_packing) {
-						min_delta_max_violations_packing = delta_max_violations_packing;
-						min_delta_violations_havest = delta_violations_havest;
-
-						moves.clear();
-						moves.add(new AssignMove(i, j));
-					} else if (min_delta_max_violations_packing == delta_max_violations_packing
-							&& min_delta_violations_packing == delta_violations_packing
-							&& min_delta_violations_havest > delta_violations_havest) {
-
-						min_delta_violations_havest = delta_violations_havest;
-
-						moves.clear();
-						moves.add(new AssignMove(i, j));
-					} else if (min_delta_max_violations_packing == delta_max_violations_packing
-							&& min_delta_violations_packing == delta_violations_packing
-							&& min_delta_violations_havest == delta_violations_havest) {
-						moves.add(new AssignMove(i, j));
-					}
-				}
-			}
-
-			// perform the move
-			if (moves.size() <= 0) {
-				System.out.println(name() + "::search, NO MOVE --> BREAK");
-				break;
-			} else {
-				AssignMove m = moves.get(R.nextInt(moves.size()));
-
-				int o = x[m.i];
-				int l1 = load[o];
-				int l2 = load[m.v];
-
-				assign(m.i, m.v);
-
-				System.out.println(name() + "::search, Step " + it
-						+ " -> move(" + m.i + " q(" + qtt[m.i] + "  from " + o
-						+ " -> " + m.v + "), old_load[" + o + "] = " + l1
-						+ ", old_load[" + m.v + "] = " + l2 + ", load[" + o
-						+ "] = " + load[o] + ", load[" + m.v + "] = "
-						+ load[m.v] + ", eval = " + eval());
-
-				getSolver().getLog().println(
-						name() + "::search, Step " + it + " -> move(" + m.i
-								+ " q(" + qtt[m.i] + "  from " + o + " -> "
-								+ m.v + "), old_load[" + o + "] = " + l1
-								+ ", old_load[" + m.v + "] = " + l2 + ", load["
-								+ o + "] = " + load[o] + ", load[" + m.v
-								+ "] = " + load[m.v] + ", eval = " + eval());
+		for(int i = 0; i < n; i++){
+			getSolver().getLog().println(name() + "::search, minDate-maxDate = " + minDate[i] + "-" + maxDate[i]
+					+ ", expectedDate = " + expectedHavestDate[i]);
+			for(int d = 0; d < m; d++){
+				if(p[i][d] > 0) getSolver().getLog().println(name() + "::search, p[" + i + "," + d + "] = " + p[i][d]);
 			}
 		}
 		*/
 		
-		searchReduceTotalPackingViolations(10000);
-		System.out.println(name() + "::search, after FIRST searchReduceTotalPackingViolations solution: eval = " + eval());
+		//initSolution();
+
+		System.out.println(name() + "::search, initial solution: eval = "
+				+ eval()); // print();
+
+		//moveSequence(200);
+
+		//if(true)return;
 		
-		searchAggregateDates(1000);
-		System.out.println(name() + "::search, after searchAggregateDates solution: eval = " + eval());
 		
-		searchReduceTotalPackingViolations(10000);
-		System.out.println(name() + "::search, after SECOND searchReduceTotalPackingViolations solution: eval = " + eval());
-		
-		
+		System.out.println(name()
+				+ "::search, after moveSequence solution: eval = " + eval());// print();
+
+		// if(true)return;
+		// maxIter = 0;
 		/*
-		searchReduceTotalPackingViolations(10);
-		System.out.println(name() + "::search, after searchReduceTotalPackingViolations: "); print();
-		searchAggregateDates(10);
-		System.out.println(name() + "::search, after searchAggregateDates: "); print();
-		searchReduceTotalPackingViolations(10);
-		System.out.println(name() + "::search, after searchReduceTotalPackingViolations: "); print();
-		
-		System.out.println(name() + "::search END ------------------------------------------------------");
-		*/
+		 * ArrayList<AssignMove> moves = new ArrayList<AssignMove>(); for (int
+		 * it = 0; it < maxIter; it++) { moves.clear(); int
+		 * min_delta_violations_packing = Integer.MAX_VALUE; int
+		 * min_delta_violations_havest = Integer.MAX_VALUE; int
+		 * min_delta_max_violations_packing = Integer.MAX_VALUE;
+		 * 
+		 * for (int i = 0; i < n; i++) { for (int j = minDate[i]; j <=
+		 * maxDate[i]; j++) { if (preload[j] == maxLoad) continue;// ignore full
+		 * date (bin)
+		 * 
+		 * int delta_violations_packing = getAssignDeltaPacking(i, j); int
+		 * delta_violations_havest = getAssignDeltaHavest(i, j); int
+		 * delta_max_violations_packing = getAssignDeltaMaxViolationsPacking( i,
+		 * j);
+		 * 
+		 * if (min_delta_max_violations_packing > delta_max_violations_packing)
+		 * { min_delta_max_violations_packing = delta_max_violations_packing;
+		 * min_delta_violations_packing = delta_violations_packing;
+		 * min_delta_violations_havest = delta_violations_havest;
+		 * 
+		 * moves.clear(); moves.add(new AssignMove(i, j)); } else if
+		 * (min_delta_max_violations_packing == delta_max_violations_packing &&
+		 * min_delta_violations_packing > delta_violations_packing) {
+		 * min_delta_max_violations_packing = delta_max_violations_packing;
+		 * min_delta_violations_havest = delta_violations_havest;
+		 * 
+		 * moves.clear(); moves.add(new AssignMove(i, j)); } else if
+		 * (min_delta_max_violations_packing == delta_max_violations_packing &&
+		 * min_delta_violations_packing == delta_violations_packing &&
+		 * min_delta_violations_havest > delta_violations_havest) {
+		 * 
+		 * min_delta_violations_havest = delta_violations_havest;
+		 * 
+		 * moves.clear(); moves.add(new AssignMove(i, j)); } else if
+		 * (min_delta_max_violations_packing == delta_max_violations_packing &&
+		 * min_delta_violations_packing == delta_violations_packing &&
+		 * min_delta_violations_havest == delta_violations_havest) {
+		 * moves.add(new AssignMove(i, j)); } } }
+		 * 
+		 * // perform the move if (moves.size() <= 0) {
+		 * System.out.println(name() + "::search, NO MOVE --> BREAK"); break; }
+		 * else { AssignMove m = moves.get(R.nextInt(moves.size()));
+		 * 
+		 * int o = x[m.i]; int l1 = load[o]; int l2 = load[m.v];
+		 * 
+		 * assign(m.i, m.v);
+		 * 
+		 * System.out.println(name() + "::search, Step " + it + " -> move(" +
+		 * m.i + " q(" + qtt[m.i] + "  from " + o + " -> " + m.v +
+		 * "), old_load[" + o + "] = " + l1 + ", old_load[" + m.v + "] = " + l2
+		 * + ", load[" + o + "] = " + load[o] + ", load[" + m.v + "] = " +
+		 * load[m.v] + ", eval = " + eval());
+		 * 
+		 * getSolver().getLog().println( name() + "::search, Step " + it +
+		 * " -> move(" + m.i + " q(" + qtt[m.i] + "  from " + o + " -> " + m.v +
+		 * "), old_load[" + o + "] = " + l1 + ", old_load[" + m.v + "] = " + l2
+		 * + ", load[" + o + "] = " + load[o] + ", load[" + m.v + "] = " +
+		 * load[m.v] + ", eval = " + eval()); } }
+		 */
+
+		//searchReduceTotalPackingViolations(10000);
+		searchReduceTotalPackingViolationsAmountSugar(10000);
+		System.out
+				.println(name()
+						+ "::search, after FIRST searchReduceTotalPackingViolations solution: eval = "
+						+ eval());
+
+		if(true) return;
+		searchAggregateDates(1000);
+		System.out.println(name()
+				+ "::search, after searchAggregateDates solution: eval = "
+				+ eval());
+
+		searchReduceTotalPackingViolations(10000);
+		System.out
+				.println(name()
+						+ "::search, after SECOND searchReduceTotalPackingViolations solution: eval = "
+						+ eval());
+
+		/*
+		 * searchReduceTotalPackingViolations(10); System.out.println(name() +
+		 * "::search, after searchReduceTotalPackingViolations: "); print();
+		 * searchAggregateDates(10); System.out.println(name() +
+		 * "::search, after searchAggregateDates: "); print();
+		 * searchReduceTotalPackingViolations(10); System.out.println(name() +
+		 * "::search, after searchReduceTotalPackingViolations: "); print();
+		 * 
+		 * System.out.println(name() +
+		 * "::search END ------------------------------------------------------"
+		 * );
+		 */
 	}
 
 	private int sumQTT(ArrayList<Integer> I) {
@@ -686,7 +808,8 @@ public class ConstrainedMultiKnapsackSolver {
 	}
 
 	private boolean canMove(ArrayList<Integer> I, int d) {
-		if(I == null || I.size() == 0) return false;
+		if (I == null || I.size() == 0)
+			return false;
 		for (int i : I)
 			if (!acceptDate(i, d))
 				return false;
@@ -695,10 +818,45 @@ public class ConstrainedMultiKnapsackSolver {
 
 	public void searchReduceTotalPackingViolations(int maxIter) {
 		ArrayList<AssignMove> moves = new ArrayList<AssignMove>();
+		ArrayList<SwapMove> swap_moves = new ArrayList<SwapMove>();
+
 		for (int it = 0; it < maxIter; it++) {
 			moves.clear();
+			swap_moves.clear();
+
 			int min_delta_violations_packing = Integer.MAX_VALUE;
 			int min_delta_violations_havest = Integer.MAX_VALUE;
+			int min_swap_delta_violations_packing = Integer.MAX_VALUE;
+			int min_swap_delta_violations_havest = Integer.MAX_VALUE;
+
+			// explore swap moves
+			for (int i = 0; i < n - 1; i++) {
+				for (int j = i + 1; j < n; j++) {
+					if (acceptDate(i, x[j]) && acceptDate(j, x[i])) {
+						int delta_swap_violations_packing = getSwapDeltaPacking(
+								i, j);
+						int delta_swap_violations_havest = getSwapDeltaHavest(
+								i, j);
+						if (delta_swap_violations_packing < min_swap_delta_violations_packing) {
+							swap_moves.clear();
+							swap_moves.add(new SwapMove(i, j));
+							min_swap_delta_violations_packing = delta_swap_violations_packing;
+							min_swap_delta_violations_havest = delta_swap_violations_havest;
+
+						} else if (delta_swap_violations_packing == min_swap_delta_violations_packing
+								&& delta_swap_violations_havest < min_swap_delta_violations_havest) {
+							swap_moves.clear();
+							swap_moves.add(new SwapMove(i, j));
+							min_swap_delta_violations_havest = delta_swap_violations_havest;
+						} else if (delta_swap_violations_packing == min_swap_delta_violations_packing
+								&& delta_swap_violations_havest == min_swap_delta_violations_havest) {
+							swap_moves.add(new SwapMove(i, j));
+						}
+					}
+				}
+			}
+
+			// explore assign move
 			for (int i = 0; i < n; i++) {
 				for (int j = minDate[i]; j <= maxDate[i]; j++) {
 					if (preload[j] == maxLoad)
@@ -706,127 +864,338 @@ public class ConstrainedMultiKnapsackSolver {
 
 					int delta_violations_packing = getAssignDeltaPacking(i, j);
 					int delta_violations_havest = getAssignDeltaHavest(i, j);
-					
+
 					if (min_delta_violations_packing > delta_violations_packing) {
 						min_delta_violations_packing = delta_violations_packing;
 						min_delta_violations_havest = delta_violations_havest;
 						moves.clear();
 						moves.add(new AssignMove(i, j));
 					} else if (min_delta_violations_packing == delta_violations_packing
-							&& min_delta_violations_havest > delta_violations_havest
-							) {
+							&& min_delta_violations_havest > delta_violations_havest) {
 						min_delta_violations_havest = delta_violations_havest;
 						moves.clear();
-						
+
 						moves.add(new AssignMove(i, j));
 					} else if (min_delta_violations_packing == delta_violations_packing
-							&& min_delta_violations_havest == delta_violations_havest
-							) {
+							&& min_delta_violations_havest == delta_violations_havest) {
 						moves.add(new AssignMove(i, j));
 					}
 				}
 			}
 
 			// perform the move
-			if (moves.size() <= 0 || min_delta_violations_packing >= 0) {
-				System.out.println(name() + "::searchReduceTotalPackingViolations, NO MOVE --> BREAK");
+			// if (moves.size() <= 0 || min_delta_violations_packing >= 0) {
+			if (min_delta_violations_packing >= 0
+					&& min_delta_violations_havest >= 0
+					&& min_swap_delta_violations_packing >= 0
+					&& min_swap_delta_violations_havest >= 0
+					) {
+				System.out
+						.println(name()
+								+ "::searchReduceTotalPackingViolations, NO MOVE --> BREAK");
 				break;
 			} else {
-				AssignMove m = moves.get(R.nextInt(moves.size()));
+				if (min_delta_violations_packing < min_swap_delta_violations_packing
+						|| min_delta_violations_packing == min_swap_delta_violations_packing
+						&& min_delta_violations_havest < min_swap_delta_violations_havest) {
+				
+					AssignMove m = moves.get(R.nextInt(moves.size()));
 
-				int o = x[m.i];
-				int l1 = load[o];
-				int l2 = load[m.v];
+					int o = x[m.i];
+					int l1 = load[o];
+					int l2 = load[m.v];
 
-				assign(m.i, m.v);
+					assign(m.i, m.v);
 
-				System.out.println(name()
-						+ "::searchReducePackingViolations, Step " + it
-						+ " -> move(" + m.i + " q(" + qtt[m.i] + "  from " + o
-						+ " -> " + m.v + "), old_load[" + o + "] = " + l1
-						+ ", old_load[" + m.v + "] = " + l2 + ", load[" + o
-						+ "] = " + load[o] + ", load[" + m.v + "] = "
-						+ load[m.v] + ", eval = " + eval() + ", delta = "
-						+ min_delta_violations_packing);
+					System.out.println(name()
+							+ "::searchReducePackingViolations, Step " + it
+							+ " -> move(" + m.i + " q(" + qtt[m.i] + "  from " + o
+							+ " -> " + m.v + "), old_load[" + o + "] = " + l1
+							+ ", old_load[" + m.v + "] = " + l2 + ", load[" + o
+							+ "] = " + load[o] + ", load[" + m.v + "] = "
+							+ load[m.v] + ", eval = " + eval() + ", delta_violations_packing = "
+							+ min_delta_violations_packing + ", delta_violations_havest = " + min_delta_violations_havest);
 
-				if(getSolver().getDEBUG())
-					getSolver().getLog().println(
-						name() + "::searchReducePackingViolations, Step " + it
-								+ " -> move(" + m.i + " q(" + qtt[m.i]
-								+ "  from " + o + " -> " + m.v + "), old_load["
-								+ o + "] = " + l1 + ", old_load[" + m.v
-								+ "] = " + l2 + ", load[" + o + "] = "
-								+ load[o] + ", load[" + m.v + "] = "
-								+ load[m.v] + ", eval = " + eval()
-								+ ", delta = " + min_delta_violations_packing);
+					if (getSolver().getDEBUG())
+						getSolver().getLog().println(
+								name() + "::searchReducePackingViolations, Step "
+										+ it + " -> move(" + m.i + " q(" + qtt[m.i]
+										+ "  from " + o + " -> " + m.v
+										+ "), old_load[" + o + "] = " + l1
+										+ ", old_load[" + m.v + "] = " + l2
+										+ ", load[" + o + "] = " + load[o]
+										+ ", load[" + m.v + "] = " + load[m.v]
+										+ ", eval = " + eval() + ", delta_violations_packing = "
+										+ min_delta_violations_packing + ", delta_violations_havest = " + min_delta_violations_havest);
+				} else {
+					SwapMove m = swap_moves.get(R.nextInt(swap_moves.size()));
+					int pi = x[m.j];
+					int pj = x[m.i];
+					int old_load_i = load[x[m.i]];
+					int old_load_j = load[x[m.j]];
+					
+					assign(m.i, pi);
+					assign(m.j, pj);
+
+					System.out.println(name()
+							+ "::searchReducePackingViolations, Step " + it
+							+ " -> swap(" + m.i + " q(" + qtt[m.i] + ") at " + pj + "  , " + m.j
+							+ " " + qtt[m.j] + " at " + pi + "), old_load[" + pj + "] = " + old_load_i
+							+ ", old_load[" + pi + "] = " + old_load_j + ", load[" + pj
+							+ "] = " + load[pj] + ", load[" + pi + "] = "
+							+ load[pi] + ", eval = " + eval() + ", delta_swap_violations_packing = "
+							+ min_swap_delta_violations_packing + ", delta_swap_violations_havest = " + min_swap_delta_violations_havest);
+
+					if (getSolver().getDEBUG())
+						getSolver().getLog().println(name()
+								+ "::searchReducePackingViolations, Step " + it
+								+ " -> swap(" + m.i + " q(" + qtt[m.i] + ") at " + pj + "  , " + m.j
+								+ " " + qtt[m.j] + " at " + pi + "), old_load[" + pj + "] = " + old_load_i
+								+ ", old_load[" + pi + "] = " + old_load_j + ", load[" + pj
+								+ "] = " + load[pj] + ", load[" + pi + "] = "
+								+ load[pi] + ", eval = " + eval() + ", delta_swap_violations_packing = "
+								+ min_swap_delta_violations_packing + ", delta_swap_violations_havest = " + min_swap_delta_violations_havest);
+	
+				}
+
+			}
+		}
+
+	}
+
+	public void searchReduceTotalPackingViolationsAmountSugar(int maxIter) {
+		ArrayList<AssignMove> moves = new ArrayList<AssignMove>();
+		ArrayList<SwapMove> swap_moves = new ArrayList<SwapMove>();
+
+		for (int it = 0; it < maxIter; it++) {
+			moves.clear();
+			swap_moves.clear();
+
+			int min_delta_violations_packing = Integer.MAX_VALUE;
+			double min_delta_sugar_harvest = Integer.MAX_VALUE;
+			int min_swap_delta_violations_packing = Integer.MAX_VALUE;
+			double min_swap_delta_sugar_havest = Integer.MAX_VALUE;
+
+			// explore swap moves
+			for (int i = 0; i < n - 1; i++) {
+				for (int j = i + 1; j < n; j++) {
+					if (acceptDate(i, x[j]) && acceptDate(j, x[i])) {
+						int delta_swap_violations_packing = getSwapDeltaPacking(
+								i, j);
+						double delta_swap_sugar_harvest = getSwapDeltaAmountSugar(
+								i, j);
+						if (delta_swap_violations_packing < min_swap_delta_violations_packing) {
+							swap_moves.clear();
+							swap_moves.add(new SwapMove(i, j));
+							min_swap_delta_violations_packing = delta_swap_violations_packing;
+							min_swap_delta_sugar_havest = delta_swap_sugar_harvest;
+
+						} else if (delta_swap_violations_packing == min_swap_delta_violations_packing
+								&& delta_swap_sugar_harvest < min_swap_delta_sugar_havest) {
+							swap_moves.clear();
+							swap_moves.add(new SwapMove(i, j));
+							min_swap_delta_sugar_havest = delta_swap_sugar_harvest;
+						} else if (delta_swap_violations_packing == min_swap_delta_violations_packing
+								&& delta_swap_sugar_harvest == min_swap_delta_sugar_havest) {
+							swap_moves.add(new SwapMove(i, j));
+						}
+					}
+				}
+			}
+
+			// explore assign move
+			for (int i = 0; i < n; i++) {
+				for (int j = minDate[i]; j <= maxDate[i]; j++) {
+					if (preload[j] == maxLoad)
+						continue;// ignore full date (bin)
+
+					int delta_violations_packing = getAssignDeltaPacking(i, j);
+					double delta_sugar_havest = getAssignDeltaAmountSugar(i, j);
+
+					if (min_delta_violations_packing > delta_violations_packing) {
+						min_delta_violations_packing = delta_violations_packing;
+						min_delta_sugar_harvest = delta_sugar_havest;
+						moves.clear();
+						moves.add(new AssignMove(i, j));
+					} else if (min_delta_violations_packing == delta_violations_packing
+							&& min_delta_sugar_harvest > delta_sugar_havest) {
+						min_delta_sugar_harvest = delta_sugar_havest;
+						moves.clear();
+
+						moves.add(new AssignMove(i, j));
+					} else if (min_delta_violations_packing == delta_violations_packing
+							&& min_delta_sugar_harvest == delta_sugar_havest) {
+						moves.add(new AssignMove(i, j));
+					}
+				}
+			}
+
+			// perform the move
+			// if (moves.size() <= 0 || min_delta_violations_packing >= 0) {
+			if (min_delta_violations_packing >= EPS
+					&& min_delta_sugar_harvest >= EPS
+					&& min_swap_delta_violations_packing >= EPS
+					&& min_swap_delta_sugar_havest >= EPS
+					) {
+				System.out
+						.println(name()
+								+ "::searchReduceTotalPackingViolations, NO MOVE --> BREAK");
+				break;
+			} else {
+				if (min_delta_violations_packing < min_swap_delta_violations_packing
+						|| min_delta_violations_packing == min_swap_delta_violations_packing
+						&& min_delta_sugar_harvest < min_swap_delta_sugar_havest) {
+				
+					AssignMove m = moves.get(R.nextInt(moves.size()));
+
+					int o = x[m.i];
+					int l1 = load[o];
+					int l2 = load[m.v];
+
+					assign(m.i, m.v);
+
+					System.out.println(name()
+							+ "::searchReducePackingViolations, Step " + it
+							+ " -> move(" + m.i + " q(" + qtt[m.i] + "  from " + o
+							+ " -> " + m.v + "), old_load[" + o + "] = " + l1
+							+ ", old_load[" + m.v + "] = " + l2 + ", load[" + o
+							+ "] = " + load[o] + ", load[" + m.v + "] = "
+							+ load[m.v] + ", eval = " + eval() + ", delta_violations_packing = "
+							+ min_delta_violations_packing + ", delta_sugar_havest = " + min_delta_sugar_harvest);
+
+					if (getSolver().getDEBUG())
+						getSolver().getLog().println(
+								name() + "::searchReducePackingViolations, Step "
+										+ it + " -> move(" + m.i + " q(" + qtt[m.i]
+										+ "  from " + o + " -> " + m.v
+										+ "), old_load[" + o + "] = " + l1
+										+ ", old_load[" + m.v + "] = " + l2
+										+ ", load[" + o + "] = " + load[o]
+										+ ", load[" + m.v + "] = " + load[m.v]
+										+ ", eval = " + eval() + ", delta_violations_packing = "
+										+ min_delta_violations_packing + ", delta_sugar_havest = " + min_delta_sugar_harvest);
+				} else {
+					SwapMove m = swap_moves.get(R.nextInt(swap_moves.size()));
+					int pi = x[m.j];
+					int pj = x[m.i];
+					int old_load_i = load[x[m.i]];
+					int old_load_j = load[x[m.j]];
+					
+					assign(m.i, pi);
+					assign(m.j, pj);
+
+					System.out.println(name()
+							+ "::searchReducePackingViolations, Step " + it
+							+ " -> swap(" + m.i + " q(" + qtt[m.i] + ") at " + pj + "  , " + m.j
+							+ " " + qtt[m.j] + " at " + pi + "), old_load[" + pj + "] = " + old_load_i
+							+ ", old_load[" + pi + "] = " + old_load_j + ", load[" + pj
+							+ "] = " + load[pj] + ", load[" + pi + "] = "
+							+ load[pi] + ", eval = " + eval() + ", delta_swap_violations_packing = "
+							+ min_swap_delta_violations_packing + ", delta_swap_sugar_havest = " + 
+							min_swap_delta_sugar_havest);
+
+					if (getSolver().getDEBUG())
+						getSolver().getLog().println(name()
+								+ "::searchReducePackingViolations, Step " + it
+								+ " -> swap(" + m.i + " q(" + qtt[m.i] + ") at " + pj + "  , " + m.j
+								+ " " + qtt[m.j] + " at " + pi + "), old_load[" + pj + "] = " + old_load_i
+								+ ", old_load[" + pi + "] = " + old_load_j + ", load[" + pj
+								+ "] = " + load[pj] + ", load[" + pi + "] = "
+								+ load[pi] + ", eval = " + eval() + ", delta_swap_violations_packing = "
+								+ min_swap_delta_violations_packing + ", delta_swap_sugar_havest = " + 
+								min_swap_delta_sugar_havest);
+	
+				}
+
 			}
 		}
 
 	}
 
 	
-	
 	public void searchAggregateDates(int maxIter) {
-		//maxIter = 1;
+		// maxIter = 1;
 		for (int it = 0; it < maxIter; it++) {
 			int minDelta = Integer.MAX_VALUE;
 			int min_delta_havest = Integer.MAX_VALUE;
-			
+
 			AggregateDatesMove sel_move = null;
 			int sel_date = -1;
 			for (int d = startDate; d <= endDate; d++) {
-				//System.out.println(name() + "::searchAggregateDates, NAME = " + name + ", it = " + it + "/" + maxIter + ", d = " + d + ", startEvaluate");
-				
+				// System.out.println(name() + "::searchAggregateDates, NAME = "
+				// + name + ", it = " + it + "/" + maxIter + ", d = " + d +
+				// ", startEvaluate");
+
 				AggregateDatesMove m = evaluateAggregateMove(d);
-				
-				//if(d >= 550 && d <= 560 )
-				//System.out.println(name() + "::searchAggregateDates, NAME = " + name + ", it = " + it + "/" + maxIter + ", d = " + d + ", delta = " + m.getDelta() + 
-				//		", delta_havest = " + m.getDelta_havest() + ", minDelta = " + minDelta + ", min_delta_havest = " + 
-				//		min_delta_havest + ", sz = " + m.getDates().size());
-				if(m.getDates().size() > 0)if (minDelta > m.getDelta() ||
-						minDelta == m.getDelta() && min_delta_havest > m.getDelta_havest()
-						) {
-					minDelta = m.getDelta();
-					min_delta_havest = m.getDelta_havest();
-					sel_move = m;
-					sel_date = d;
-					System.out.println(name() + "::searchAggregateDates, it = " + it + "/" + maxIter + ", UPDATE sel_date = " + d + 
-					
-							", minDelta = " + minDelta + ", sel_dates = " + sel_move.getDates().size());
-				}
-			}
-			if(sel_move != null){
-				if(minDelta >= 0){
-					System.out.println(name() + "::searchAggregateDates, no improvement, BREAK");
-					break;
-				}else{
-					//getSolver().getLog().println(name() + "::searchAggregateDates, sel_date = " + sel_date + 
-					//		", load[" + sel_date + "] = " + load[sel_date] + ", dates = ");
-					
-					for(int d : sel_move.getDates()){
-						ArrayList<Integer> I = getItemsOfBin(d);
-						//getSolver().getLog().print(" date[" + d + ", load-" + load[d] + "]: ");
-						for(int i: I){
-							//getSolver().getLog().print("(" + i + ", qtt[" + qtt[i] + "]) ");
-							assign(i,sel_date);
-						}
-						//getSolver().getLog().println();
+
+				// if(d >= 550 && d <= 560 )
+				// System.out.println(name() + "::searchAggregateDates, NAME = "
+				// + name + ", it = " + it + "/" + maxIter + ", d = " + d +
+				// ", delta = " + m.getDelta() +
+				// ", delta_havest = " + m.getDelta_havest() + ", minDelta = " +
+				// minDelta + ", min_delta_havest = " +
+				// min_delta_havest + ", sz = " + m.getDates().size());
+				if (m.getDates().size() > 0)
+					if (minDelta > m.getDelta() || minDelta == m.getDelta()
+							&& min_delta_havest > m.getDelta_havest()) {
+						minDelta = m.getDelta();
+						min_delta_havest = m.getDelta_havest();
+						sel_move = m;
+						sel_date = d;
+						System.out.println(name()
+								+ "::searchAggregateDates, it = " + it + "/"
+								+ maxIter + ", UPDATE sel_date = " + d +
+
+								", minDelta = " + minDelta + ", sel_dates = "
+								+ sel_move.getDates().size());
 					}
-					
-					if(getSolver().getDEBUG())
-						getSolver().getLog().println(name() + "::searchAggregateDates, iter " + it + ", move aggregate, eval = " + eval() + 
-							", load[" + sel_date + "] = " + load[sel_date] + ", delta = " + minDelta + ", dates.sz = " + sel_move.getDates().size());
-				
-					System.out.println(name() + "::searchAggregateDates, iter " + it + ", move aggregate, eval = " + eval() + 
-							", load[" + sel_date + "] = " + load[sel_date] + ", delta = " + minDelta + ", dates.sz = " + sel_move.getDates().size());
-				
+			}
+			if (sel_move != null) {
+				if (minDelta >= 0) {
+					System.out.println(name()
+							+ "::searchAggregateDates, no improvement, BREAK");
+					break;
+				} else {
+					// getSolver().getLog().println(name() +
+					// "::searchAggregateDates, sel_date = " + sel_date +
+					// ", load[" + sel_date + "] = " + load[sel_date] +
+					// ", dates = ");
+
+					for (int d : sel_move.getDates()) {
+						ArrayList<Integer> I = getItemsOfBin(d);
+						// getSolver().getLog().print(" date[" + d + ", load-" +
+						// load[d] + "]: ");
+						for (int i : I) {
+							// getSolver().getLog().print("(" + i + ", qtt[" +
+							// qtt[i] + "]) ");
+							assign(i, sel_date);
+						}
+						// getSolver().getLog().println();
+					}
+
+					if (getSolver().getDEBUG())
+						getSolver().getLog().println(
+								name() + "::searchAggregateDates, iter " + it
+										+ ", move aggregate, eval = " + eval()
+										+ ", load[" + sel_date + "] = "
+										+ load[sel_date] + ", delta = "
+										+ minDelta + ", dates.sz = "
+										+ sel_move.getDates().size());
+
+					System.out.println(name() + "::searchAggregateDates, iter "
+							+ it + ", move aggregate, eval = " + eval()
+							+ ", load[" + sel_date + "] = " + load[sel_date]
+							+ ", delta = " + minDelta + ", dates.sz = "
+							+ sel_move.getDates().size());
+
 				}
-			}else{
-				System.out.println(name() + "::searchAggregateDates, sel_move = NULL, BREAK");
+			} else {
+				System.out.println(name()
+						+ "::searchAggregateDates, sel_move = NULL, BREAK");
 				break;
 			}
-			
-			//break;
+
+			// break;
 		}
 	}
 
@@ -841,17 +1210,16 @@ public class ConstrainedMultiKnapsackSolver {
 		int dl = d - 1;
 		int dr = d + 1;
 		int reducedViolations = 0;
-		
+
 		/*
-		maxDeltaDay = 0;
-		for (int i = 0; i < getSolver().getInput().getFields().length; i++) {
-			int del = getSolver().getInput().getFields()[i].getDeltaDays();
-			maxDeltaDay = maxDeltaDay > del ? maxDeltaDay : del;
-		}
-		*/
-		
+		 * maxDeltaDay = 0; for (int i = 0; i <
+		 * getSolver().getInput().getFields().length; i++) { int del =
+		 * getSolver().getInput().getFields()[i].getDeltaDays(); maxDeltaDay =
+		 * maxDeltaDay > del ? maxDeltaDay : del; }
+		 */
+
 		maxDeltaDay = getSolver().getInput().getPlantStandard().getMaxRange();
-		
+
 		ArrayList<Integer> agg_dates = new ArrayList<Integer>();
 		ArrayList<Integer> items = new ArrayList<Integer>();
 		boolean hasLeft = true;
@@ -866,15 +1234,16 @@ public class ConstrainedMultiKnapsackSolver {
 							loadd += l;
 							reducedViolations += (minLoad - l);
 							agg_dates.add(dl);
-							
-							for(int i: I) items.add(i);
-							
+
+							for (int i : I)
+								items.add(i);
+
 							if (loadd >= minLoad)
 								break;
 						}
 					}
 					dl--;
-				}else{
+				} else {
 					hasLeft = false;
 				}
 			} else {// find fields in successing dates
@@ -886,42 +1255,43 @@ public class ConstrainedMultiKnapsackSolver {
 							loadd += l;
 							reducedViolations += (minLoad - l);
 							agg_dates.add(dr);
-							
-							for(int i: I) items.add(i);
-							
+
+							for (int i : I)
+								items.add(i);
+
 							if (loadd >= minLoad)
 								break;
 						}
 					}
 					dr++;
-				}else{
+				} else {
 					hasRight = false;
 				}
 			}
 			turn = 1 - turn;
 		}
 
-		
 		int vd = violations_packing(loadd);
 
 		int delta = (vd - reducedViolations - violations_packing[d]);
-		
+
 		// compute delta_violations_havest
 		int delta_violations_havest = 0;
-		for(int i: items){
+		for (int i : items) {
 			int di = getAssignDeltaHavest(i, d);
 			delta_violations_havest += di;
-			//System.out.println(name() + "::getDeltaAggregate, violations_havest = " + violations_havest[i] +
-			//		", delta_violations_havest = " + delta_violations_havest);
+			// System.out.println(name() +
+			// "::getDeltaAggregate, violations_havest = " +
+			// violations_havest[i] +
+			// ", delta_violations_havest = " + delta_violations_havest);
 		}
-		
-		
+
 		return new AggregateDatesMove(agg_dates, delta, delta_violations_havest);
 	}
 
 	public String eval() {
 		return "(" + max_violations_packing + "," + total_violations_packing
-				+ "," + total_violations_havest + ")";
+				+ "," + total_violations_havest + "," + total_amount_sugar_gained + ")";
 	}
 
 	public String name() {
@@ -930,22 +1300,22 @@ public class ConstrainedMultiKnapsackSolver {
 
 	public static void main(String[] args) {
 		/*
-		int[] qtt = new int[] { 3, 7, 9, 2, 6, 4, 4, 8, 5, 10, 3, 12, 6, 6, 7 };
-		int minLoad = 10;
-		int maxLoad = 18;
-		int[] minDate = new int[] { 2, 5, 0, 2, 6, 0, 0, 3, 3, 2, 5, 6, 5, 4, 0 };
-		int[] maxDate = new int[] { 4, 7, 1, 5, 8, 2, 3, 6, 6, 4, 7, 8, 8, 6, 3 };
-		int[] preload = new int[] { 0, 0, 18, 0, 18, 0, 0, 18, 0 };
-
-		ConstrainedMultiKnapsackSolver solver = new ConstrainedMultiKnapsackSolver(
-				null);
-		solver.solve(preload, qtt, minDate, maxDate, minLoad, maxLoad);
-		*/
-		int[] q = new int[]{30, 5, 45, 20, 10, 35};
+		 * int[] qtt = new int[] { 3, 7, 9, 2, 6, 4, 4, 8, 5, 10, 3, 12, 6, 6, 7
+		 * }; int minLoad = 10; int maxLoad = 18; int[] minDate = new int[] { 2,
+		 * 5, 0, 2, 6, 0, 0, 3, 3, 2, 5, 6, 5, 4, 0 }; int[] maxDate = new int[]
+		 * { 4, 7, 1, 5, 8, 2, 3, 6, 6, 4, 7, 8, 8, 6, 3 }; int[] preload = new
+		 * int[] { 0, 0, 18, 0, 18, 0, 0, 18, 0 };
+		 * 
+		 * ConstrainedMultiKnapsackSolver solver = new
+		 * ConstrainedMultiKnapsackSolver( null); solver.solve(preload, qtt,
+		 * minDate, maxDate, minLoad, maxLoad);
+		 */
+		int[] q = new int[] { 30, 5, 45, 20, 10, 35 };
 		int maxQ = 130;
-		ConstrainedMultiKnapsackSolver S = new ConstrainedMultiKnapsackSolver(null);
+		ConstrainedMultiKnapsackSolver S = new ConstrainedMultiKnapsackSolver(
+				null);
 		double[] sq = S.selectQuantity(q, 100, maxQ);
-		for(int i = 0; i < sq.length; i++)
+		for (int i = 0; i < sq.length; i++)
 			System.out.println(sq[i] + " ");
 	}
 }

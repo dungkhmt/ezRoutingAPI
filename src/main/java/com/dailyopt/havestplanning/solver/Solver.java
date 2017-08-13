@@ -73,7 +73,7 @@ public class Solver {
 	protected Date endHarvestDate;
 
 	// end of computed statistic information
-	protected boolean DEBUG = false;
+	protected boolean DEBUG = true;
 	
 	protected PrintWriter log = null;
 	public String name(){
@@ -177,7 +177,7 @@ public class Solver {
 		//}
 		numberOfDatesInPlan = Utility.distance(startHarvestDate, endHarvestDate);
 		numberOfFieldsInPlan = fields.length;
-		numberOfDatesInPlantStandard = input.getPlantStandard().getMaxRange();
+		numberOfDatesInPlantStandard = input.getPlantStandard().getMaxRange() + 1;
 		System.out.println(name() + "::mapDates, numberOfDatesInPlan = " + numberOfDatesInPlan);
 		//System.exit(-1);
 		

@@ -446,7 +446,7 @@ public class HavestPlanningController {
 
 			HavestPlanningSolution sol = solver.solve(input);
 			String json = gson.toJson(sol);
-			System.out.println(name() + "::compute, RETURN " + json);
+			//System.out.println(name() + "::compute, RETURN " + json);
 			
 			
 			path = ROOT + "/harvest-plan-solution.json";
