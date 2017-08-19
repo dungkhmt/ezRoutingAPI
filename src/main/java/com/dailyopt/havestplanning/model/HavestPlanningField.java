@@ -5,8 +5,16 @@ import java.util.Date;
 public class HavestPlanningField {
 	private Field field;
 	private String expected_havest_date;
-	
+	private int havestQuantity;
 	private int days_late;
+	
+	
+	public int getHavestQuantity() {
+		return havestQuantity;
+	}
+	public void setHavestQuantity(int havestQuantity) {
+		this.havestQuantity = havestQuantity;
+	}
 	public Field getField() {
 		return field;
 	}
@@ -25,11 +33,13 @@ public class HavestPlanningField {
 	public void setDays_late(int days_late) {
 		this.days_late = days_late;
 	}
+
 	public HavestPlanningField(Field field, String expected_havest_date,
-			int days_late) {
+			int havestQuantity, int days_late) {
 		super();
 		this.field = field;
 		this.expected_havest_date = expected_havest_date;
+		this.havestQuantity = havestQuantity;
 		this.days_late = days_late;
 	}
 	public HavestPlanningField() {

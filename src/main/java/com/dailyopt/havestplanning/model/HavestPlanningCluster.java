@@ -4,9 +4,11 @@ import java.util.Date;
 
 public class HavestPlanningCluster {
 	private String date;
-	private HavestPlanningField[] fields;
 	private int quantity;
 	private int numberOfFields;
+	private HavestPlanningField[] fields;
+	
+	
 	public String getDate() {
 		return date;
 	}
@@ -44,7 +46,18 @@ public class HavestPlanningCluster {
 		// TODO Auto-generated constructor stub
 	}
 	
-	
+	// additional methods
+	public void concate(HavestPlanningCluster C){
+		this.quantity = this.quantity + C.getQuantity();
+		this.numberOfFields = this.numberOfFields + C.getNumberOfFields();
+		HavestPlanningField[] newFields = new HavestPlanningField[fields.length + C.getFields().length];
+		for(int i = 0; i < fields.length; i++)
+			newFields[i] = fields[i];
+		for(int i = 0; i < C.getFields().length; i++){
+			newFields[i + fields.length] = C.getFields()[i];
+		}
+		fields = newFields;
+	}
 	
 	
 }

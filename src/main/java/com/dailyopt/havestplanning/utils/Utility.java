@@ -6,6 +6,16 @@ import java.util.Date;
 import com.dailyopt.havestplanning.model.QualityFunction;
 
 public class Utility {
+
+	public static double getInducedValue(int x1, double y1, int x2, double y2, int x){
+		if(x1 > x2){
+			int tmp = x1; x1 = x2; x2 = tmp;
+			double tmpf = y1; y1 = y2; y2 = tmpf;
+		}
+		if(x <= x1) return y1;
+		if(x >= x2) return y2;
+		return y1 + (y2-y1)*(x-x1)/(x2-x1);
+	}
 	
 	public static double eval(QualityFunction f, int days_late){
 		days_late = Math.abs(days_late);
@@ -28,6 +38,11 @@ public class Utility {
 		cal.add(Calendar.DATE, nbDays);
 		return cal.getTime();
 	}
+	public static int distance(String s_date1, String s_date2){
+		Date d1 = DateTimeUtils.convertYYYYMMDD2Date(s_date1);
+		Date d2 = DateTimeUtils.convertYYYYMMDD2Date(s_date2);
+		return distance(d1,d2);
+	}
 	public static int distance(Date d1, Date d2){
 		int d = 0;
 		if(d1.compareTo(d2) > 0){
@@ -48,5 +63,9 @@ public class Utility {
 	}
 	public static String dateMonthYear(Date d){
 		return d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getYear();
+	}
+	
+	public static void main(String[] args){
+		System.out.println(distance("2015-12-22","2015-12-21"));
 	}
 }
