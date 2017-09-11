@@ -109,7 +109,7 @@ public class ConstrainedMultiKnapsackSolver {
 	}
 	public LeveledHavestPlanSolution solve(int[] preload, int[] qtt,
 			int[] minDate, int[] maxDate, int[] expected_date, int minLoad,
-			int maxLoad) {
+			int maxLoad, int timeLimit) {
 
 		/*
 		 * m = preload.length: number of bins (days), bins are numbered 0, 1,
@@ -153,7 +153,7 @@ public class ConstrainedMultiKnapsackSolver {
 				.println(name() + "::solve start.... n = " + n + ", m = " + m);
 
 		stateModel();
-		search(0);
+		search(timeLimit);
 
 		if (getSolver().getDEBUG())
 			getSolver().getLog().println("SOLUTION:");
@@ -676,8 +676,11 @@ public class ConstrainedMultiKnapsackSolver {
 		}
 	}
 
-	public void search(int maxIter) {
-		int[] sol = cbls(120,100000);
+	public void search(int timeLimit) {
+		int timeLimit1 = timeLimit/2 < 120 ? timeLimit : 120;
+		int timeLimit2 = timeLimit - timeLimit1;
+		
+		int[] sol = cbls(timeLimit1,100000);
 		for(int i = 0; i < n; i++) x[i] = sol[i];
 		initPropagate();
 		
@@ -768,7 +771,8 @@ public class ConstrainedMultiKnapsackSolver {
 		 */
 
 		//searchReduceTotalPackingViolations(10000);
-		searchReduceTotalPackingViolationsAmountSugar(10000);
+		searchReduceTotalPackingViolationsAmountSugar(timeLimit2, 10000);
+		
 		System.out
 				.println(name()
 						+ "::search, after FIRST searchReduceTotalPackingViolations solution: eval = "
@@ -963,11 +967,21 @@ public class ConstrainedMultiKnapsackSolver {
 
 	}
 
-	public void searchReduceTotalPackingViolationsAmountSugar(int maxIter) {
+	public void searchReduceTotalPackingViolationsAmountSugar(int timeLimit, int maxIter) {
 		ArrayList<AssignMove> moves = new ArrayList<AssignMove>();
 		ArrayList<SwapMove> swap_moves = new ArrayList<SwapMove>();
-
+		
+		timeLimit = timeLimit*1000;
+		double t0 = System.currentTimeMillis();
+		
 		for (int it = 0; it < maxIter; it++) {
+			double t = System.currentTimeMillis() - t0;
+			if(t > timeLimit) break;
+			
+			System.out.println(name() + "::searchReduceTotalPackingViolationsAmountSugar, time = " + 
+			t + " timeLimit = " + timeLimit);
+			
+			
 			moves.clear();
 			swap_moves.clear();
 

@@ -85,7 +85,7 @@ public class SolverMultiStepSplitFields extends Solver {
 	}
 
 	
-	public void search() {
+	public void search(int maxNbSteps, int timeLimit) {
 		
 		
 		int n = input.getFields().length;
@@ -184,7 +184,7 @@ public class SolverMultiStepSplitFields extends Solver {
 		for(int i = 0; i < b.length; i++) b[i] = 0;
 		
 		int nbSteps = 0;
-		while (true) {
+		while (nbSteps < maxNbSteps) {
 			// check feasibility for before solving
 			boolean feasible = true;
 			int nbEmptyFields = 0;
@@ -212,7 +212,7 @@ public class SolverMultiStepSplitFields extends Solver {
 			S.name = "ConstraintMultiKnapsackSolver[" + (solutions.size() + 1) + "]";
 			// solve the problem
 			LeveledHavestPlanSolution s = S.solve(preload, qtt, minDate,
-					maxDate, expected_dates, minLoad, maxLoad);
+					maxDate, expected_dates, minLoad, maxLoad, timeLimit);
 			solutions.add(s);
 			//System.out.println(name() + "::search, solutions[" + solutions.size() + "] = " + s.toString());
 			//,System.out.println(name() + "*******************************************************************************");
@@ -235,8 +235,8 @@ public class SolverMultiStepSplitFields extends Solver {
 					}
 				}
 			}
-			
-			if(solutions.size() >= 1) break;
+			nbSteps++;
+			//if(solutions.size() >= 1) break;
 			
 			
 		}
@@ -247,7 +247,7 @@ public class SolverMultiStepSplitFields extends Solver {
 		
 	}
 
-	public HavestPlanningSolution solve(HavestPlanningInput input) {
+	public HavestPlanningSolution solve(HavestPlanningInput input, int maxNbSteps, int timeLimit) {
 		initLog();
 
 		this.input = input;
@@ -281,7 +281,7 @@ public class SolverMultiStepSplitFields extends Solver {
 		//
 		stateModel();
 
-		search();
+		search(maxNbSteps, timeLimit);
 
 		finalize();
 		System.out.println("finished, number of levels = " + solutions.size());

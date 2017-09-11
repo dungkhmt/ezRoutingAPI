@@ -33,6 +33,7 @@ import com.dailyopt.havestplanning.model.ReturnMachineSetting;
 import com.dailyopt.havestplanning.model.ReturnPlantStandard;
 import com.dailyopt.havestplanning.model.ReturnSetPlantStandard;
 import com.dailyopt.havestplanning.model.ReturnStart;
+import com.dailyopt.havestplanning.model.RunParameters;
 import com.dailyopt.havestplanning.solver.Solver;
 import com.dailyopt.havestplanning.solver.multistepsplitfield.SolutionChecker;
 import com.dailyopt.havestplanning.solver.multistepsplitfield.SolverMultiStepSplitFields;
@@ -418,7 +419,7 @@ public class HavestPlanningController {
 
 	@RequestMapping(value = "/havest-plan/compute", method = RequestMethod.POST)
 	public HavestPlanningSolution compute(HttpServletRequest request
-	// , @RequestBody HavestPlanningInput input
+	 , @RequestBody RunParameters param
 	) {
 		String path = request.getServletContext().getRealPath(
 				"ezRoutingAPIROOT");
@@ -427,6 +428,8 @@ public class HavestPlanningController {
 		String setPlatStandardFilename = ROOT + "/plant-standard.json";
 		String machineSettingFilename = ROOT + "/machine-setting.json";
 
+		int timeLimit = param.getTimeLimit();
+		int maxNbSteps = param.getNbSteps();
 		Gson gson = new Gson();
 		try {
 			FieldList fieldList = gson.fromJson(new FileReader(fieldFilename),
@@ -444,7 +447,7 @@ public class HavestPlanningController {
 			if (input.getPlantStandard() == null)
 				input.initDefaultPlantStandard();
 
-			HavestPlanningSolution sol = solver.solve(input);
+			HavestPlanningSolution sol = solver.solve(input, maxNbSteps, timeLimit);
 			String json = gson.toJson(sol);
 			//System.out.println(name() + "::compute, RETURN " + json);
 			
