@@ -427,6 +427,16 @@ public class HavestPlanningController {
 		String fieldFilename = ROOT + "/fields.json";
 		String setPlatStandardFilename = ROOT + "/plant-standard.json";
 		String machineSettingFilename = ROOT + "/machine-setting.json";
+		// reset harvest-plan-solution.json
+		path = ROOT + "/harvest-plan-solution.json";
+
+		try {
+			PrintWriter out = new PrintWriter(path);
+			out.print("{}");
+			out.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 
 		int timeLimit = param.getTimeLimit();
 		int maxNbSteps = param.getNbSteps();
