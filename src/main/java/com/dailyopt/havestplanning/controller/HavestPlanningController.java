@@ -457,6 +457,12 @@ public class HavestPlanningController {
 			if (input.getPlantStandard() == null)
 				input.initDefaultPlantStandard();
 
+			String des = input.checkConsistency(); 
+			if(!des.equals("OK")){
+				HavestPlanningSolution ret_sol = new HavestPlanningSolution();
+				ret_sol.setDescription(des);
+				return ret_sol;
+			}
 			HavestPlanningSolution sol = solver.solve(input, maxNbSteps, timeLimit);
 			String json = gson.toJson(sol);
 			//System.out.println(name() + "::compute, RETURN " + json);

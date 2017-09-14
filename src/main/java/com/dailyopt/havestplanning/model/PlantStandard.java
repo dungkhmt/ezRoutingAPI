@@ -45,6 +45,15 @@ public class PlantStandard {
 		return minPeriod;
 	}
 
+	public boolean find(String category, String plantType){
+		for(int i = 0; i < plantStandards.length; i++){
+			PlantStandardElement e = plantStandards[i];
+			if(e.getCategory().equals(category) && e.getPlantType().equals(plantType)){
+				return true;
+			}
+		}
+		return false;
+	}
 	public int getMaxPeriod(String category, String plantType){
 		int maxPeriod = 1-Integer.MAX_VALUE;
 		for(int i = 0; i < plantStandards.length; i++){

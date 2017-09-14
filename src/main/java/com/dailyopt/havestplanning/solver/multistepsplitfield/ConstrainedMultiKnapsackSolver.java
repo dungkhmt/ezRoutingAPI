@@ -487,12 +487,17 @@ public class ConstrainedMultiKnapsackSolver {
 
 	public void initSolutionExpectedDate() {
 		for (int i = 0; i < n; i++) {
+			System.out.println("minDate, maxDate [" + i + "] = " + minDate[i] + ", " + maxDate[i] + 
+					", preload.length = " + preload.length + ", category = " + getSolver().getInput().getFields()[i].getCategory() + 
+					", plantType = " + getSolver().getInput().getFields()[i].getPlantType());
+			
 			// assign(i,expectedHavestDate[i]);
 			HashSet<Integer> S = new HashSet<Integer>();
-			for (int j = minDate[i]; j <= maxDate[i]; j++)
+			for (int j = minDate[i]; j <= maxDate[i]; j++){
 				if (preload[j] < maxLoad)
 					S.add(j);
-
+			}
+			
 			int minD = Integer.MAX_VALUE;
 			int sel_j = -1;
 			for (int j : S) {

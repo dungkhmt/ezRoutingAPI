@@ -100,8 +100,9 @@ public class Solver {
 			Date mDate = DateTimeUtils.convertYYYYMMDD2Date(F.getPlant_date());
 			
 			fields[i] = new MField(F.getCode(), F.getDistrictCode(), 
-					F.getOwnerCode(), F.getArea(), F.getPlant_date(), F.getQuantity(), 
-					F.getDeltaDays(), mDate);
+					F.getOwnerCode(), F.getArea(), F.getPlant_date(), F.getQuantity(),  
+					
+					F.getDeltaDays(), F.getPlantType(), F.getCategory(), mDate);
 			
 		}
 		
