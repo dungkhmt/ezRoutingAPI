@@ -320,6 +320,7 @@ public class SolverMultiStepSplitFields extends Solver {
 					// Utility.next(date_sequence[i],DURATION);
 					Date currentDate = date_sequence[i];
 
+					double sugarQuantityOfCluster = 0;
 					HavestPlanningField[] HPF = new HavestPlanningField[F
 							.size()];
 					int qtt = 0;
@@ -340,9 +341,7 @@ public class SolverMultiStepSplitFields extends Solver {
 						// d = Utility.next(d,DURATION);
 						int days_late = Utility.distance(expected_havest_date,
 								d);
-						HPF[j] = new HavestPlanningField(f,
-								expected_havest_date_str, sq[fid], days_late);
-
+						
 						
 						if(days_late < 0){
 							if(maxDaysEarly < (-days_late)) maxDaysEarly = -days_late;
@@ -358,16 +357,24 @@ public class SolverMultiStepSplitFields extends Solver {
 
 						// quality += Utility.eval(input.getQualityFunction(),
 						// days_late);
-						quality += sq[fid]
+						double sugarQuantity =  sq[fid]
 								* input.getPlantStandard().evaluateQuality(
 										f.getCategory(), f.getPlantType(),
 										period);
-
+						
+						//HPF[j].setSugarQuantity(sugarQuantity);
+						quality += sugarQuantity;
+						sugarQuantityOfCluster += sugarQuantity;
+						HPF[j] = new HavestPlanningField(f,
+								expected_havest_date_str, sq[fid], days_late, sugarQuantity);
+ 
 						qtt += sq[fid];//f.getQuantity();
 					}
 					String date = DateTimeUtils.date2YYYYMMDD(currentDate);
+					//HavestPlanningCluster Ck = new HavestPlanningCluster(date,
+					//		HPF, qtt, F.size(), sugarQuantityOfCluster);
 					HavestPlanningCluster Ck = new HavestPlanningCluster(date,
-							HPF, qtt, F.size());
+							qtt, F.size(), HPF, sugarQuantityOfCluster);
 					
 					HavestPlanningCluster Ci = mDate2Cluster.get(i);
 					if(Ci == null){
