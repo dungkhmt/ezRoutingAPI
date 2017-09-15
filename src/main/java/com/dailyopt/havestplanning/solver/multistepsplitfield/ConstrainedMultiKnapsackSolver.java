@@ -783,13 +783,15 @@ public class ConstrainedMultiKnapsackSolver {
 						+ "::search, after FIRST searchReduceTotalPackingViolations solution: eval = "
 						+ eval());
 
-		if(true) return;
+		//if(true) return;
 		searchAggregateDates(1000);
 		System.out.println(name()
 				+ "::search, after searchAggregateDates solution: eval = "
 				+ eval());
 
-		searchReduceTotalPackingViolations(10000);
+		//searchReduceTotalPackingViolations(10000);
+		searchReduceTotalPackingViolationsAmountSugar(timeLimit2, 10000);
+		
 		System.out
 				.println(name()
 						+ "::search, after SECOND searchReduceTotalPackingViolations solution: eval = "
