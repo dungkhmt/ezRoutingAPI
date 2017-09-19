@@ -48,6 +48,7 @@ public class HavestPlanningController {
 		return "HavestPlanningController";
 	}
 
+	/*
 	@RequestMapping(value = "/havest-plan", method = RequestMethod.POST)
 	public HavestPlanningSolution computeHavestPlanningSolution(
 			HttpServletRequest request, @RequestBody HavestPlanningInput input) {
@@ -63,7 +64,7 @@ public class HavestPlanningController {
 
 		return solver.solve(input);
 	}
-
+	*/
 	@RequestMapping(value = "/havest-plan/start", method = RequestMethod.POST)
 	public ReturnStart start(HttpServletRequest request,
 			@RequestBody HavestPlanningInput input) {

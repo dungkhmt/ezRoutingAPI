@@ -131,7 +131,7 @@ public class SolverMultiStepSplitFields extends Solver {
 							f.getPlantType());
 			
 		}
-
+		System.out.println(name() + "::search, n = " + n + ", m = " + m);
 		double[][] p = new double[n][m];
 		for(int i = 0; i < n; i++){
 			Date date = DateTimeUtils.convertYYYYMMDD2Date(fields[i].getPlant_date());
@@ -254,6 +254,16 @@ public class SolverMultiStepSplitFields extends Solver {
 		// this.DURATION = input.getGrowthDuration();
 		analyze();
 		mapDates();
+		
+		if(date_sequence.length > 1000){
+			String des = "field " + fields[0].getCode() + " with plant_date = " + fields[0].getPlant_date() + 
+					", field " + fields[fields.length-1].getCode() + " with plant_date = " + 
+					fields[fields.length-1].getPlant_date() + ", maxPeriod = " + input.getPlantStandard().getMaxPeriod();
+			System.out.println(name() + "::solve, EXCEPTION des = " + des);
+			HavestPlanningSolution sol = new HavestPlanningSolution();
+			sol.setDescription(des);
+			return sol;
+		}
 		
 		System.out.println(name() + "::solve date_sequence = "
 				+ date_sequence.length + " ...");

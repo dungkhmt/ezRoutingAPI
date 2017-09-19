@@ -106,6 +106,16 @@ public class Solver {
 			
 		}
 		
+		// sorting fields
+		for(int i = 0; i < fields.length-1; i++){
+			for(int j = i+1; j < fields.length; j++){
+				if(fields[i].getmDate().compareTo(fields[j].getmDate()) > 0){
+					MField tmp = fields[i]; fields[i] = fields[j]; fields[j] = tmp;
+				}				
+			}
+		}
+		
+		
 		mDate2Quantity = new HashMap<Date, Integer>();
 		mDate2ListFields = new HashMap<Date, ArrayList<Integer>>();
 
@@ -289,7 +299,7 @@ public class Solver {
 		if(s < min) s = min;
 		return s;
 	}
-
+	/*
 	public HavestPlanningSolution solve(HavestPlanningInput input){
 		this.input = input;
 		//this.DURATION = input.getGrowthDuration();
@@ -421,7 +431,7 @@ public class Solver {
 		HavestPlanningSolution sol = new HavestPlanningSolution(arr_clusters, quality);
 		return sol;
 	}
-	
+	*/
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
