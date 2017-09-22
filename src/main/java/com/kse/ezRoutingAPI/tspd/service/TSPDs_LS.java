@@ -46,8 +46,6 @@ public class TSPDs_LS {
 		ArrayList<Point> customerPoints=tspds.getClientPoints();
 		boolean d[]= new boolean[tour.getTD().getTruck_tour().size()+1];
 		//int dlr[]= new int[customerPoints.size()];
-		
-		
 		for(int i=0;i<d.length;i++) d[i]=true;
 		while (true){
 			ArrayList<Point> truckTourList=tour.getTD().getTruck_tour();
