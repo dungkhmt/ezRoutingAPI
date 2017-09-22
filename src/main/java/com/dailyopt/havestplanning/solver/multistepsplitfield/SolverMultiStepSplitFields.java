@@ -85,7 +85,7 @@ public class SolverMultiStepSplitFields extends Solver {
 	}
 
 	
-	public void search() {
+	public void search(int maxNbSteps, int timeLimit) {
 		
 		
 		int n = input.getFields().length;
@@ -131,7 +131,7 @@ public class SolverMultiStepSplitFields extends Solver {
 							f.getPlantType());
 			
 		}
-
+		System.out.println(name() + "::search, n = " + n + ", m = " + m);
 		double[][] p = new double[n][m];
 		for(int i = 0; i < n; i++){
 			Date date = DateTimeUtils.convertYYYYMMDD2Date(fields[i].getPlant_date());
@@ -184,7 +184,7 @@ public class SolverMultiStepSplitFields extends Solver {
 		for(int i = 0; i < b.length; i++) b[i] = 0;
 		
 		int nbSteps = 0;
-		while (true) {
+		while (nbSteps < maxNbSteps) {
 			// check feasibility for before solving
 			boolean feasible = true;
 			int nbEmptyFields = 0;
@@ -212,7 +212,7 @@ public class SolverMultiStepSplitFields extends Solver {
 			S.name = "ConstraintMultiKnapsackSolver[" + (solutions.size() + 1) + "]";
 			// solve the problem
 			LeveledHavestPlanSolution s = S.solve(preload, qtt, minDate,
-					maxDate, expected_dates, minLoad, maxLoad);
+					maxDate, expected_dates, minLoad, maxLoad, timeLimit);
 			solutions.add(s);
 			//System.out.println(name() + "::search, solutions[" + solutions.size() + "] = " + s.toString());
 			//,System.out.println(name() + "*******************************************************************************");
@@ -235,8 +235,8 @@ public class SolverMultiStepSplitFields extends Solver {
 					}
 				}
 			}
-			
-			if(solutions.size() >= 1) break;
+			nbSteps++;
+			//if(solutions.size() >= 1) break;
 			
 			
 		}
@@ -247,13 +247,23 @@ public class SolverMultiStepSplitFields extends Solver {
 		
 	}
 
-	public HavestPlanningSolution solve(HavestPlanningInput input) {
+	public HavestPlanningSolution solve(HavestPlanningInput input, int maxNbSteps, int timeLimit) {
 		initLog();
 
 		this.input = input;
 		// this.DURATION = input.getGrowthDuration();
 		analyze();
 		mapDates();
+		
+		if(date_sequence.length > 1000){
+			String des = "field " + fields[0].getCode() + " with plant_date = " + fields[0].getPlant_date() + 
+					", field " + fields[fields.length-1].getCode() + " with plant_date = " + 
+					fields[fields.length-1].getPlant_date() + ", maxPeriod = " + input.getPlantStandard().getMaxPeriod();
+			System.out.println(name() + "::solve, EXCEPTION des = " + des);
+			HavestPlanningSolution sol = new HavestPlanningSolution();
+			sol.setDescription(des);
+			return sol;
+		}
 		
 		System.out.println(name() + "::solve date_sequence = "
 				+ date_sequence.length + " ...");
@@ -281,7 +291,7 @@ public class SolverMultiStepSplitFields extends Solver {
 		//
 		stateModel();
 
-		search();
+		search(maxNbSteps, timeLimit);
 
 		finalize();
 		System.out.println("finished, number of levels = " + solutions.size());
@@ -320,6 +330,7 @@ public class SolverMultiStepSplitFields extends Solver {
 					// Utility.next(date_sequence[i],DURATION);
 					Date currentDate = date_sequence[i];
 
+					double sugarQuantityOfCluster = 0;
 					HavestPlanningField[] HPF = new HavestPlanningField[F
 							.size()];
 					int qtt = 0;
@@ -340,9 +351,7 @@ public class SolverMultiStepSplitFields extends Solver {
 						// d = Utility.next(d,DURATION);
 						int days_late = Utility.distance(expected_havest_date,
 								d);
-						HPF[j] = new HavestPlanningField(f,
-								expected_havest_date_str, sq[fid], days_late);
-
+						
 						
 						if(days_late < 0){
 							if(maxDaysEarly < (-days_late)) maxDaysEarly = -days_late;
@@ -358,16 +367,24 @@ public class SolverMultiStepSplitFields extends Solver {
 
 						// quality += Utility.eval(input.getQualityFunction(),
 						// days_late);
-						quality += sq[fid]
+						double sugarQuantity =  sq[fid]
 								* input.getPlantStandard().evaluateQuality(
 										f.getCategory(), f.getPlantType(),
 										period);
-
+						
+						//HPF[j].setSugarQuantity(sugarQuantity);
+						quality += sugarQuantity;
+						sugarQuantityOfCluster += sugarQuantity;
+						HPF[j] = new HavestPlanningField(f,
+								expected_havest_date_str, sq[fid], days_late, sugarQuantity);
+ 
 						qtt += sq[fid];//f.getQuantity();
 					}
 					String date = DateTimeUtils.date2YYYYMMDD(currentDate);
+					//HavestPlanningCluster Ck = new HavestPlanningCluster(date,
+					//		HPF, qtt, F.size(), sugarQuantityOfCluster);
 					HavestPlanningCluster Ck = new HavestPlanningCluster(date,
-							HPF, qtt, F.size());
+							qtt, F.size(), HPF, sugarQuantityOfCluster);
 					
 					HavestPlanningCluster Ci = mDate2Cluster.get(i);
 					if(Ci == null){

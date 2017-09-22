@@ -33,6 +33,7 @@ import com.dailyopt.havestplanning.model.ReturnMachineSetting;
 import com.dailyopt.havestplanning.model.ReturnPlantStandard;
 import com.dailyopt.havestplanning.model.ReturnSetPlantStandard;
 import com.dailyopt.havestplanning.model.ReturnStart;
+import com.dailyopt.havestplanning.model.RunParameters;
 import com.dailyopt.havestplanning.solver.Solver;
 import com.dailyopt.havestplanning.solver.multistepsplitfield.SolutionChecker;
 import com.dailyopt.havestplanning.solver.multistepsplitfield.SolverMultiStepSplitFields;
@@ -47,6 +48,7 @@ public class HavestPlanningController {
 		return "HavestPlanningController";
 	}
 
+	/*
 	@RequestMapping(value = "/havest-plan", method = RequestMethod.POST)
 	public HavestPlanningSolution computeHavestPlanningSolution(
 			HttpServletRequest request, @RequestBody HavestPlanningInput input) {
@@ -62,7 +64,7 @@ public class HavestPlanningController {
 
 		return solver.solve(input);
 	}
-
+	*/
 	@RequestMapping(value = "/havest-plan/start", method = RequestMethod.POST)
 	public ReturnStart start(HttpServletRequest request,
 			@RequestBody HavestPlanningInput input) {
@@ -418,7 +420,7 @@ public class HavestPlanningController {
 
 	@RequestMapping(value = "/havest-plan/compute", method = RequestMethod.POST)
 	public HavestPlanningSolution compute(HttpServletRequest request
-	// , @RequestBody HavestPlanningInput input
+	 , @RequestBody RunParameters param
 	) {
 		String path = request.getServletContext().getRealPath(
 				"ezRoutingAPIROOT");
@@ -426,7 +428,19 @@ public class HavestPlanningController {
 		String fieldFilename = ROOT + "/fields.json";
 		String setPlatStandardFilename = ROOT + "/plant-standard.json";
 		String machineSettingFilename = ROOT + "/machine-setting.json";
+		// reset harvest-plan-solution.json
+		path = ROOT + "/harvest-plan-solution.json";
 
+		try {
+			PrintWriter out = new PrintWriter(path);
+			out.print("{}");
+			out.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+		int timeLimit = param.getTimeLimit();
+		int maxNbSteps = param.getNbSteps();
 		Gson gson = new Gson();
 		try {
 			FieldList fieldList = gson.fromJson(new FileReader(fieldFilename),
@@ -444,7 +458,13 @@ public class HavestPlanningController {
 			if (input.getPlantStandard() == null)
 				input.initDefaultPlantStandard();
 
-			HavestPlanningSolution sol = solver.solve(input);
+			String des = input.checkConsistency(); 
+			if(!des.equals("OK")){
+				HavestPlanningSolution ret_sol = new HavestPlanningSolution();
+				ret_sol.setDescription(des);
+				return ret_sol;
+			}
+			HavestPlanningSolution sol = solver.solve(input, maxNbSteps, timeLimit);
 			String json = gson.toJson(sol);
 			//System.out.println(name() + "::compute, RETURN " + json);
 			

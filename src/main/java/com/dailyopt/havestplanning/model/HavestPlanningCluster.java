@@ -8,7 +8,18 @@ public class HavestPlanningCluster {
 	private int numberOfFields;
 	private HavestPlanningField[] fields;
 	
+	private double sugarQuantity;
 	
+	
+	public double getSugarQuantity() {
+		return sugarQuantity;
+	}
+	public void setSugarQuantity(double sugarQuantity) {
+		this.sugarQuantity = sugarQuantity;
+	}
+	public void setDate(String date) {
+		this.date = date;
+	}
 	public String getDate() {
 		return date;
 	}
@@ -33,17 +44,19 @@ public class HavestPlanningCluster {
 	public void setNumberOfFields(int numberOfFields) {
 		this.numberOfFields = numberOfFields;
 	}
-	public HavestPlanningCluster(String date, HavestPlanningField[] fields,
-			int quantity, int numberOfFields) {
-		super();
-		this.date = date;
-		this.fields = fields;
-		this.quantity = quantity;
-		this.numberOfFields = numberOfFields;
-	}
 	public HavestPlanningCluster() {
 		super();
 		// TODO Auto-generated constructor stub
+	}
+	
+	public HavestPlanningCluster(String date, int quantity, int numberOfFields,
+			HavestPlanningField[] fields, double sugarQuantity) {
+		super();
+		this.date = date;
+		this.quantity = quantity;
+		this.numberOfFields = numberOfFields;
+		this.fields = fields;
+		this.sugarQuantity = sugarQuantity;
 	}
 	
 	// additional methods

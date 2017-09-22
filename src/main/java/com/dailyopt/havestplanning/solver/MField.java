@@ -17,8 +17,9 @@ public class MField extends Field {
 	}
 	
 	public MField(String code, String districtCode, String ownerCode,
-			double area, String date, int quantity, int deltaDays, Date mDate){
-		super(code,districtCode,ownerCode,area,date,quantity,deltaDays);
+			double area, String date, int quantity, int deltaDays, String plantType, String category, Date mDate){
+		super(code,districtCode,ownerCode,area,date,quantity,category,plantType,deltaDays);
+		
 		this.mDate = mDate;
 	}
 }

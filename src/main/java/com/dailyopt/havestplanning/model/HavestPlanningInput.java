@@ -14,6 +14,18 @@ public class HavestPlanningInput {
 	private PlantStandard plantStandard;
 	private MachineSetting machineSetting;
 	
+	public String checkConsistency(){
+		String des = "";
+		boolean ok = true;
+		for(int i = 0; i < fields.length; i++){
+			if(!plantStandard.find(fields[i].getCategory(), fields[i].getPlantType())){
+				des += "fields " + fields[i].getCode() + " NOT in plat-standard\n";
+				ok = false;
+			}
+		}
+		if(ok) des = "OK";
+		return des;
+	}
 	public PlantStandard getPlantStandard() {
 		return plantStandard;
 	}

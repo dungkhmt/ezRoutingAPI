@@ -7,8 +7,15 @@ public class HavestPlanningField {
 	private String expected_havest_date;
 	private int havestQuantity;
 	private int days_late;
+	private	double sugarQuantity;
 	
 	
+	public double getSugarQuantity() {
+		return sugarQuantity;
+	}
+	public void setSugarQuantity(double sugarQuantity) {
+		this.sugarQuantity = sugarQuantity;
+	}
 	public int getHavestQuantity() {
 		return havestQuantity;
 	}
@@ -34,17 +41,18 @@ public class HavestPlanningField {
 		this.days_late = days_late;
 	}
 
+	public HavestPlanningField() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 	public HavestPlanningField(Field field, String expected_havest_date,
-			int havestQuantity, int days_late) {
+			int havestQuantity, int days_late, double sugarQuantity) {
 		super();
 		this.field = field;
 		this.expected_havest_date = expected_havest_date;
 		this.havestQuantity = havestQuantity;
 		this.days_late = days_late;
-	}
-	public HavestPlanningField() {
-		super();
-		// TODO Auto-generated constructor stub
+		this.sugarQuantity = sugarQuantity;
 	}
 	
 	
