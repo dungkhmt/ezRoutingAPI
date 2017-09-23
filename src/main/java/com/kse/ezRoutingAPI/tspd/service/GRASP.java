@@ -270,11 +270,11 @@ public class GRASP {
 		for(int i=0; i<droneNodes.size(); i++){
 			totalPoints.add(droneNodes.get(i));
 		}
-		//System.out.println("GRASP::local_search:: totalPoints="+totalPoints.toString());
+		System.out.println("GRASP::local_search:: totalPoints="+totalPoints.toString());
 		//System.out.println()
 		int maxIter = 20;
 		int it = 0;
-		while(next_tour == null && it < maxIter){
+		while(next_tour == null && it < maxIter && totalPoints.size() >= 3){
 			int iMoveOperator = rand.nextInt(4);
 			int iPa = rand.nextInt(totalPoints.size());
 			int iPb = rand.nextInt(totalPoints.size());
