@@ -29,6 +29,7 @@ public class TSPD_LS {
 		tour= new Tour(truckTour, droneTours);
 	}
 	public Tour solve(){
+		System.out.println("Start");
 		init();
 		ArrayList<Point> customerPoints=tspd.getClientPoints();
 		boolean d[]= new boolean[customerPoints.size()];
@@ -104,7 +105,6 @@ public class TSPD_LS {
 	public NeighborHood relocateAsDrone(Point j,int subPointStart,int subPointEnd,double savings){
 		
 		NeighborHood ne=null;
-		System.out.println(name()+"cus "+j);
 		for(int i=subPointStart;i<subPointEnd-1;i++)
 			for(int k=i+1;k<subPointEnd;k++){
 				ArrayList<Point> truckPoint=tour.getTD().getTruck_tour();
@@ -127,7 +127,7 @@ public class TSPD_LS {
 				tour.setDD(lde);
 				//System.out.println(name()+"truckTour2:: "+truckPoint);
 			}
-		System.out.println(name()+ne);
+		System.out.println("END");
 		return ne;
 	}
 	public NeighborHood relocateAsTruck(Point j,int subPointStart,int subPointEnd,double savings){
