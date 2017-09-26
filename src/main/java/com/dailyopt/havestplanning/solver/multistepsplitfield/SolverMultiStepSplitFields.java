@@ -255,7 +255,7 @@ public class SolverMultiStepSplitFields extends Solver {
 		analyze();
 		mapDates();
 		
-		if(date_sequence.length > 1000){
+		if(date_sequence.length > 2000){
 			String des = "field " + fields[0].getCode() + " with plant_date = " + fields[0].getPlant_date() + 
 					", field " + fields[fields.length-1].getCode() + " with plant_date = " + 
 					fields[fields.length-1].getPlant_date() + ", maxPeriod = " + input.getPlantStandard().getMaxPeriod();
