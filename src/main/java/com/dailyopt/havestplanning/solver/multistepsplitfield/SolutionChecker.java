@@ -123,7 +123,8 @@ public class SolutionChecker extends Solver {
 					String expected_havest_date_str = DateTimeUtils.date2YYYYMMDD(expected_havest_date);
 					Date d = DateTimeUtils.convertYYYYMMDD2Date(f.getHavest_date());//date_sequence[xd[fid]];
 					int days_late = Utility.distance(expected_havest_date,d);
-					HPF[j] = new HavestPlanningField(f, expected_havest_date_str, f.getHavest_quantity(), days_late);
+					HPF[j] = new HavestPlanningField(f, expected_havest_date_str, 
+							f.getHavest_quantity(), days_late, -1);
 					
 					int period = mDate2Slot.get(DateTimeUtils.convertYYYYMMDD2Date(f.getHavest_date())) - 
 							mDate2Slot.get(DateTimeUtils.convertYYYYMMDD2Date(f.getPlant_date()));
@@ -134,7 +135,7 @@ public class SolutionChecker extends Solver {
 					qtt += f.getHavest_quantity();
 				}
 				String date = DateTimeUtils.date2YYYYMMDD(currentDate);
-				HavestPlanningCluster C = new HavestPlanningCluster(date, HPF, qtt, F.size());
+				HavestPlanningCluster C = new HavestPlanningCluster(date, qtt, F.size(), HPF, -1);
 				cluster.add(C);
 		
 				if(qtt > input.getMachineSetting().getMaxLoad()){
