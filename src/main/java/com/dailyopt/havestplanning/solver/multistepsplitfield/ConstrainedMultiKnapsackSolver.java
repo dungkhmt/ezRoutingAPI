@@ -682,7 +682,7 @@ public class ConstrainedMultiKnapsackSolver {
 	}
 
 	public void search(int timeLimit) {
-		int timeLimit1 = timeLimit/2 < 120 ? timeLimit : 120;
+		int timeLimit1 = timeLimit/2 < 120 ? timeLimit/2 : 120;
 		int timeLimit2 = timeLimit - timeLimit1;
 		
 		int[] sol = cbls(timeLimit1,100000);

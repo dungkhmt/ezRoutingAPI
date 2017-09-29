@@ -464,7 +464,9 @@ public class HavestPlanningController {
 				ret_sol.setDescription(des);
 				return ret_sol;
 			}
-			HavestPlanningSolution sol = solver.solve(input, maxNbSteps, timeLimit);
+			HavestPlanningSolution sol = solver.solve(input, maxNbSteps, timeLimit,param.getDeltaPlantDateLeft(),
+					param.getDeltaPlantDateRight());
+			
 			String json = gson.toJson(sol);
 			//System.out.println(name() + "::compute, RETURN " + json);
 			

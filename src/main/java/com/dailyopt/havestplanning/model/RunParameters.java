@@ -3,11 +3,29 @@ package com.dailyopt.havestplanning.model;
 public class RunParameters {
 	private int timeLimit;
 	private int nbSteps;
+	private int deltaPlantDateLeft;
+	private int deltaPlantDateRight;
 	
 	public RunParameters(int timeLimit, int nbSteps) {
 		super();
 		this.timeLimit = timeLimit;
 		this.nbSteps = nbSteps;
+	}
+
+	public int getDeltaPlantDateLeft() {
+		return deltaPlantDateLeft;
+	}
+
+	public void setDeltaPlantDateLeft(int deltaPlantDateLeft) {
+		this.deltaPlantDateLeft = deltaPlantDateLeft;
+	}
+
+	public int getDeltaPlantDateRight() {
+		return deltaPlantDateRight;
+	}
+
+	public void setDeltaPlantDateRight(int deltaPlantDateRight) {
+		this.deltaPlantDateRight = deltaPlantDateRight;
 	}
 
 	public int getNbSteps() {

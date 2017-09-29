@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import localsearch.constraints.basic.AND;
 import localsearch.constraints.basic.IsEqual;
@@ -85,7 +86,7 @@ public class SolverMultiStepSplitFields extends Solver {
 	}
 
 	
-	public void search(int maxNbSteps, int timeLimit) {
+	public void search(int maxNbSteps, int timeLimit, int delta_left, int delta_right) {
 		
 		
 		int n = input.getFields().length;
@@ -114,14 +115,11 @@ public class SolverMultiStepSplitFields extends Solver {
 			 */
 			Date d = DateTimeUtils.convertYYYYMMDD2Date(f.getPlant_date());
 			int plantStart = mDate2Slot.get(d);
-			System.out.println(name() + "::search, field[" + i
-					+ "], plantStart = " + plantStart + ", category = "
-					+ f.getCategory() + ", plantType = " + f.getPlantType());
-			System.out.println(name() + "::search, plantStandard = "
-					+ input.getPlantStandard());
 			minDate[i] = plantStart
 					+ input.getPlantStandard().getMinPeriod(f.getCategory(),
 							f.getPlantType());
+			
+			
 			maxDate[i] = plantStart
 					+ input.getPlantStandard().getMaxPeriod(f.getCategory(),
 							f.getPlantType());
@@ -129,9 +127,44 @@ public class SolverMultiStepSplitFields extends Solver {
 			expected_dates[i] = plantStart
 					+ input.getPlantStandard().getBestPeriod(f.getCategory(),
 							f.getPlantType());
+
+			if(minDate[i] < expected_dates[i] - delta_left){
+				minDate[i] = expected_dates[i] - delta_left;
+			}
+			if(maxDate[i] > expected_dates[i] + delta_right){
+				maxDate[i] = expected_dates[i] + delta_right;
+			}
+			
+			System.out.println(name() + "::search, field[" + i
+					+ "], plantStart = " + plantStart + ", category = "
+					+ f.getCategory() + ", plantType = " + f.getPlantType() + ", minDate = " + (minDate[i] - plantStart)
+					+ ", maxDate = " + (maxDate[i] - plantStart));
+			
+			System.out.println(name() + "::search, plantStandard = "
+					+ input.getPlantStandard());
 			
 		}
-		System.out.println(name() + "::search, n = " + n + ", m = " + m);
+		int totalQuantity = 0;
+		HashSet<Integer> D = new HashSet<Integer>();
+		int E = Integer.MAX_VALUE;
+		int L = 0;
+		int min_range = Integer.MAX_VALUE;
+		int max_range = 0;
+		for(int i = 0; i < n; i++){
+			totalQuantity += fields[i].getQuantity();
+			for(int d = minDate[i]; d <= maxDate[i]; d++){
+				D.add(d);
+			}
+			if(E > minDate[i]) E = minDate[i];
+			if(L < maxDate[i]) L = maxDate[i];
+			if(min_range > maxDate[i] - minDate[i]) min_range = maxDate[i] - minDate[i];
+			if(max_range < maxDate[i] - minDate[i]) max_range = maxDate[i] - minDate[i];
+		}
+		System.out.println(name() + "::search, n = " + n + ", m = " + m + ", totalQuantity = " + totalQuantity +
+				", E = " + E + ", L = " + L + ", D.sz = " + D.size() + ", min_rng = " + min_range + 
+				", max_rng = " + max_range + ", MAX = " + (D.size()*6000));
+		//System.exit(-1);
+		
 		double[][] p = new double[n][m];
 		for(int i = 0; i < n; i++){
 			Date date = DateTimeUtils.convertYYYYMMDD2Date(fields[i].getPlant_date());
@@ -247,7 +280,8 @@ public class SolverMultiStepSplitFields extends Solver {
 		
 	}
 
-	public HavestPlanningSolution solve(HavestPlanningInput input, int maxNbSteps, int timeLimit) {
+	public HavestPlanningSolution solve(HavestPlanningInput input, int maxNbSteps, int timeLimit,
+			int delta_left, int delta_right) {
 		initLog();
 
 		this.input = input;
@@ -291,7 +325,7 @@ public class SolverMultiStepSplitFields extends Solver {
 		//
 		stateModel();
 
-		search(maxNbSteps, timeLimit);
+		search(maxNbSteps, timeLimit, delta_left, delta_right);
 
 		finalize();
 		System.out.println("finished, number of levels = " + solutions.size());
