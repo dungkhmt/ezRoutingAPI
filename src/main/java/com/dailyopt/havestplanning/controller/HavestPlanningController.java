@@ -172,7 +172,7 @@ public class HavestPlanningController {
 			System.out.println(name() + "::getSolution, solution = "
 					+ sol.toString());
 
-
+			sol.sort();
 
 			return sol;
 			

@@ -28,6 +28,18 @@ public class HavestPlanningSolution {
 	
 	private HavestPlanningCluster[] clusters;
 	
+	
+	public void sort(){
+		for(int i= 0; i < clusters.length; i++){
+			for(int j = i+1; j < clusters.length; j++){
+				if(clusters[i].getQuantity() < clusters[j].getQuantity()){
+					HavestPlanningCluster tmp = clusters[i];
+					clusters[i] = clusters[j];
+					clusters[j] = tmp;
+				}
+			}
+		}
+	}
 	public String getDescription() {
 		return description;
 	}
