@@ -105,10 +105,10 @@ public class ConstrainedMultiKnapsackSolver {
 		int[] sol = new int[n];
 		for(int i = 0; i < n; i++){
 			sol[i] = y[i].getValue();
-			if(Math.abs(sol[i] - expectedHavestDate[i]) > 50){
-				System.out.println(name() + "::cbls, BUG sol[" + i + "] = " + sol[i] + ", expected_harvest = " + 
-			expectedHavestDate[i]); System.exit(-1);
-			}
+			//if(Math.abs(sol[i] - expectedHavestDate[i]) > 50){
+			//	System.out.println(name() + "::cbls, BUG sol[" + i + "] = " + sol[i] + ", expected_harvest = " + 
+			//expectedHavestDate[i]); System.exit(-1);
+			//}
 		}
 		return sol;
 	}
@@ -1115,15 +1115,15 @@ public class ConstrainedMultiKnapsackSolver {
 					assign(m.i, pi);
 					assign(m.j, pj);
 
-					if(Math.abs(x[m.i] - expectedHavestDate[m.i]) > 50){
-						System.out.println(name() + "::searchReduceTotalPackingViolationsAmountSugar, BUG");
-						System.exit(-1);
-					}
+					//if(Math.abs(x[m.i] - expectedHavestDate[m.i]) > 50){
+					//	System.out.println(name() + "::searchReduceTotalPackingViolationsAmountSugar, BUG");
+					//	System.exit(-1);
+					//}
 					
-					if(Math.abs(x[m.j] - expectedHavestDate[m.j]) > 50){
-						System.out.println(name() + "::searchReduceTotalPackingViolationsAmountSugar, BUG");
-						System.exit(-1);
-					}
+					//if(Math.abs(x[m.j] - expectedHavestDate[m.j]) > 50){
+					//	System.out.println(name() + "::searchReduceTotalPackingViolationsAmountSugar, BUG");
+					//	System.exit(-1);
+					//}
 					
 					System.out.println(name()
 							+ "::searchReducePackingViolations, Step " + it

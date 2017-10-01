@@ -260,14 +260,14 @@ public class SolverMultiStepSplitFields extends Solver {
 			
 			for(int i = 0; i < n; i++){
 				int delta = Math.abs(xd[i]- expected_dates[i]); 
-				if(delta > 50){
-					System.out.println(name() + "::search, BUG, xd[" + i + "] = " + xd[i] + 
-							", expected_date[" + i + "] = " + expected_dates[i]);
-					System.exit(-1);
+				//if(delta > 50){
+				//	System.out.println(name() + "::search, BUG, xd[" + i + "] = " + xd[i] + 
+				//			", expected_date[" + i + "] = " + expected_dates[i]);
+				//	System.exit(-1);
 					
-				}
+				//}
 				String msg = "TRUETRUE";
-				if(delta > 50) msg = "FALSEFALSE";
+				//if(delta > 50) msg = "FALSEFALSE";
 				log.println(name() + "::search, xd[" + i + "] = " + xd[i] + 
 							", expected_date[" + i + "] = " + expected_dates[i] + ", minDate = " + minDate[i] + 
 							", maxDate = " + maxDate[i] + ", MSGMSG = " + msg);
@@ -376,7 +376,7 @@ public class SolverMultiStepSplitFields extends Solver {
 				int bd = getBestHavestDate(f);
 				int delta = xd[j] - bd;
 				String msg = "TRUE";
-				if(Math.abs(delta) > 50) msg = "FALSE";
+				//if(Math.abs(delta) > 50) msg = "FALSE";
 				String hd = DateTimeUtils
 						.date2YYYYMMDD(date_sequence[xd[j]]);
 				String bhd = DateTimeUtils
