@@ -124,10 +124,15 @@ public class SolverMultiStepSplitFields extends Solver {
 					+ input.getPlantStandard().getMaxPeriod(f.getCategory(),
 							f.getPlantType());
 			
+			int p = input.getPlantStandard().getBestPeriod(f.getCategory(),
+					f.getPlantType());
 			expected_dates[i] = plantStart
-					+ input.getPlantStandard().getBestPeriod(f.getCategory(),
-							f.getPlantType());
-
+					+ p;
+			if(i == 0){
+				log.println(name() + "::search, field " + fields[i].getCode() + 
+						", plantStart = " + plantStart + ", bestPeriod = " + p + ", expectedDate = " + 
+						expected_dates[i]);
+			}
 			if(minDate[i] < expected_dates[i] - delta_left){
 				minDate[i] = expected_dates[i] - delta_left;
 			}
@@ -252,7 +257,23 @@ public class SolverMultiStepSplitFields extends Solver {
 			// update remaining qtt, preload for next steps
 			int[] xd = s.getXd();
 			int[] sq = s.getQuantity();
-
+			
+			for(int i = 0; i < n; i++){
+				int delta = Math.abs(xd[i]- expected_dates[i]); 
+				if(delta > 50){
+					System.out.println(name() + "::search, BUG, xd[" + i + "] = " + xd[i] + 
+							", expected_date[" + i + "] = " + expected_dates[i]);
+					System.exit(-1);
+					
+				}
+				String msg = "TRUETRUE";
+				if(delta > 50) msg = "FALSEFALSE";
+				log.println(name() + "::search, xd[" + i + "] = " + xd[i] + 
+							", expected_date[" + i + "] = " + expected_dates[i] + ", minDate = " + minDate[i] + 
+							", maxDate = " + maxDate[i] + ", MSGMSG = " + msg);
+			}
+			
+			
 			for(int i = 0; i < xd.length; i++) b[xd[i]] = 1;
 			
 			for (int i = 0; i < n; i++) {
@@ -327,7 +348,6 @@ public class SolverMultiStepSplitFields extends Solver {
 
 		search(maxNbSteps, timeLimit, delta_left, delta_right);
 
-		finalize();
 		System.out.println("finished, number of levels = " + solutions.size());
 
 		numberLevels = solutions.size();
@@ -350,7 +370,22 @@ public class SolverMultiStepSplitFields extends Solver {
 			
 			int[] xd = sol.getXd();
 			int[] sq = sol.getQuantity();
-
+			
+			for(int j = 0; j < xd.length; j++){
+				Field f = fields[j];//input.getFields()[j];
+				int bd = getBestHavestDate(f);
+				int delta = xd[j] - bd;
+				String msg = "TRUE";
+				if(Math.abs(delta) > 50) msg = "FALSE";
+				String hd = DateTimeUtils
+						.date2YYYYMMDD(date_sequence[xd[j]]);
+				String bhd = DateTimeUtils
+						.date2YYYYMMDD(date_sequence[bd]);
+				log.println(name() + "::solve, RESULT xd[" + j + "] = " + xd[j] + " = " + hd + ", field " + f.getCode() + 
+						", bestDate = " + bd + " = " + bhd + ", MSG = " + msg);
+				
+			}
+			
 			for(int i = 0; i < xd.length; i++) day_planned[xd[i]] = 1;
 			
 			for (int i = 0; i < date_sequence.length; i++) {
@@ -477,6 +512,7 @@ public class SolverMultiStepSplitFields extends Solver {
 		solution.setClusters(a_cluster);
 		
 		
+		finalize();
 		
 		return solution;
 	}

@@ -106,6 +106,7 @@ public class Solver {
 			
 		}
 		
+		/*
 		// sorting fields
 		for(int i = 0; i < fields.length-1; i++){
 			for(int j = i+1; j < fields.length; j++){
@@ -114,7 +115,7 @@ public class Solver {
 				}				
 			}
 		}
-		
+		*/
 		
 		mDate2Quantity = new HashMap<Date, Integer>();
 		mDate2ListFields = new HashMap<Date, ArrayList<Integer>>();
@@ -164,6 +165,7 @@ public class Solver {
 		//int maxP = input.getPlantStandard().getMaxPeriod(f.getCategory(), f.getPlantType());
 		//return (sl + (minP + maxP)/2);
 		int p = input.getPlantStandard().getBestPeriod(f.getCategory(), f.getPlantType());
+		//log.println(name() + "::getBestHavestDate(" + f.getCode() + "), sl = " + sl + ", p = " + p + ", bestHavestDate = " + (sl + p));
 		return sl + p;
 	}
 	public void mapDates() {
