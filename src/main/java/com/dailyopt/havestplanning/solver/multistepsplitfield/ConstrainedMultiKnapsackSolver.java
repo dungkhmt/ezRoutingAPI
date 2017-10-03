@@ -114,7 +114,7 @@ public class ConstrainedMultiKnapsackSolver {
 	}
 	public LeveledHavestPlanSolution solve(int[] preload, int[] qtt,
 			int[] minDate, int[] maxDate, int[] expected_date, int minLoad,
-			int maxLoad, int timeLimit) {
+			int maxLoad, int startDatePlan, int timeLimit) {
 
 		/*
 		 * m = preload.length: number of bins (days), bins are numbered 0, 1,

@@ -23,6 +23,7 @@ import com.dailyopt.havestplanning.model.HavestPlanningCluster;
 import com.dailyopt.havestplanning.model.HavestPlanningField;
 import com.dailyopt.havestplanning.model.HavestPlanningInput;
 import com.dailyopt.havestplanning.model.HavestPlanningSolution;
+import com.dailyopt.havestplanning.model.InputAnalysisInfo;
 import com.dailyopt.havestplanning.model.PlantStandard;
 import com.dailyopt.havestplanning.solver.MField;
 import com.dailyopt.havestplanning.solver.Solver;
@@ -86,9 +87,13 @@ public class SolverMultiStepSplitFields extends Solver {
 	}
 
 	
-	public void search(int maxNbSteps, int timeLimit, int delta_left, int delta_right) {
+	public void search(int maxNbSteps, int timeLimit, int delta_left, int delta_right, String startDatePlanStr) {
 		
+		Date sdp = DateTimeUtils.convertYYYYMMDD2Date(startDatePlanStr);
+		System.out.println(name() + "::search, startDatePlan = " + startDatePlanStr);
+		System.out.println(name() + "::search, sdp = " + sdp.toString());
 		
+		int startDatePlan = mDate2Slot.get(sdp);
 		int n = input.getFields().length;
 		int[] qtt = new int[n];
 		for (int i = 0; i < n; i++)
@@ -170,7 +175,9 @@ public class SolverMultiStepSplitFields extends Solver {
 				", max_rng = " + max_range + ", MAX = " + (D.size()*6000));
 		//System.exit(-1);
 		
+		
 		double[][] p = new double[n][m];
+		/*
 		for(int i = 0; i < n; i++){
 			Date date = DateTimeUtils.convertYYYYMMDD2Date(fields[i].getPlant_date());
 			int plantStart = mDate2Slot.get(date);
@@ -182,11 +189,14 @@ public class SolverMultiStepSplitFields extends Solver {
 					int period = d - plantStart; 
 							p[i][d] = input.getPlantStandard().evaluateQuality(fields[i].getCategory(), fields[i].getPlantType(),
 						period);
+							System.out.println(name() + "::search, SET p[" + i + "," + d + "] = " + p[i][d]);
 				}
 			}
 		}
+		*/
 		
-		S = new ConstrainedMultiKnapsackSolver(this);
+		//S = new ConstrainedMultiKnapsackSolver(this);
+		S = new GreedyConstrainedMultiKnapsackSolver(this);
 
 		// analyze min-max Quantity of days
 		S.setInput(preload, qtt, minDate, maxDate, expected_dates, minLoad, maxLoad,p);
@@ -250,7 +260,7 @@ public class SolverMultiStepSplitFields extends Solver {
 			S.name = "ConstraintMultiKnapsackSolver[" + (solutions.size() + 1) + "]";
 			// solve the problem
 			LeveledHavestPlanSolution s = S.solve(preload, qtt, minDate,
-					maxDate, expected_dates, minLoad, maxLoad, timeLimit);
+					maxDate, expected_dates, minLoad, maxLoad, startDatePlan, timeLimit);
 			solutions.add(s);
 			//System.out.println(name() + "::search, solutions[" + solutions.size() + "] = " + s.toString());
 			//,System.out.println(name() + "*******************************************************************************");
@@ -300,9 +310,33 @@ public class SolverMultiStepSplitFields extends Solver {
 		
 		
 	}
+	public InputAnalysisInfo analyze(HavestPlanningInput input) {
+		this.input = input;
+		analyze();
+		mapDates();
+		
+		String earliestPlantDate = DateTimeUtils.date2YYYYMMDD(dates[0]);
+		String latestPlantDate = DateTimeUtils.date2YYYYMMDD(dates[dates.length-1]);
+		int numberOfFields = input.getFields().length;
+		int totalQuantity = 0;
+		int numberOfDatesPlantRange = Utility.distance(earliestPlantDate, latestPlantDate);
+		int maxQuantity = -1;
+		int minQuantity = Integer.MAX_VALUE;
+		
+		for(int i = 0; i < input.getFields().length; i++){
+			Field f = input.getFields()[i];
+			totalQuantity += f.getQuantity();
+			if(minQuantity > f.getQuantity()) minQuantity = f.getQuantity();
+			if(maxQuantity < f.getQuantity()) maxQuantity = f.getQuantity();
+		}
 
+		return new InputAnalysisInfo(earliestPlantDate, latestPlantDate, 
+				numberOfFields, totalQuantity, 
+				numberOfDatesPlantRange, maxQuantity, minQuantity);
+	}
+	
 	public HavestPlanningSolution solve(HavestPlanningInput input, int maxNbSteps, int timeLimit,
-			int delta_left, int delta_right) {
+			int delta_left, int delta_right, String startDatePlan) {
 		initLog();
 
 		this.input = input;
@@ -346,7 +380,7 @@ public class SolverMultiStepSplitFields extends Solver {
 		//
 		stateModel();
 
-		search(maxNbSteps, timeLimit, delta_left, delta_right);
+		search(maxNbSteps, timeLimit, delta_left, delta_right, startDatePlan);
 
 		System.out.println("finished, number of levels = " + solutions.size());
 
