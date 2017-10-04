@@ -21,6 +21,7 @@ import com.kse.ezRoutingAPI.tspd.service.TSPD;
 import com.kse.ezRoutingAPI.tspd.service.TSPD_LS;
 import com.kse.ezRoutingAPI.tspd.service.TSPDs;
 import com.kse.ezRoutingAPI.tspd.service.TSPDs_LS;
+import com.kse.ezRoutingAPI.tspd.service.TSPDs_LS2;
 
 @RestController
 public class TSPwithDroneController {
@@ -199,7 +200,7 @@ public class TSPwithDroneController {
 				input.getDroneSpeed(), startPoint, clientPoints, endPoint, map);
 		GRASPkDrone grasp = new GRASPkDrone(tspd);
 		tours[1] = grasp.solve();
-		TSPDs_LS tspls = new TSPDs_LS(tspds);
+		TSPDs_LS2 tspls = new TSPDs_LS2(tspds);
 		tours[0] = tspls.solve();
 
 		System.out.println("TSPD_LS solution = " + tours[0].toString()

@@ -172,7 +172,7 @@ public class TSPDs {
 		int nPoints = clientPoints.size() + 2;
 		distancesDrone = new double[nPoints][nPoints];
 		distancesTruck = new double[nPoints][nPoints];
-
+		
 		GoogleMapsQuery gmap = new GoogleMapsQuery();
 
 		for (int i = 0; i < clientPoints.size(); i++) {
@@ -204,17 +204,37 @@ public class TSPDs {
 			distancesDrone[startPoint.getID()][pi.getID()] = gmap
 					.computeDistanceHaversine(startPoint.getLat(),
 							startPoint.getLng(), pi.getLat(), pi.getLng());
+			distancesDrone[endPoint.getID()][pi.getID()] = distancesDrone[startPoint.getID()][pi.getID()];
 			double dis = gmap.getDistance(startPoint.getLat(),
 					startPoint.getLng(), pi.getLat(), pi.getLng());
 			if (dis == -1) {
 				distancesTruck[startPoint.getID()][pi.getID()] = gmap
 						.computeDistanceHaversine(startPoint.getLat(),
 								startPoint.getLng(), pi.getLat(), pi.getLng());
+				distancesTruck[endPoint.getID()][pi.getID()] =distancesTruck[startPoint.getID()][pi.getID()];
 			} else {
 				distancesTruck[startPoint.getID()][pi.getID()] = dis;
+				distancesTruck[endPoint.getID()][pi.getID()] =distancesTruck[startPoint.getID()][pi.getID()];
 			}
-			distancesDrone[pi.getID()][endPoint.getID()] = 0;
-			distancesTruck[pi.getID()][endPoint.getID()] = 0;
+		}
+		
+		for (int i = 0; i < clientPoints.size(); i++) {
+			Point pi = clientPoints.get(i);
+			distancesDrone[pi.getID()][startPoint.getID()] = gmap
+					.computeDistanceHaversine( pi.getLat(), pi.getLng(),startPoint.getLat(),
+							startPoint.getLng());
+			distancesDrone[pi.getID()][endPoint.getID()] = distancesDrone[pi.getID()][startPoint.getID()];
+			double dis = gmap.getDistance( pi.getLat(), pi.getLng(),startPoint.getLat(),
+					startPoint.getLng());
+			if (dis == -1) {
+				distancesTruck[pi.getID()][startPoint.getID()] = gmap
+						.computeDistanceHaversine( pi.getLat(), pi.getLng(),startPoint.getLat(),
+								startPoint.getLng());
+				distancesTruck[pi.getID()][endPoint.getID()] =distancesTruck[pi.getID()][startPoint.getID()];
+			} else {
+				distancesTruck[pi.getID()][startPoint.getID()] = dis;
+				distancesTruck[pi.getID()][endPoint.getID()] =distancesTruck[pi.getID()][startPoint.getID()];
+			}
 		}
 		System.out.println(name() + "::build_distances_array DONE ---------");
 		System.out.println("distancesDrone");
@@ -268,10 +288,23 @@ public class TSPDs {
 							startPoint.getLng(), pi.getLat(), pi.getLng());
 			String key = startPoint.getID() + "_" + pi.getID();
 			double dis = map.get(key);
-			
-				distancesTruck[startPoint.getID()][pi.getID()] = dis;
-			distancesDrone[pi.getID()][endPoint.getID()] = 0;
-			distancesTruck[pi.getID()][endPoint.getID()] = 0;
+
+			distancesTruck[startPoint.getID()][pi.getID()] = dis;
+			distancesDrone[endPoint.getID()][pi.getID()] =distancesDrone[startPoint.getID()][pi.getID()];
+			distancesTruck[endPoint.getID()][pi.getID()] = distancesTruck[startPoint.getID()][pi.getID()];
+		}
+		
+		for (int i = 0; i < clientPoints.size(); i++) {
+			Point pi = clientPoints.get(i);
+			distancesDrone[pi.getID()][startPoint.getID()] = gmap
+					.computeDistanceHaversine( pi.getLat(), pi.getLng(),startPoint.getLat(),
+							startPoint.getLng());
+			String key =  pi.getID()+ "_" +startPoint.getID();
+			double dis = map.get(key);
+
+			distancesTruck[pi.getID()][startPoint.getID()] = dis;
+			distancesDrone[pi.getID()][endPoint.getID()] =distancesDrone[pi.getID()][startPoint.getID()];
+			distancesTruck[pi.getID()][endPoint.getID()] = distancesTruck[pi.getID()][startPoint.getID()];
 		}
 		System.out.println(name() + "::build_distances_array DONE ---------");
 		System.out.println("distancesDrone");
@@ -405,12 +438,15 @@ public class TSPDs {
 		ArrayList<DroneDelivery> dd = tspd.getDD();
 		return cost(td) + cost(dd);
 	}
-
+	/**
+	 * delete droneList.remove(droneList.size() - 1);
+	 */
 	public boolean checkWaitTime(ArrayList<Point> truckTour,
 			ArrayList<DroneDelivery> droneList) {
 		// HashMap<Point, Integer> p2i= new HashMap<Point, Integer>();
-		System.out.println(name() + truckTour);
-		System.out.println(name() + droneList);
+		// System.out.println(name()+"checkWaitTime current truckTour" +
+		// truckTour);
+		// System.out.println(name()+"checkWaitTime new droneList" + droneList);
 		HashMap<Point, ArrayList<Integer>> p2iDeliveryLaught = new HashMap<Point, ArrayList<Integer>>();
 		HashMap<Point, ArrayList<Integer>> p2iDeliveryRendezvous = new HashMap<Point, ArrayList<Integer>>();
 		for (int ii = 0; ii < droneList.size(); ii++) {
@@ -440,12 +476,16 @@ public class TSPDs {
 			}
 
 		}
-		System.out.println(name() + p2iDeliveryLaught);
-		System.out.println(name() + p2iDeliveryRendezvous);
+		// System.out.println(name()+" checkWaitTime p2iDeliveryLaught " +
+		// p2iDeliveryLaught);
+		// System.out.println(name()+" checkWaitTime p2iDeliveryRendezvous " +
+		// p2iDeliveryRendezvous);
 		// System.out.println(name()+"size "+truckTour.size());
 		double x[] = new double[truckTour.size()];
 		x[0] = 0;
-		System.out.println(name() + truckTour.size() + " ");
+		// System.out.println(name()+" checkWaitTime " + truckTour.size() +
+		// " ");
+		
 		for (int ii = 1; ii < truckTour.size(); ii++) {
 
 			x[ii] = x[ii - 1]
@@ -462,6 +502,7 @@ public class TSPDs {
 			Point vtmin = null;
 			for (int jj = 0; jj < li.size(); jj++) {
 				DroneDelivery dd = droneList.get(li.get(jj));
+				
 				double time = (d_drone(dd.getLauch_node(), dd.getDrone_node()) + d_drone(
 						dd.getDrone_node(), dd.getRendezvous_node()))
 						* 60
@@ -474,42 +515,44 @@ public class TSPDs {
 					min = time;
 					vtmin = dd.getLauch_node();
 				}
+				System.out.println(dd+"->"+time);
 			}
-			System.out.print(" max ->" + max + " ");
+			System.out.println(name()+" checkWaitTime max ->" + max + " min ->"+min);
 			if (x[ii] - x[truckTour.indexOf(vtmax)] > (max + delta)) {
-				droneList.remove(droneList.size() - 1);
+				//droneList.remove(droneList.size() - 1);
 				return false;
-			} else if (x[ii] - x[truckTour.indexOf(vtmax)] + delta < max) {
-				droneList.remove(droneList.size() - 1);
+			} else 
+			//System.out.println(name()+" checkWaitTime x[ii] - x[truckTour.indexOf(vtmax)]" + (x[ii] - x[truckTour.indexOf(vtmax)]));
+			if ((x[ii] - x[truckTour.indexOf(vtmax)] + delta) < max) {
+				//droneList.remove(droneList.size() - 1);
 				return false;
-			}
-			if (x[ii] - x[truckTour.indexOf(vtmin)] > (min + delta)) {
-				droneList.remove(droneList.size() - 1);
+			}//System.out.println(name()+" checkWaitTime x[ii] - x[truckTour.indexOf(vtmin)]" + (x[ii] - x[truckTour.indexOf(vtmin)]));
+			if ((x[ii] - x[truckTour.indexOf(vtmin)]) > (min + delta)) {
+				//droneList.remove(droneList.size() - 1);
 				return false;
 			} else if (x[ii] - x[truckTour.indexOf(vtmin)] + delta < min) {
-				droneList.remove(droneList.size() - 1);
+				//droneList.remove(droneList.size() - 1);
 				return false;
 			}
-			if (x[ii] - x[truckTour.indexOf(vtmin)] < min) {
-				x[ii] += min - (x[ii] - x[truckTour.indexOf(vtmin)]);
+			if (x[ii] - x[truckTour.indexOf(vtmax)] < max) {
+				//x[ii] += min - (x[ii] - x[truckTour.indexOf(vtmin)]);
+				x[ii] += max - (x[ii] - x[truckTour.indexOf(vtmax)]);
+				
 			}
-			System.out.print(ii + "--" + (x[ii] - x[truckTour.indexOf(vtmin)])
-					+ " ");
+			/*
+			 * System.out.print(name()+" checkWaitTime "+ii + "--" + (x[ii] -
+			 * x[truckTour.indexOf(vtmin)]) + " ");
+			 */
 		}
-		System.out.println();
-		droneList.remove(droneList.size() - 1);
-		System.out.println(name() + "true");
+		for(int i=0;i<x.length;i++){
+			System.out.println(x[i]+" ");
+		}
+		//System.out.println();
+		//droneList.remove(droneList.size() - 1);
+		// System.out.println(name() + "checkWaitTime DONE true");
+		//System.out.println(name()+" "+d_truck(truckTour.get(truckTour.size()-2),truckTour.get(truckTour.size()-1)));
 		return true;
 	}
-
-	/*
-	 * public boolean isDroneDelivery(Point i, Point j, Point k,
-	 * ArrayList<Point> trucktour){ for(int index=0; index<P.size(); index++){
-	 * DroneDelivery tmp_dd = P.get(index); boolean check =
-	 * tmp_dd.getLauch_node().equals(i) && tmp_dd.getDrone_node().equals(j) &&
-	 * tmp_dd.getRendezvous_node().equals(k); if(check && checkWaitTime(i, j, k,
-	 * trucktour)){ return true; } } return false; }
-	 */
 
 	public ArrayList<Point> getTruckOnlyNodes(Tour tspd) {
 		ArrayList<Point> TD = tspd.getTD().getTruck_tour();
@@ -551,9 +594,12 @@ public class TSPDs {
 	public boolean checkConstraint(Tour tour) {
 		ArrayList<Point> truckTour = tour.getTD().getTruck_tour();
 		ArrayList<DroneDelivery> dronDeliveries = tour.getDD();
-
+		// System.out.println(name()+"checkConstraint current truckTour" +
+		// truckTour);
+		// System.out.println(name()+"checkConstraint new droneList" +
+		// dronDeliveries);
 		boolean checkWaitime = checkWaitTime(truckTour, dronDeliveries);
-		System.out.println(name() + "checkWaitime " + checkWaitime);
+		// System.out.println(name() + "checkWaitime " + checkWaitime);
 		boolean checkDroneEndurance = true;
 		for (int i = 0; i < dronDeliveries.size(); i++) {
 			DroneDelivery dd_tmp = dronDeliveries.get(i);
@@ -631,7 +677,7 @@ public class TSPDs {
 	}
 
 	String name() {
-		return "TSPD:: ";
+		return "TSPDs:: ";
 	}
 
 	@Override
