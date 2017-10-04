@@ -87,9 +87,45 @@ public class SolverMultiStepSplitFields extends Solver {
 	}
 
 	
+	public void extendDateSequence(Date fromDate, Date toDate){
+		Date startDate = fromDate;
+		if(startDate.compareTo(date_sequence[0]) >= 0) startDate = date_sequence[0];
+		Date lastDate = toDate;
+		if(lastDate.compareTo(date_sequence[date_sequence.length-1]) <= 0) lastDate = date_sequence[date_sequence.length-1];
+		System.out.println(name() + "::extendDateSequence, startDate = " + DateTimeUtils.date2YYYYMMDD(startDate) + 
+				", lastDate = " + DateTimeUtils.date2YYYYMMDD(lastDate));
+		
+		ArrayList<Date> dateList = new ArrayList<Date>();
+		
+		//for(int i = 0; i < date_sequence.length; i++)
+		//	dateList.add(date_sequence[i]);
+		Date curDate = startDate;//date_sequence[date_sequence.length-1];
+		dateList.add(curDate);
+		while(true){
+			Date d = Utility.next(curDate,1);
+			dateList.add(d);
+			System.out.println(name() + "::extendDateSequence, dateList[" + (dateList.size()-1) + "] = " + Utility.dateMonthYear(d)
+					+ ", lastDate = " + Utility.dateMonthYear(lastDate));
+			if(d.compareTo(lastDate) >= 0) break;
+			curDate = d;
+		}
+		date_sequence = new Date[dateList.size()];
+		for(int i = 0; i < dateList.size(); i++){
+			date_sequence[i] = dateList.get(i);
+			mDate2Slot.put(date_sequence[i], i);
+		}
+		
+	}
+	
 	public void search(int maxNbSteps, int timeLimit, int delta_left, int delta_right, String startDatePlanStr) {
 		
+		int nbHarvestDays = totalQuantity/input.getMachineSetting().getMinLoad() + 1;
+		
 		Date sdp = DateTimeUtils.convertYYYYMMDD2Date(startDatePlanStr);
+		Date lastDate = Utility.next(sdp, nbHarvestDays);
+		
+		extendDateSequence(sdp,lastDate);
+		
 		System.out.println(name() + "::search, startDatePlan = " + startDatePlanStr);
 		System.out.println(name() + "::search, sdp = " + sdp.toString());
 		
