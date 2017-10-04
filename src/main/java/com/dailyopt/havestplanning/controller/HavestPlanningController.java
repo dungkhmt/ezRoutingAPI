@@ -25,6 +25,7 @@ import com.dailyopt.havestplanning.model.FieldList;
 import com.dailyopt.havestplanning.model.FieldSolutionList;
 import com.dailyopt.havestplanning.model.HavestPlanningInput;
 import com.dailyopt.havestplanning.model.HavestPlanningSolution;
+import com.dailyopt.havestplanning.model.InputAnalysisInfo;
 import com.dailyopt.havestplanning.model.MachineSetting;
 import com.dailyopt.havestplanning.model.PlantStandard;
 import com.dailyopt.havestplanning.model.ReturnAddFields;
@@ -172,7 +173,7 @@ public class HavestPlanningController {
 			System.out.println(name() + "::getSolution, solution = "
 					+ sol.toString());
 
-
+			sol.sort();
 
 			return sol;
 			
@@ -465,7 +466,7 @@ public class HavestPlanningController {
 				return ret_sol;
 			}
 			HavestPlanningSolution sol = solver.solve(input, maxNbSteps, timeLimit,param.getDeltaPlantDateLeft(),
-					param.getDeltaPlantDateRight());
+					param.getDeltaPlantDateRight(), param.getStartDatePlan());
 			
 			String json = gson.toJson(sol);
 			//System.out.println(name() + "::compute, RETURN " + json);
@@ -495,6 +496,71 @@ public class HavestPlanningController {
 			
 			return ret_sol;
 			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return null;
+	}
+	@RequestMapping(value = "/havest-plan/analyze-input", method = RequestMethod.POST)
+	public InputAnalysisInfo analyzeInput(HttpServletRequest request
+	 
+	) {
+		String path = request.getServletContext().getRealPath(
+				"ezRoutingAPIROOT");
+
+		String fieldFilename = ROOT + "/fields.json";
+		String setPlatStandardFilename = ROOT + "/plant-standard.json";
+		String machineSettingFilename = ROOT + "/machine-setting.json";
+		// reset harvest-plan-solution.json
+		path = ROOT + "/harvest-plan-solution.json";
+
+		try {
+			PrintWriter out = new PrintWriter(path);
+			out.print("{}");
+			out.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+		Gson gson = new Gson();
+		try {
+			FieldList fieldList = gson.fromJson(new FileReader(fieldFilename),
+					FieldList.class);
+			PlantStandard ps = gson.fromJson(new FileReader(
+					setPlatStandardFilename), PlantStandard.class);
+			MachineSetting ms = gson.fromJson(new FileReader(
+					machineSettingFilename), MachineSetting.class);
+
+			HavestPlanningInput input = new HavestPlanningInput(
+					fieldList.getFields(), ps, ms);
+
+			SolverMultiStepSplitFields solver = new SolverMultiStepSplitFields();
+
+			if (input.getPlantStandard() == null)
+				input.initDefaultPlantStandard();
+
+			String des = input.checkConsistency(); 
+			if(!des.equals("OK")){
+				
+				return null;
+			}
+			InputAnalysisInfo info = solver.analyze(input);
+			
+			String json = gson.toJson(info);
+			//System.out.println(name() + "::compute, RETURN " + json);
+			
+			
+			path = ROOT + "/harvest-plan-solution.json";
+
+			try {
+				PrintWriter out = new PrintWriter(path);
+				out.print(gson.toJson(info));
+				out.close();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			
+			return info;
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

@@ -103,13 +103,18 @@ public class ConstrainedMultiKnapsackSolver {
 		TabuSearch ts = new TabuSearch();
 		ts.search(CS, 50, maxTime, maxIter, 200);
 		int[] sol = new int[n];
-		for(int i = 0; i < n; i++)
+		for(int i = 0; i < n; i++){
 			sol[i] = y[i].getValue();
+			//if(Math.abs(sol[i] - expectedHavestDate[i]) > 50){
+			//	System.out.println(name() + "::cbls, BUG sol[" + i + "] = " + sol[i] + ", expected_harvest = " + 
+			//expectedHavestDate[i]); System.exit(-1);
+			//}
+		}
 		return sol;
 	}
 	public LeveledHavestPlanSolution solve(int[] preload, int[] qtt,
 			int[] minDate, int[] maxDate, int[] expected_date, int minLoad,
-			int maxLoad, int timeLimit) {
+			int maxLoad, int startDatePlan, int timeLimit) {
 
 		/*
 		 * m = preload.length: number of bins (days), bins are numbered 0, 1,
@@ -141,17 +146,21 @@ public class ConstrainedMultiKnapsackSolver {
 
 		startDate = 10000000;
 		endDate = -10000000;
+		int max_range = 0;
 		for (int i = 0; i < n; i++) {
 			if (startDate > minDate[i])
 				startDate = minDate[i];
 			if (endDate < maxDate[i])
 				endDate = maxDate[i];
+			if(max_range < maxDate[i] - minDate[i]) max_range = maxDate[i] - minDate[i];
 		}
 		R = new Random();
 
 		System.out
-				.println(name() + "::solve start.... n = " + n + ", m = " + m);
+				.println(name() + "::solve start.... n = " + n + ", m = " + m + ", max_range = " + max_range);
 
+		getSolver().getLog().println(name() + "::solve, EXP_DATE[0] = " + expected_date[0]);
+		
 		stateModel();
 		search(timeLimit);
 
@@ -776,7 +785,8 @@ public class ConstrainedMultiKnapsackSolver {
 		 */
 
 		//searchReduceTotalPackingViolations(10000);
-		searchReduceTotalPackingViolationsAmountSugar(timeLimit2, 10000);
+		
+		searchReduceTotalPackingViolationsAmountSugar(timeLimit2/3, 10000);
 		
 		System.out
 				.println(name()
@@ -784,13 +794,13 @@ public class ConstrainedMultiKnapsackSolver {
 						+ eval());
 
 		//if(true) return;
-		searchAggregateDates(1000);
+		searchAggregateDates(10000, timeLimit2/3);
 		System.out.println(name()
 				+ "::search, after searchAggregateDates solution: eval = "
 				+ eval());
 
 		//searchReduceTotalPackingViolations(10000);
-		searchReduceTotalPackingViolationsAmountSugar(timeLimit2, 10000);
+		searchReduceTotalPackingViolationsAmountSugar(timeLimit2/3, 10000);
 		
 		System.out
 				.println(name()
@@ -1105,6 +1115,16 @@ public class ConstrainedMultiKnapsackSolver {
 					assign(m.i, pi);
 					assign(m.j, pj);
 
+					//if(Math.abs(x[m.i] - expectedHavestDate[m.i]) > 50){
+					//	System.out.println(name() + "::searchReduceTotalPackingViolationsAmountSugar, BUG");
+					//	System.exit(-1);
+					//}
+					
+					//if(Math.abs(x[m.j] - expectedHavestDate[m.j]) > 50){
+					//	System.out.println(name() + "::searchReduceTotalPackingViolationsAmountSugar, BUG");
+					//	System.exit(-1);
+					//}
+					
 					System.out.println(name()
 							+ "::searchReducePackingViolations, Step " + it
 							+ " -> swap(" + m.i + " q(" + qtt[m.i] + ") at " + pj + "  , " + m.j
@@ -1134,9 +1154,13 @@ public class ConstrainedMultiKnapsackSolver {
 	}
 
 	
-	public void searchAggregateDates(int maxIter) {
+	public void searchAggregateDates(int maxIter, int maxTime) {
 		// maxIter = 1;
+		double t0 = System.currentTimeMillis();
 		for (int it = 0; it < maxIter; it++) {
+			double t = System.currentTimeMillis() - t0;
+			if(t > maxTime) break;
+			
 			int minDelta = Integer.MAX_VALUE;
 			int min_delta_havest = Integer.MAX_VALUE;
 

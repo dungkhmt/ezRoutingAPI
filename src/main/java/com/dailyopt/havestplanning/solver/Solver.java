@@ -93,10 +93,12 @@ public class Solver {
 		log.close();
 	}
 	public void analyze(){
-		
+		totalQuantity = 0;
 		fields = new MField[input.getFields().length];
 		for(int i = 0; i < fields.length; i++){
 			Field F = input.getFields()[i];
+			totalQuantity += F.getQuantity();
+			
 			Date mDate = DateTimeUtils.convertYYYYMMDD2Date(F.getPlant_date());
 			
 			fields[i] = new MField(F.getCode(), F.getDistrictCode(), 
@@ -106,6 +108,7 @@ public class Solver {
 			
 		}
 		
+		/*
 		// sorting fields
 		for(int i = 0; i < fields.length-1; i++){
 			for(int j = i+1; j < fields.length; j++){
@@ -114,7 +117,7 @@ public class Solver {
 				}				
 			}
 		}
-		
+		*/
 		
 		mDate2Quantity = new HashMap<Date, Integer>();
 		mDate2ListFields = new HashMap<Date, ArrayList<Integer>>();
@@ -164,6 +167,7 @@ public class Solver {
 		//int maxP = input.getPlantStandard().getMaxPeriod(f.getCategory(), f.getPlantType());
 		//return (sl + (minP + maxP)/2);
 		int p = input.getPlantStandard().getBestPeriod(f.getCategory(), f.getPlantType());
+		//log.println(name() + "::getBestHavestDate(" + f.getCode() + "), sl = " + sl + ", p = " + p + ", bestHavestDate = " + (sl + p));
 		return sl + p;
 	}
 	public void mapDates() {
@@ -217,6 +221,7 @@ public class Solver {
 		 * System.out.println(cal.getTime().toString()); } if(true) return;
 		 */
 
+		/*
 		for (int i = 1; i < dates.length; i++) {
 			Date d = dates[i - 1];
 			while (true) {
@@ -228,7 +233,13 @@ public class Solver {
 			}
 			mDate2Slot.put(dates[i], start);
 		}
-
+		*/
+		
+		for(int i = 0; i < date_sequence.length; i++){
+			Date d = date_sequence[i];
+			mDate2Slot.put(d, i);
+		}
+		
 		for (int i = 0; i < dates.length; i++) {
 			System.out.println(dates[i].toString() + "\t" + Utility.dateMonthYear(dates[i]) + "\t"
 					+ mDate2Slot.get(dates[i]));

@@ -5,7 +5,17 @@ public class RunParameters {
 	private int nbSteps;
 	private int deltaPlantDateLeft;
 	private int deltaPlantDateRight;
+	private String startDatePlan;
 	
+	
+	public String getStartDatePlan() {
+		return startDatePlan;
+	}
+
+	public void setStartDatePlan(String startDatePlan) {
+		this.startDatePlan = startDatePlan;
+	}
+
 	public RunParameters(int timeLimit, int nbSteps) {
 		super();
 		this.timeLimit = timeLimit;
@@ -47,6 +57,16 @@ public class RunParameters {
 	public RunParameters(int timeLimit) {
 		super();
 		this.timeLimit = timeLimit;
+	}
+
+	public RunParameters(int timeLimit, int nbSteps, int deltaPlantDateLeft,
+			int deltaPlantDateRight, String startDatePlan) {
+		super();
+		this.timeLimit = timeLimit;
+		this.nbSteps = nbSteps;
+		this.deltaPlantDateLeft = deltaPlantDateLeft;
+		this.deltaPlantDateRight = deltaPlantDateRight;
+		this.startDatePlan = startDatePlan;
 	}
 
 	public RunParameters() {
