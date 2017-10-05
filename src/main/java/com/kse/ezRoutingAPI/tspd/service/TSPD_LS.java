@@ -97,6 +97,7 @@ public class TSPD_LS {
 			}
 		}
 		System.out.println(name()+tour);
+		tour.setTotalCost(tspd.cost(tour));
 		return tour;
 		
 	}

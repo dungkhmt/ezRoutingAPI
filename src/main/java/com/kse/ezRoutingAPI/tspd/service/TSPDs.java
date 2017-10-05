@@ -13,7 +13,7 @@ import com.kse.ezRoutingAPI.tspd.model.Tour;
 import com.kse.ezRoutingAPI.tspd.model.TruckTour;
 
 public class TSPDs {
-	private int K = 4;
+	
 	private int C1;// cost per unit of trunk
 	private int C2; // cost per unit of drone
 	private double delta;
@@ -26,14 +26,7 @@ public class TSPDs {
 	private ArrayList<DroneDelivery> P;
 	private double distancesDrone[][];
 	private double distancesTruck[][];
-
-	public int getK() {
-		return K;
-	}
-
-	public void setK(int k) {
-		K = k;
-	}
+	
 
 	public ArrayList<DroneDelivery> getP() {
 		return P;
@@ -515,9 +508,8 @@ public class TSPDs {
 					min = time;
 					vtmin = dd.getLauch_node();
 				}
-				System.out.println(dd+"->"+time);
 			}
-			System.out.println(name()+" checkWaitTime max ->" + max + " min ->"+min);
+			//System.out.println(name()+" checkWaitTime max ->" + max + " min ->"+min);
 			if (x[ii] - x[truckTour.indexOf(vtmax)] > (max + delta)) {
 				//droneList.remove(droneList.size() - 1);
 				return false;
@@ -539,18 +531,7 @@ public class TSPDs {
 				x[ii] += max - (x[ii] - x[truckTour.indexOf(vtmax)]);
 				
 			}
-			/*
-			 * System.out.print(name()+" checkWaitTime "+ii + "--" + (x[ii] -
-			 * x[truckTour.indexOf(vtmin)]) + " ");
-			 */
 		}
-		for(int i=0;i<x.length;i++){
-			System.out.println(x[i]+" ");
-		}
-		//System.out.println();
-		//droneList.remove(droneList.size() - 1);
-		// System.out.println(name() + "checkWaitTime DONE true");
-		//System.out.println(name()+" "+d_truck(truckTour.get(truckTour.size()-2),truckTour.get(truckTour.size()-1)));
 		return true;
 	}
 
