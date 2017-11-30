@@ -23,13 +23,15 @@ public class TSPD_LS {
 		
 		tsp=new TSP(tspd.getStartPoint(), tspd.getClientPoints(), tspd.getEndPoint());
 		tsp.setDistances_matrix(tspd.getDistancesTruck());
-		System.out.println(tsp.lsInitTSP());
+		//System.out.println(tsp.lsInitTSP());
 		TruckTour truckTour=new TruckTour(tsp.lsInitTSP());
 		ArrayList<DroneDelivery> droneTours=new ArrayList<DroneDelivery>();
 		tour= new Tour(truckTour, droneTours);
 	}
 	public Tour solve(){
+		System.out.println(name()+"init solve ");
 		init();
+		System.out.println(name()+"solve ");
 		ArrayList<Point> customerPoints=tspd.getClientPoints();
 		boolean d[]= new boolean[customerPoints.size()];
 		maxSavings=0;
@@ -47,11 +49,11 @@ public class TSPD_LS {
 				
 				TruckTour t= new TruckTour(truckTourList);
 				tour.setTD(t);
-				//System.out.println(name()+"cus "+i+" savings is "+savings);
+				System.out.println(name()+"cus "+i+" savings is "+savings);
 				for(int j=0;j<truckTourList.size()-1;j++)
 					for(int k=j+1;k<truckTourList.size();k++){
 						Point droneNode=tspd.drone(truckTourList.get(j), truckTourList.get(k),tour);
-						//System.out.println(name()+"drone "+droneNode);
+						System.out.println(name()+"i :"+i+"j :"+j+"k :"+k+"drone "+droneNode);
 						if(droneNode!=null){
 							NeighborHood nee=relocateAsTruck(customerPoints.get(i), j, k, savings);
 							if(nee!=null) 
