@@ -1,7 +1,5 @@
 package com.kse.ezRoutingAPI.tspd.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class TSPDRequest {
 	private double truckSpeed; //Speed of truck

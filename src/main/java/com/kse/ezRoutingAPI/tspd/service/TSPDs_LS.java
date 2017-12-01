@@ -1,6 +1,7 @@
 package com.kse.ezRoutingAPI.tspd.service;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import com.kse.ezRoutingAPI.tspd.model.DroneDelivery;
 import com.kse.ezRoutingAPI.tspd.model.NeighborHood;
@@ -15,6 +16,7 @@ public class TSPDs_LS {
 	TSP tsp;
 	int maxRangeMove;
 	private int K;
+	Map<Integer,Boolean> allowDrone;
 
 	public int getK() {
 		return K;
@@ -24,10 +26,11 @@ public class TSPDs_LS {
 		K = k;
 	}
 
-	public TSPDs_LS(TSPDs tspkd, int numOfDrone, int maxRangeMove) {
+	public TSPDs_LS(TSPDs tspkd, int numOfDrone, int maxRangeMove,Map<Integer,Boolean> map) {
 		this.tspds = tspkd;
 		this.K = numOfDrone;
 		this.maxRangeMove=maxRangeMove;
+		this.allowDrone=map;
 	}
 
 	void printDArr(double[][] arr, int m, int n) {
@@ -61,9 +64,9 @@ public class TSPDs_LS {
 	public Tour solve() {
 		init();
 		ArrayList<Point> customerPoints = tspds.getClientPoints();
-
+		System.out.println(allowDrone.toString());
 		boolean d[] = new boolean[tour.getTD().getTruck_tour().size() + 1];
-
+		
 		for (int i = 0; i < d.length; i++)
 			d[i] = true;
 		while (true) {
@@ -74,7 +77,7 @@ public class TSPDs_LS {
 				for (int i = 1; i < truckTourList.size() - (ik + 1); i++) {
 					boolean xd = true;
 					for (int j = i; j < i + ik; j++) {
-						if (d[truckTourList.get(j).getID()] == false) {
+						if (d[truckTourList.get(j).getID()] == false || !allowDrone.get(truckTourList.get(j).getID())) {
 							xd = false;
 							break;
 						}

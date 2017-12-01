@@ -1,6 +1,7 @@
 package com.kse.ezRoutingAPI.tspd.service;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import com.kse.ezRoutingAPI.tspd.model.DroneDelivery;
 import com.kse.ezRoutingAPI.tspd.model.NeighborHood;
@@ -14,10 +15,12 @@ public class TSPD_LS {
 	TSPD tspd;
 	TSP tsp;
 	double maxSavings=0;
+	Map<Integer,Boolean> allowDrone;
 	
-	public TSPD_LS(TSPD tspd) {
+	public TSPD_LS(TSPD tspd,Map<Integer,Boolean> map) {
 		super();
 		this.tspd = tspd;
+		this.allowDrone=map;
 	}
 	public void init(){
 		
@@ -58,7 +61,7 @@ public class TSPD_LS {
 							NeighborHood nee=relocateAsTruck(customerPoints.get(i), j, k, savings);
 							if(nee!=null) 
 								ne=nee;
-						} else{
+						} else if(allowDrone.get(customerPoints.get(i).getID())){
 							NeighborHood nee=relocateAsDrone(customerPoints.get(i), j, k, savings);
 							if(nee!=null) 
 								ne=nee;

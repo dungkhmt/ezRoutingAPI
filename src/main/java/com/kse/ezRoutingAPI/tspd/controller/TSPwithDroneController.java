@@ -1,6 +1,7 @@
 package com.kse.ezRoutingAPI.tspd.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kse.ezRoutingAPI.tspd.model.Point;
 import com.kse.ezRoutingAPI.tspd.model.TSPDRequest;
 import com.kse.ezRoutingAPI.tspd.model.TSPDRequestwithDistance;
+import com.kse.ezRoutingAPI.tspd.model.TSPDRequestwithDistance2;
 import com.kse.ezRoutingAPI.tspd.model.TSPDSolution;
 import com.kse.ezRoutingAPI.tspd.model.Tour;
 import com.kse.ezRoutingAPI.tspd.service.GRASP;
@@ -31,6 +33,13 @@ public class TSPwithDroneController {
 		// System.out.println(name()+"computeTSPwithDroneProblem::request");
 		// System.out.println(input.toString());
 		TSPDSolution tspdSol;
+		/*
+		 * Temp
+		 */
+		Map<Integer,Boolean> allowDrone = new HashMap<Integer, Boolean>();
+		for(int i=0;i<input.getListPoints().length;i++){
+			allowDrone.put(input.getListPoints()[i].getID(), true);
+		}
 		Point startPoint = input.getListPoints()[0];
 		startPoint.setID(0);
 		Point endPoint = new Point(input.getListPoints().length,
@@ -51,7 +60,7 @@ public class TSPwithDroneController {
 		GRASP grasp = new GRASP(tspd);
 		tours[1] = grasp.solve();
 
-		TSPD_LS tspls = new TSPD_LS(tspd);
+		TSPD_LS tspls = new TSPD_LS(tspd,allowDrone);
 		tours[0] = tspls.solve();
 
 		// System.out.println("TSPD_LS solution = "+tours[1].toString()+"  cost = "+tspd.cost(tours[1]));
@@ -69,6 +78,13 @@ public class TSPwithDroneController {
 			@RequestBody TSPDRequest input) {
 		System.out.println(name() + "computeTSPwithKDroneProblem::request");
 		System.out.println(input.toString());
+		/*
+		 * Temp
+		 */
+		Map<Integer,Boolean> allowDrone = new HashMap<Integer, Boolean>();
+		for(int i=0;i<input.getListPoints().length;i++){
+			allowDrone.put(input.getListPoints()[i].getID(), true);
+		}
 		TSPDSolution tspdSol;
 		Point startPoint = input.getListPoints()[0];
 		startPoint.setID(0);
@@ -91,7 +107,7 @@ public class TSPwithDroneController {
 				input.getDroneSpeed(), startPoint, clientPoints, endPoint);
 		GRASPkDrone grasp = new GRASPkDrone(tspd);
 		tours[1] = grasp.solve();
-		TSPDs_LS tspls = new TSPDs_LS(tspds,4,4);
+		TSPDs_LS tspls = new TSPDs_LS(tspds,4,4,allowDrone);
 		tours[0] = tspls.solve();
 
 		System.out.println("TSPD_LS solution = " + tours[0].toString()
@@ -111,6 +127,13 @@ public class TSPwithDroneController {
 		// System.out.println(name()+"computeTSPwithDroneProblem::request");
 		// System.out.println(input.toString());
 		TSPDSolution tspdSol;
+		/*
+		 * Temp
+		 */
+		Map<Integer,Boolean> allowDrone = new HashMap<Integer, Boolean>();
+		for(int i=0;i<input.getListPoints().length;i++){
+			allowDrone.put(input.getListPoints()[i].getID(), true);
+		}
 		Point startPoint = input.getListPoints()[0];
 		startPoint.setID(0);
 		Point endPoint = new Point(input.getListPoints().length,
@@ -145,7 +168,7 @@ public class TSPwithDroneController {
 		GRASP grasp = new GRASP(tspd);
 		tours[1] = grasp.solve();
 
-		TSPD_LS tspls = new TSPD_LS(tspd);
+		TSPD_LS tspls = new TSPD_LS(tspd,allowDrone);
 		tours[0] = tspls.solve();
 
 		// System.out.println("TSPD_LS solution = "+tours[1].toString()+"  cost = "+tspd.cost(tours[1]));
@@ -165,6 +188,13 @@ public class TSPwithDroneController {
 		System.out.println(name() + "computeTSPwithKDroneProblem::request");
 		System.out.println(input.toString());
 		TSPDSolution tspdSol;
+		/*
+		 * Temp
+		 */
+		Map<Integer,Boolean> allowDrone = new HashMap<Integer, Boolean>();
+		for(int i=0;i<input.getListPoints().length;i++){
+			allowDrone.put(input.getListPoints()[i].getID(), true);
+		}
 		Point startPoint = input.getListPoints()[0];
 		startPoint.setID(0);
 		Point endPoint = new Point(input.getListPoints().length,
@@ -199,7 +229,7 @@ public class TSPwithDroneController {
 				input.getDroneSpeed(), startPoint, clientPoints, endPoint, map);
 		GRASPkDrone grasp = new GRASPkDrone(tspd);
 		tours[1] = grasp.solve();
-		TSPDs_LS tspls = new TSPDs_LS(tspds,4,4);
+		TSPDs_LS tspls = new TSPDs_LS(tspds,4,4,allowDrone);
 		tours[0] = tspls.solve();
 
 		System.out.println("TSPD_LS solution = " + tours[0].toString()
@@ -215,9 +245,11 @@ public class TSPwithDroneController {
 	@RequestMapping(value = "/tsp-with-drone-tspdls-input-distance", method = RequestMethod.POST)
 	public TSPDSolution computeTSPwithKDroneTSPDLSInputDistance(
 			HttpServletRequest request,
-			@RequestBody TSPDRequestwithDistance input) {
+			@RequestBody TSPDRequestwithDistance2 input2) {
 		System.out.println(name() + "computeTSPwithKDroneTSPDLSInputDistance::request");
 		//System.out.println(input.toString());
+		TSPDRequestwithDistance input= input2.getTspdRequestwithDistance();
+		Map<Integer,Boolean> allowDrone= input2.getAllowDroneMap();
 		TSPDSolution tspdSol;
 		Point startPoint = input.getListPoints()[0];
 		startPoint.setID(0);
@@ -250,23 +282,23 @@ public class TSPwithDroneController {
 		TSPD tspd = new TSPD(input.getTruckCost(), input.getDroneCost(),
 				input.getDelta(), input.getEndurance(), input.getTruckSpeed(),
 				input.getDroneSpeed(), startPoint, clientPoints, endPoint, map);
-		TSPD_LS tspdls1 = new TSPD_LS(tspd);
+		TSPD_LS tspdls1 = new TSPD_LS(tspd,allowDrone);
 		long startTime = System.currentTimeMillis();
 		System.out.println(name() + "computeTSPwithKDroneProblem::tspkd 1");
 		tours[0] = tspdls1.solve();
 		tours[0].setTotalTime(  System.currentTimeMillis()- startTime);
 		startTime = System.currentTimeMillis();
-		TSPDs_LS tspls = new TSPDs_LS(tspds,2,7);
+		TSPDs_LS tspls = new TSPDs_LS(tspds,2,7,allowDrone);
 		System.out.println(name() + "computeTSPwithKDroneProblem::tspkd 2");
 		tours[1] = tspls.solve();
 		tours[1].setTotalTime(  System.currentTimeMillis()- startTime);
 		startTime = System.currentTimeMillis();
-		tspls = new TSPDs_LS(tspds,3,7);
+		tspls = new TSPDs_LS(tspds,3,7,allowDrone);
 		System.out.println(name() + "computeTSPwithKDroneProblem::tspkd 3");
 		tours[2] = tspls.solve();
 		tours[2].setTotalTime(  System.currentTimeMillis()- startTime);
 		startTime = System.currentTimeMillis();
-		tspls = new TSPDs_LS(tspds,4,7);
+		tspls = new TSPDs_LS(tspds,4,7,allowDrone);
 		System.out.println(name() + "computeTSPwithKDroneProblem::tspkd 4");
 		tours[3] = tspls.solve();
 		tours[3].setTotalTime(  System.currentTimeMillis()- startTime);

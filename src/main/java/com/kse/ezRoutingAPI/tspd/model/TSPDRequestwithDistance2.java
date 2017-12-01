@@ -1,16 +1,17 @@
 package com.kse.ezRoutingAPI.tspd.model;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
-public class TSPDRequestwithDistance{
+public class TSPDRequestwithDistance2 {
 	private double truckSpeed; //Speed of truck
 	private double droneSpeed; //Speed of drone
 	private int truckCost;//cost per unit of trunk
 	private int droneCost; //cost per unit of drone
 	private double delta;
 	private double endurance;
-	Point[] listPoints;
+	Point2[] listPoints;
 	Map<String,Double> map;
 	
 	public Map<String, Double> getMap() {
@@ -21,11 +22,11 @@ public class TSPDRequestwithDistance{
 		this.map = map;
 	}
 
-	public Point[] getListPoints() {
+	public Point2[] getListPoints() {
 		return listPoints;
 	}
 
-	public void setListPoints(Point[] listPoints) {
+	public void setListPoints(Point2[] listPoints) {
 		this.listPoints = listPoints;
 	}
 
@@ -77,13 +78,31 @@ public class TSPDRequestwithDistance{
 		this.endurance = endurance;
 	}
 
-	public TSPDRequestwithDistance() {
+	public TSPDRequestwithDistance2() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-
-	public TSPDRequestwithDistance(double truckSpeed, double droneSpeed, int truckCost,
-			int droneCost, double delta, double endurance, Point[] listPoints,Map<String,Double> map) {
+	public Map<Integer,Boolean> getAllowDroneMap(){
+		Map<Integer,Boolean> hashMap= new HashMap<Integer, Boolean>();
+		System.out.println("listPoint"+listPoints.toString());
+		for(int i=0;i<listPoints.length;i++){
+			hashMap.put(listPoints[i].getID(), listPoints[i].isAllowdrone());
+		}
+		return hashMap;
+	}
+	public TSPDRequestwithDistance getTspdRequestwithDistance(){
+		Point[] lp=new Point[listPoints.length];
+		System.out.println(listPoints);
+		for(int i=0;i<listPoints.length;i++){
+			System.out.println(listPoints[i].getID());
+			Point p= new Point(listPoints[i].getID(), listPoints[i].getLat(), listPoints[i].getLng());
+			lp[i]=p;
+		}
+		TSPDRequestwithDistance tspdRequestwithDistance= new TSPDRequestwithDistance(truckSpeed, droneSpeed, truckCost, droneCost, delta, endurance, lp, map);
+		return tspdRequestwithDistance;
+	}
+	public TSPDRequestwithDistance2(double truckSpeed, double droneSpeed, int truckCost,
+			int droneCost, double delta, double endurance, Point2[] listPoints,Map<String,Double> map) {
 		super();
 		this.truckSpeed = truckSpeed;
 		this.droneSpeed = droneSpeed;
@@ -97,13 +116,11 @@ public class TSPDRequestwithDistance{
 
 	@Override
 	public String toString() {
-		return "TSPDRequestwithDistance [truckSpeed=" + truckSpeed
+		return "TSPDRequestwithDistance2 [truckSpeed=" + truckSpeed
 				+ ", droneSpeed=" + droneSpeed + ", truckCost=" + truckCost
 				+ ", droneCost=" + droneCost + ", delta=" + delta
 				+ ", endurance=" + endurance + ", listPoints="
 				+ Arrays.toString(listPoints) + ", map=" + map + "]";
 	}
 
-	
-	
 }
