@@ -171,9 +171,9 @@ public class TSPD {
 			distancesDrone[pi.getID()][pi.getID()] = 0;
 			for (int j = i + 1; j < allPoints.size(); j++) {
 				Point pj = allPoints.get(j);
-				distancesDrone[pi.getID()][pj.getID()] = gmap
-						.computeDistanceHaversine(pi.getLat(), pi.getLng(),
-								pj.getLat(), pj.getLng());
+				distancesDrone[pi.getID()][pj.getID()] = 
+						gmap.computeDistanceHaversine(pi.getLat(), pi.getLng(),pj.getLat(), pj.getLng());
+						//computeEuclice(pi.getLat(), pi.getLng(),pj.getLat(), pj.getLng());
 				String key = pi.getID() + "_" + pj.getID();
 				double dis = map.get(key);
 				distancesTruck[pi.getID()][pj.getID()] = dis;
@@ -194,7 +194,10 @@ public class TSPD {
 		 * System.out.print(distancesTruck[i][j]+" "); } System.out.println(); }
 		 */
 	}
-
+	public double computeEuclice(double lat1, double long1,
+			double lat2, double long2){
+		return Math.sqrt((lat1-lat2)*(lat1-lat2)+(long1-long2)*(long1-long2));
+	}
 	public void build_distances_array() {
 		// System.out.println(name()+"::build_distances_array-----------");
 		int nPoints = clientPoints.size() + 2;

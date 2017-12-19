@@ -84,7 +84,7 @@ public class TSPDRequestwithDistance2 {
 	}
 	public Map<Integer,Boolean> getAllowDroneMap(){
 		Map<Integer,Boolean> hashMap= new HashMap<Integer, Boolean>();
-		System.out.println("listPoint"+listPoints.toString());
+		//System.out.println("listPoint"+listPoints.toString());
 		for(int i=0;i<listPoints.length;i++){
 			hashMap.put(listPoints[i].getID(), listPoints[i].isAllowdrone());
 		}
@@ -92,9 +92,9 @@ public class TSPDRequestwithDistance2 {
 	}
 	public TSPDRequestwithDistance getTspdRequestwithDistance(){
 		Point[] lp=new Point[listPoints.length];
-		System.out.println(listPoints);
+		//System.out.println(listPoints);
 		for(int i=0;i<listPoints.length;i++){
-			System.out.println(listPoints[i].getID());
+			//System.out.println(listPoints[i].getID());
 			Point p= new Point(listPoints[i].getID(), listPoints[i].getLat(), listPoints[i].getLng());
 			lp[i]=p;
 		}

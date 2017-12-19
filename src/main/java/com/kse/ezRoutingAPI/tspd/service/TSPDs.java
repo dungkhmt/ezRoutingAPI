@@ -176,9 +176,9 @@ public class TSPDs {
 					distancesDrone[pi.getID()][pj.getID()] = 0;
 					distancesTruck[pi.getID()][pj.getID()] = 0;
 				} else {
-					distancesDrone[pi.getID()][pj.getID()] = gmap
-							.computeDistanceHaversine(pi.getLat(), pi.getLng(),
-									pj.getLat(), pj.getLng());
+					distancesDrone[pi.getID()][pj.getID()] = 
+							gmap.computeDistanceHaversine(pi.getLat(), pi.getLng(),	pj.getLat(), pj.getLng());
+							//computeEuclice(pi.getLat(), pi.getLng(),	pj.getLat(), pj.getLng());
 					double dis = gmap.getDistance(pi.getLat(), pi.getLng(),
 							pj.getLat(), pj.getLng());
 					if (dis == -1) {
@@ -194,16 +194,15 @@ public class TSPDs {
 
 		for (int i = 0; i < clientPoints.size(); i++) {
 			Point pi = clientPoints.get(i);
-			distancesDrone[startPoint.getID()][pi.getID()] = gmap
-					.computeDistanceHaversine(startPoint.getLat(),
-							startPoint.getLng(), pi.getLat(), pi.getLng());
+			distancesDrone[startPoint.getID()][pi.getID()] = 
+					gmap.computeDistanceHaversine(startPoint.getLat(),	startPoint.getLng(), pi.getLat(), pi.getLng());
+					//computeEuclice(startPoint.getLat(),	startPoint.getLng(), pi.getLat(), pi.getLng());
 			distancesDrone[endPoint.getID()][pi.getID()] = distancesDrone[startPoint.getID()][pi.getID()];
 			double dis = gmap.getDistance(startPoint.getLat(),
 					startPoint.getLng(), pi.getLat(), pi.getLng());
 			if (dis == -1) {
-				distancesTruck[startPoint.getID()][pi.getID()] = gmap
-						.computeDistanceHaversine(startPoint.getLat(),
-								startPoint.getLng(), pi.getLat(), pi.getLng());
+				distancesTruck[startPoint.getID()][pi.getID()] = 
+						gmap.computeDistanceHaversine(startPoint.getLat(),	startPoint.getLng(), pi.getLat(), pi.getLng());
 				distancesTruck[endPoint.getID()][pi.getID()] =distancesTruck[startPoint.getID()][pi.getID()];
 			} else {
 				distancesTruck[startPoint.getID()][pi.getID()] = dis;
@@ -213,14 +212,15 @@ public class TSPDs {
 		
 		for (int i = 0; i < clientPoints.size(); i++) {
 			Point pi = clientPoints.get(i);
-			distancesDrone[pi.getID()][startPoint.getID()] = gmap
-					.computeDistanceHaversine( pi.getLat(), pi.getLng(),startPoint.getLat(),
-							startPoint.getLng());
+			distancesDrone[pi.getID()][startPoint.getID()] = 
+					gmap.computeDistanceHaversine( pi.getLat(), pi.getLng(),startPoint.getLat(),startPoint.getLng()); //***
+					//computeEuclice(pi.getLat(), pi.getLng(),startPoint.getLat(),startPoint.getLng());
 			distancesDrone[pi.getID()][endPoint.getID()] = distancesDrone[pi.getID()][startPoint.getID()];
 			double dis = gmap.getDistance( pi.getLat(), pi.getLng(),startPoint.getLat(),
 					startPoint.getLng());
 			if (dis == -1) {
-				distancesTruck[pi.getID()][startPoint.getID()] = gmap
+				distancesTruck[pi.getID()][startPoint.getID()] = 
+						gmap
 						.computeDistanceHaversine( pi.getLat(), pi.getLng(),startPoint.getLat(),
 								startPoint.getLng());
 				distancesTruck[pi.getID()][endPoint.getID()] =distancesTruck[pi.getID()][startPoint.getID()];
@@ -262,9 +262,9 @@ public class TSPDs {
 					distancesDrone[pi.getID()][pj.getID()] = 0;
 					distancesTruck[pi.getID()][pj.getID()] = 0;
 				} else {
-					distancesDrone[pi.getID()][pj.getID()] = gmap
-							.computeDistanceHaversine(pi.getLat(), pi.getLng(),
-									pj.getLat(), pj.getLng());
+					distancesDrone[pi.getID()][pj.getID()] = 
+							gmap.computeDistanceHaversine(pi.getLat(), pi.getLng(),pj.getLat(), pj.getLng());
+							//computeEuclice(pi.getLat(), pi.getLng(),pj.getLat(), pj.getLng());
 					String key = pi.getID() + "_" + pj.getID();
 					double dis = map.get(key);
 
@@ -276,9 +276,9 @@ public class TSPDs {
 
 		for (int i = 0; i < clientPoints.size(); i++) {
 			Point pi = clientPoints.get(i);
-			distancesDrone[startPoint.getID()][pi.getID()] = gmap
-					.computeDistanceHaversine(startPoint.getLat(),
-							startPoint.getLng(), pi.getLat(), pi.getLng());
+			distancesDrone[startPoint.getID()][pi.getID()] = 
+					gmap.computeDistanceHaversine(startPoint.getLat(),startPoint.getLng(), pi.getLat(), pi.getLng());
+					//computeEuclice(startPoint.getLat(),startPoint.getLng(), pi.getLat(), pi.getLng());
 			String key = startPoint.getID() + "_" + pi.getID();
 			double dis = map.get(key);
 
@@ -289,9 +289,9 @@ public class TSPDs {
 		
 		for (int i = 0; i < clientPoints.size(); i++) {
 			Point pi = clientPoints.get(i);
-			distancesDrone[pi.getID()][startPoint.getID()] = gmap
-					.computeDistanceHaversine( pi.getLat(), pi.getLng(),startPoint.getLat(),
-							startPoint.getLng());
+			distancesDrone[pi.getID()][startPoint.getID()] = 
+					gmap.computeDistanceHaversine( pi.getLat(), pi.getLng(),startPoint.getLat(),startPoint.getLng());
+					//computeEuclice(pi.getLat(), pi.getLng(),startPoint.getLat(),startPoint.getLng());
 			String key =  pi.getID()+ "_" +startPoint.getID();
 			double dis = map.get(key);
 
@@ -299,7 +299,7 @@ public class TSPDs {
 			distancesDrone[pi.getID()][endPoint.getID()] =distancesDrone[pi.getID()][startPoint.getID()];
 			distancesTruck[pi.getID()][endPoint.getID()] = distancesTruck[pi.getID()][startPoint.getID()];
 		}
-		System.out.println(name() + "::build_distances_array DONE ---------");
+		/*System.out.println(name() + "::build_distances_array DONE ---------");
 		System.out.println("distancesDrone");
 		for (int i = 0; i < nPoints; i++) {
 			for (int j = 0; j < nPoints; j++) {
@@ -313,9 +313,12 @@ public class TSPDs {
 				System.out.print(distancesTruck[i][j] + " ");
 			}
 			System.out.println();
-		}
+		}*/
 	}
-
+	public double computeEuclice(double lat1, double long1,
+			double lat2, double long2){
+		return Math.sqrt((lat1-lat2)*(lat1-lat2)+(long1-long2)*(long1-long2));
+	}
 	public void build_P() {
 		P = new ArrayList<DroneDelivery>();
 		for (int i = 0; i < clientPoints.size() - 2; i++) {
@@ -364,7 +367,7 @@ public class TSPDs {
 				}
 			}
 		}
-		System.out.println("build_P P=" + P.toString());
+		//System.out.println("build_P P=" + P.toString());
 	}
 
 	public boolean inP(Point i, Point j, Point k) {
