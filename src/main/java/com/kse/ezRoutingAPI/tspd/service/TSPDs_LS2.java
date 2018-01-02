@@ -2,14 +2,13 @@ package com.kse.ezRoutingAPI.tspd.service;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Random;
 
 import com.kse.ezRoutingAPI.tspd.model.DroneDelivery;
 import com.kse.ezRoutingAPI.tspd.model.Point;
 import com.kse.ezRoutingAPI.tspd.model.Tour;
 import com.kse.ezRoutingAPI.tspd.model.TruckTour;
 
-public class TSPDs_LS {
+public class TSPDs_LS2 {
 	int customers;
 	Tour tour;
 	TSPDs tspds;
@@ -26,7 +25,7 @@ public class TSPDs_LS {
 		K = k;
 	}
 
-	public TSPDs_LS(TSPDs tspkd, int numOfDrone, int maxRangeMove,
+	public TSPDs_LS2(TSPDs tspkd, int numOfDrone, int maxRangeMove,
 			Map<Integer, Boolean> map) {
 		this.tspds = tspkd;
 		this.K = numOfDrone;
@@ -134,8 +133,8 @@ public class TSPDs_LS {
 						lde.add(de);
 						tour.setDD(lde);
 					}
-					//maxSavings =( maxSavings+savings) / ik;
-					maxSavings =maxSavings+savings;
+					maxSavings =( maxSavings+savings) / ik;
+					//maxSavings =maxSavings+savings;
 					if (maxkPointRelocationSavings < maxSavings && isBreak != 1) {
 						maxkPointRelocationSavings = maxSavings;
 
@@ -157,7 +156,7 @@ public class TSPDs_LS {
 			/**
 			 * swap truck drone
 			 */
-			double maxSwapTruckDrone = 0;
+			/*double maxSwapTruckDrone = 0;
 			int vtDD = -1;
 			int vtTD = -1;
 			for (int i = 0; i < lde.size(); i++)
@@ -201,9 +200,9 @@ public class TSPDs_LS {
 							vtTD = j;
 						}
 					}
-			/**
+			*//**
 			 * swap 2 truck
-			 */
+			 *//*
 			double maxSwap2Truck = 0;
 			int vtsT1 = -1;
 			int vtsT2 = -1;
@@ -267,9 +266,9 @@ public class TSPDs_LS {
 								vtsT2 = j;
 							}
 						}
-			/**
+			*//**
 			 * swap 2 drone
-			 */
+			 *//*
 			double maxSwap2Drone = 0;
 			int swap2Dronevt1 = -1;
 			int swap2Dronevt2 = -1;
@@ -302,9 +301,9 @@ public class TSPDs_LS {
 						swap2Dronevt2 = j;
 					}
 				}
-			/**
+			*//**
 			 * truck relocation
-			 */
+			 *//*
 			double maxTruckRelocation = 0;
 			int vtTruckRelocation = -1;
 			int vtTruckRelocation1 = -1;
@@ -345,9 +344,9 @@ public class TSPDs_LS {
 								vtTruckRelocation=i;
 							}
 						}
-			/**
+			*//**
 			 * Drone relocation
-			 */
+			 *//*
 			double maxDroneRelocation = 0;
 			int vtMaxDroneRelocation=-1;
 			int vtMaxDroneRelocation1 = -1;
@@ -382,9 +381,9 @@ public class TSPDs_LS {
 							vtMaxDroneRelocation2 = jj;
 						}
 					}
-			/**
+			*//**
 			 * Drone removal
-			 */
+			 *//*
 			double maxDroneRemoval = 0;
 			int vtMaxDroneRemoval=-1;
 			int vtMaxDroneRemoval1 = -1;
@@ -416,17 +415,16 @@ public class TSPDs_LS {
 						vtMaxDroneRemoval=i;
 						vtMaxDroneRemoval1 = j;
 					}
-				}
-			if (maxkPointRelocationSavings <= 0 
-					&& maxSwapTruckDrone <= 0
-					&& maxSwap2Truck <= 0 && maxDroneRelocation <= 0
-					&& maxSwap2Drone <= 0 && maxDroneRemoval <= 0
-					&& maxTruckRelocation <= 0
+				}*/
+			if (maxkPointRelocationSavings <= 0 //&& maxSwapTruckDrone <= 0
+					//&& maxSwap2Truck <= 0 && maxDroneRelocation <= 0
+					//&& maxSwap2Drone <= 0 && maxDroneRemoval <= 0
+					//&& maxTruckRelocation <= 0
 					)// here
 				break;
 			double globalMax = maxkPointRelocationSavings;
 			int vt = 1;
-			if (globalMax < maxSwapTruckDrone) {
+			/*if (globalMax < maxSwapTruckDrone) {
 				globalMax = maxSwapTruckDrone;
 				vt = 2;
 			}
@@ -449,7 +447,7 @@ public class TSPDs_LS {
 			if(globalMax<maxTruckRelocation){
 				globalMax=maxTruckRelocation;
 				vt=7;
-			}
+			}*/
 			if (vt==1) {
 				/*
 				 * if (globalMaxSavings <= 0 )// here break;
@@ -473,7 +471,7 @@ public class TSPDs_LS {
 				}
 				tour.setDD(lde);
 				System.out.println(name() + tour);
-			} else if (vt==2) {
+			} /*else if (vt==2) {
 				System.out.println("Swap drone truck point");
 				DroneDelivery dd = lde.get(vtDD);
 				d[dd.getDrone_node().getID()] -= 1;
@@ -540,7 +538,7 @@ public class TSPDs_LS {
 				TruckTour t = new TruckTour(truckTourList);
 				tour.setTD(t);
 				System.out.println(name() + tour);
-			}
+			}*/
 		}
 		tour.setTotalCost(tspds.cost(tour));
 		return tour;
