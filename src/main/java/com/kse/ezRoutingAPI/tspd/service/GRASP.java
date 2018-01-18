@@ -1,11 +1,10 @@
 package com.kse.ezRoutingAPI.tspd.service;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Random;
+import java.util.Map;
 
-import org.apache.xmlbeans.impl.jam.xml.TunnelledException;
+import org.apache.log4j.Logger;
 
 import com.kse.ezRoutingAPI.tspd.model.DroneDelivery;
 import com.kse.ezRoutingAPI.tspd.model.GRASP_Arc;
@@ -17,10 +16,17 @@ public class GRASP {
 	private Tour solution_tour;
 	private TSPD tspd;
 	int nTSP;
+	private Map<Integer, Boolean> allowDrone;
+	private final static Logger logger = Logger.getLogger(GRASP.class);
 	
 	public GRASP(TSPD tspd){
 		this.tspd = tspd;
 		//System.out.println("GRASP::construct::tspd["+tspd.getStartPoint().toString()+","+tspd.getClientPoints().toString()+","+tspd.getEndPoint().toString());
+	}
+	
+	public GRASP(TSPD tspd, Map<Integer, Boolean> allowDrone){
+		this.tspd = tspd;
+		this.allowDrone = allowDrone;
 	}
 	
 	public Tour solve(){
@@ -34,10 +40,10 @@ public class GRASP {
 		
 		while(iteration < nTSP){
 			iteration++;
+			logger.info("iteration "+iteration);
 			//ArrayList<Point> tour = tsp.randomGenerator();
 			ArrayList<Point> tour = tsp.lsInitTSP();
-			System.out.println("iteration "+iteration);
-			System.out.println("tsp tour = "+tour.toString());
+			logger.info("tsp tour = "+tour.toString());
 			Tour tspdSolution = split_algorithm(tour);
 			
 			/*
@@ -66,7 +72,8 @@ public class GRASP {
 				bestObjectiveValue = tspd.cost(tspdSolution);
 			}
 			
-			System.out.println("tspd after using split = " + tspdSolution.toString()+"  cost = "+tspd.cost(tspdSolution));
+			logger.info("tspd after using split = " + tspdSolution.toString()+"  cost = "+tspd.cost(tspdSolution));
+			/*
 			tspdSolution = local_search(tspdSolution);
 			System.out.println("tspd after local_search = " + tspdSolution.toString()+"  cost = "+tspd.cost(tspdSolution));
 			if(tspd.cost(tspdSolution) < bestObjectiveValue){
@@ -75,8 +82,9 @@ public class GRASP {
 				iteration = 0;
 			}
 			System.out.println("bestTour = "+solution_tour.toString()+"   bestObjectiveValue "+bestObjectiveValue);
+			*/
 		}
-		
+		solution_tour.setTotalCost(tspd.cost(solution_tour));
 		return solution_tour;
 	}
 	
@@ -85,13 +93,13 @@ public class GRASP {
 	
 	public Tour split_algorithm(ArrayList<Point> tsp_tour){
 		build_graph(tsp_tour);
-		System.out.println("GRASP::split_alogrithm::T="+T.toString());
-		System.out.print("GRASP::split_alogrithm::P=[");
-		for(int i=0; i<P.length; i++){
-			System.out.print(P[i].toString()+", ");
-		}
-		System.out.print("]");
-		System.out.println();
+		logger.info("GRASP::split_alogrithm::T="+T.toString());
+		//System.out.print("GRASP::split_alogrithm::P=[");
+//		for(int i=0; i<P.length; i++){
+//			System.out.print(P[i].toString()+", ");
+//		}
+//		System.out.print("]");
+//		System.out.println();
 		Point pj = tsp_tour.get(nTSP+1);
 		ArrayList<Point> Sa = new ArrayList<Point>();
 		
@@ -177,7 +185,7 @@ public class GRASP {
 	public void build_graph(ArrayList<Point> tsp_tour){
 		ArrayList<GRASP_Arc> arcs = new ArrayList<GRASP_Arc>();
 		T = new ArrayList<DroneDelivery>();
-		//System.out.println("build_graph: tsp_tour input="+tsp_tour.toString());
+		logger.info("build_graph: tsp_tour input="+tsp_tour.toString());
 		for(int i=0; i<tsp_tour.size()-1; i++){
 			Point pi = tsp_tour.get(i);
 			Point pk = tsp_tour.get(i+1);	
@@ -198,18 +206,20 @@ public class GRASP {
 				//System.out.println("pk="+pk.toString());
 				for(int j=i+1; j<k; j++){
 					Point pj = tsp_tour.get(j);
-					//System.out.println("pj="+pj.toString());
-					if(tspd.inP(pi, pj, pk) && tspd.checkWaitTime(pi, pj, pk, tsp_tour)){
-						double d1 = tspd.d_truck(tsp_tour.get(j-1), tsp_tour.get(j+1));
-						double d2 = tspd.d_truck(tsp_tour.get(j-1), tsp_tour.get(j));
-						double d3 = tspd.d_truck(tsp_tour.get(j), tsp_tour.get(j+1));
-						
-						double cost = tspd.cost(i, k, tsp_tour) + tspd.getC1()*(d1-d2-d3) + tspd.cost(pi,pj,pk);
-						//System.out.println("pi,pj,pk is droneDelivery , cost="+cost);
-						if(cost < minValue){
-							minValue = cost;
-							minIndex = j;
+					if(allowDrone.get(pj.getID())){
+						//System.out.println("j="+j+" pj="+pj.toString()+"before remove tsp_tour="+tsp_tour.toString());
+						tsp_tour.remove(j);
+						//System.out.println("after remove tsp_tour="+tsp_tour.toString());
+						if(tspd.checkDroneConstraint(pi, pj, pk, tsp_tour)){
+							double cost = tspd.cost(i, k, tsp_tour) + tspd.cost(pi,pj,pk);
+							//System.out.println("pi,pj,pk is droneDelivery , cost="+cost);
+							if(cost < minValue){
+								minValue = cost;
+								minIndex = j;
+							}
 						}
+						tsp_tour.add(j, pj);
+						//System.out.println("after add tsp_tour="+tsp_tour.toString());
 					}
 				}
 				
@@ -254,6 +264,7 @@ public class GRASP {
 //		System.out.println();
 	}
 	
+	/*
 	public Tour local_search(Tour tspdSolution){
 		Random rand = new Random();
 		
@@ -592,4 +603,5 @@ public class GRASP {
 			return null;
 		}
 	}
+	*/
 }
