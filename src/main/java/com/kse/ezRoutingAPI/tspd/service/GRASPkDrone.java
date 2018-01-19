@@ -53,10 +53,10 @@ public class GRASPkDrone {
 		while(iteration < nTSP){
 			iteration++;
 			//ArrayList<Point> tour = tsp.randomGenerator();
-			LOGGER.LOGGER.log(Level.INFO,"iteration "+iteration);
 			ArrayList<Point> tour = tsp.lsInitTSP();
-			LOGGER.LOGGER.log(Level.INFO,"init tsp tour="+tour.toString()+" \ncost = "+tspd.cost(0,tour.size()-1,tour));
+			LOGGER.LOGGER.log(Level.INFO,"it "+iteration+" init tsp tour cost = "+tspd.cost(0,tour.size()-1,tour));
 			Tour tspdSolution = split_algorithm(tour);
+			LOGGER.LOGGER.log(Level.INFO,"tspd after using split cost = "+tspd.cost(tspdSolution));
 			
 			/*
 			 * record solution 
@@ -83,17 +83,17 @@ public class GRASPkDrone {
 				solution_tour = new Tour(new TruckTour(solution_truckTour), solution_droneDeliveries);
 				bestObjectiveValue = tspd.cost(tspdSolution);
 			}
-			LOGGER.LOGGER.log(Level.INFO,"tspd after using split = " + tspdSolution.toString()+"  \ncost = "+tspd.cost(tspdSolution));
-			tspdSolution = local_search(tspdSolution);
-			LOGGER.LOGGER.log(Level.INFO,"tspd after local_search = " + tspdSolution.toString()+"  \ncost = "+tspd.cost(tspdSolution));
+//			LOGGER.LOGGER.log(Level.INFO,"bestObjectiveValue = "+bestObjectiveValue+" bestTour cost = "+tspd.cost(solution_tour));
+			local_search(tspdSolution);
+			LOGGER.LOGGER.log(Level.INFO,"tspd after local_search cost = "+tspd.cost(tspdSolution));
 			if(tspd.cost(tspdSolution) < bestObjectiveValue){
 				solution_tour = tspdSolution;
 				bestObjectiveValue = tspd.cost(tspdSolution);
 				iteration = 0;
 			}
-			LOGGER.LOGGER.log(Level.INFO,"bestTour = "+solution_tour.toString()+"   \ncost = "+tspd.cost(solution_tour)+"    bestObjectiveValue "+bestObjectiveValue);
+			LOGGER.LOGGER.log(Level.INFO,"bestTour cost = "+tspd.cost(solution_tour)+"    bestObjectiveValue "+bestObjectiveValue);
 		}
-		LOGGER.LOGGER.log(Level.INFO,"bestTour with cost = "+tspd.cost(solution_tour)+"    bestObjectiveValue "+bestObjectiveValue);
+		LOGGER.LOGGER.log(Level.INFO,"bestTour cost = "+tspd.cost(solution_tour)+"    bestObjectiveValue "+bestObjectiveValue);
 		solution_tour.setTotalCost(tspd.cost(solution_tour));
 		return solution_tour;
 	}
@@ -105,7 +105,7 @@ public class GRASPkDrone {
 		
 		build_graph(tsp_tour);
 //		loggger.info("T="+T.toString());
-		LOGGER.LOGGER.log(Level.INFO,"GRASP::split_alogrithm:: start");
+		//LOGGER.LOGGER.log(Level.INFO,"GRASP::split_alogrithm:: start");
 //		for(int i=0; i<P.length; i++){
 //			System.out.print(P[i].toString()+", ");
 //		}
@@ -201,14 +201,14 @@ public class GRASPkDrone {
 		//St.add(tsp_tour.get(nTSP+1));
 		TruckTour truck_tour = new TruckTour(St);
 		Tour tour = new Tour(truck_tour, Sd);
-		LOGGER.LOGGER.log(Level.INFO,"GRASP::split_alogrithm:: done");
+		//LOGGER.LOGGER.log(Level.INFO,"GRASP::split_alogrithm:: done");
 		return tour;
 	}
 	
 	public void build_graph(ArrayList<Point> tsp_tour){
 		ArrayList<GRASP_Arc> arcs = new ArrayList<GRASP_Arc>();
 		T = new ArrayList<DroneDelivery>();
-		LOGGER.LOGGER.log(Level.INFO,"build_graph:: start");
+		//LOGGER.LOGGER.log(Level.INFO,"build_graph:: start");
 		for(int i=0; i<tsp_tour.size()-1; i++){
 			Point pi = tsp_tour.get(i);
 			Point pk = tsp_tour.get(i+1);	
@@ -216,7 +216,7 @@ public class GRASPkDrone {
 			arcs.add(arc);
 		}
 		
-		LOGGER.LOGGER.log(Level.INFO,"compute cost");
+		//LOGGER.LOGGER.log(Level.INFO,"compute cost");
 		for(int i=0; i<tsp_tour.size()-2; i++){
 			for(int k=i+2; k<tsp_tour.size(); k++){
 				double minValue = Double.MAX_VALUE;
@@ -264,7 +264,7 @@ public class GRASPkDrone {
 			}
 		}
 		
-		LOGGER.LOGGER.log(Level.INFO,"compute cost done");
+		//LOGGER.LOGGER.log(Level.INFO,"compute cost done");
 		
 		P = new Point[nTSP+2];
 		double V[] = new double[nTSP+2];
@@ -286,7 +286,7 @@ public class GRASPkDrone {
 				}
 			}
 		}
-		LOGGER.LOGGER.log(Level.INFO,"build_graph:: done");
+		//LOGGER.LOGGER.log(Level.INFO,"build_graph:: done");
 //		LOGGER.LOGGER.log(Level.INFO,"P=[");
 //		for(int i=0; i<nTSP+2; i++){
 //			System.out.print(P[i].toString()+", ");
@@ -325,41 +325,65 @@ public class GRASPkDrone {
 	    return combination;
 	}
 	
-	public Tour local_search(Tour tspdSolution){
-		LOGGER.LOGGER.log(Level.INFO,"tspd input="+tspdSolution.toString());
-		Tour next_tour = null;
+	public void local_search(Tour tspdSolution){
+		//LOGGER.LOGGER.log(Level.INFO,"local_search start");
 		
-		int maxIter = 100;
+		int maxIter = 1000;
 		int it = 0;
+		
 		Random R = new Random();
 		
+		int nOperator = 4;
+		int[] nChoseOperator = new int[nOperator];
+		for(int i=0; i<nOperator; i++){
+			nChoseOperator[i] = 0;
+		}
+		
 		while(it++ < maxIter){
-			LOGGER.LOGGER.log(Level.INFO,"iter "+it);
-			int i = R.nextInt(11);
+			//LOGGER.LOGGER.log(Level.INFO,"iter "+it);
+			int i = R.nextInt(4);
+			nChoseOperator[i]++;
 			switch(i){
-				case 0: next_tour = relocate_T(tspdSolution); break;
-				case 1: next_tour = relocate_D(tspdSolution); break;
-				case 2: next_tour = remove(tspdSolution); break;
-				case 3: next_tour = two_exchange_launch2drone(tspdSolution); break;
-				case 4: next_tour = two_exchange_rendezvous2drone(tspdSolution); break;
-				case 5: next_tour = two_exchange_truckonly2drone(tspdSolution); break;
-				case 6: next_tour = two_exchange_drone2drone(tspdSolution); break;
-				case 7: next_tour = two_exchange_launch2launch(tspdSolution); break;
-				case 8: next_tour = two_exchange_launch2rendezvous(tspdSolution); break;
-				case 9: next_tour = two_exchange_launch2truckOnly(tspdSolution); break;
-				case 10: next_tour = two_exchange_rendezvous2truckOnly(tspdSolution); break;
+				case 0: {
+					//LOGGER.LOGGER.log(Level.INFO,"prev_cost = "+tspd.cost(tspdSolution));
+					relocate_T(tspdSolution);
+					//LOGGER.LOGGER.log(Level.INFO,"new_cost = "+tspd.cost(tspdSolution));
+					break;
+				}
+				case 1: {
+					//LOGGER.LOGGER.log(Level.INFO,"prev_cost = "+tspd.cost(tspdSolution));
+					relocate_D(tspdSolution); 
+					//LOGGER.LOGGER.log(Level.INFO,"new_cost = "+tspd.cost(tspdSolution));
+					break;
+				}
+				case 2: {
+					//LOGGER.LOGGER.log(Level.INFO,"prev_cost = "+tspd.cost(tspdSolution));
+					remove(tspdSolution); 
+					//LOGGER.LOGGER.log(Level.INFO,"new_cost = "+tspd.cost(tspdSolution));
+					break;
+				}
+				case 3: {
+					//LOGGER.LOGGER.log(Level.INFO,"prev_cost = "+tspd.cost(tspdSolution));
+					two_exchange(tspdSolution); 
+					//LOGGER.LOGGER.log(Level.INFO,"new_cost = "+tspd.cost(tspdSolution));
+					break;
+				}
 			}
 		}
 		
-		if(next_tour == null ) return tspdSolution;
-		
- 		return next_tour;
+		LOGGER.LOGGER.log(Level.INFO,"number chosen operator: relocate_T="+nChoseOperator[0]+" relocate_D="
+		+nChoseOperator[1]+" remove="+nChoseOperator[2]+" two_exchange="+nChoseOperator[3]);
 	}
 	
-	public Tour relocate_T(Tour tspd_tour){
-		LOGGER.LOGGER.log(Level.INFO,"tspd input = "+tspd_tour.toString());
+	public void relocate_T(Tour tspd_tour){
+		//LOGGER.LOGGER.log(Level.INFO,"chose relocate_T, tspd input = "+tspd_tour.toString()+"\ncost = "+tspd.cost(tspd_tour));
 		ArrayList<Point> truckOnlyNodes = tspd.getTruckOnlyNodes(tspd_tour);
 		ArrayList<Point> truckTour = tspd_tour.getTD().getTruck_tour();
+		
+		if(truckOnlyNodes.size() == 0 || truckOnlyNodes == null){
+			//LOGGER.LOGGER.log(Level.INFO,"truckOnlyNodes size = 0");
+			return;
+		}
 		
 		Random R = new Random();
 		
@@ -371,14 +395,9 @@ public class GRASPkDrone {
 		
 		Point b = truckTour.get(iInsert);
 		
-		//to compute cost
-		Point prev_a = truckTour.get(pRelocation-1);
-		Point next_a = truckTour.get(pRelocation+1);
-		Point prev_b = truckTour.get(iInsert-1);
-		
 		//check a==b or a is previous point of b
 		int it = 0;
-		while((iInsert == pRelocation || iInsert-pRelocation == 1) && it != truckTour.size()){
+		while((a.equals(b) || iInsert-pRelocation == 1) && it != truckTour.size()){
 			iInsert = R.nextInt(truckTour.size()-1)+1;
 			ia = R.nextInt(truckOnlyNodes.size());
 			
@@ -390,43 +409,41 @@ public class GRASPkDrone {
 			it++;
 		}
 		if(it >= truckTour.size()){
-			LOGGER.LOGGER.log(Level.INFO,"Fail to chose a and b because a==b, tspd input = "+tspd_tour.toString());
-			return null;
+			//LOGGER.LOGGER.log(Level.INFO,"Fail to chose a and b because a==b");
+			return;
 		}
 		
-		LOGGER.LOGGER.log(Level.INFO,"a = "+a.toString()+" b = "+b.toString());
+		Point prev_a = truckTour.get(pRelocation-1);
+		Point next_a = truckTour.get(pRelocation+1);
+		Point prev_b = truckTour.get(iInsert-1);
 		
-		//check constraint and compute cost 
-		truckTour.remove(pRelocation);
-		truckTour.add(iInsert, a);
-			
-		if(tspd.checkConstraint(tspd_tour)){
-			double prev_cost = tspd.cost(prev_a, a) + tspd.cost(a, next_a) + tspd.cost(prev_b, b);
-			double new_cost = tspd.cost(prev_a,next_a) + tspd.cost(prev_b,a)+ tspd.cost(a,b);
-			
-			if(new_cost < prev_cost){
-				LOGGER.LOGGER.log(Level.INFO,"NEW_TOUR = "+tspd_tour.toString());
-				return tspd_tour;
-			}else{
-				
-				//reverse input 
-				truckTour.remove(iInsert);
-				truckTour.add(pRelocation,a);
-				
-				LOGGER.LOGGER.log(Level.INFO,"apply this operation not improve, tspd input = "+tspd_tour.toString());
-				return null;
-			}	
-		}
+		//LOGGER.LOGGER.log(Level.INFO,"a = "+a.toString()+" b = "+b.toString()+" prev_a = "+prev_a.toString()+" next_a = "+next_a.toString()+" prev_b = "+prev_b.toString());
 		
-		truckTour.remove(iInsert);
-		truckTour.add(pRelocation,a);
-		LOGGER.LOGGER.log(Level.INFO,"checkConstraint false, tspd input = "+tspd_tour.toString());
+		//compute cost 
+		double prev_cost = tspd.cost(prev_a, a) + tspd.cost(a, next_a) + tspd.cost(prev_b, b);
+		double new_cost = tspd.cost(prev_a,next_a) + tspd.cost(prev_b,a)+ tspd.cost(a,b);
 		
-		return null;
+		if(new_cost < prev_cost){
+			truckTour.remove(pRelocation);
+			iInsert = truckTour.indexOf(b);
+			truckTour.add(iInsert, a);
+			if(tspd.checkConstraint(tspd_tour)){
+				//LOGGER.LOGGER.log(Level.INFO,"NEW_TOUR = "+tspd_tour.toString()+"\ncost="+tspd.cost(tspd_tour));
+				//LOGGER.LOGGER.log(Level.INFO,"NEW_TOUR improve cost = "+(new_cost-prev_cost));
+				return;
+			}
+			//reverse input 
+			truckTour.remove(iInsert);
+			truckTour.add(pRelocation,a);
+			//LOGGER.LOGGER.log(Level.INFO,"checkConstraint false");
+			return;
+		}	
+		//LOGGER.LOGGER.log(Level.INFO,"apply this operation not improve");
+		return;
 	}
 	
-	public Tour relocate_D(Tour tspd_tour){
-		LOGGER.LOGGER.log(Level.INFO,"tspd input = "+tspd_tour.toString());
+	public void relocate_D(Tour tspd_tour){
+		//LOGGER.LOGGER.log(Level.INFO,"chose relocate_D");
 		
 		ArrayList<Point> truckOnlyNodes = tspd.getTruckOnlyNodes(tspd_tour);
 		
@@ -435,16 +452,22 @@ public class GRASPkDrone {
 
 		//chose point a, point i, point k
 		Random R  = new Random();
-		int i_a_truck = R.nextInt(truckOnlyNodes.size());
-		int i_da_drone = R.nextInt(droneDeliveries.size());
-		
-		DroneDelivery da = droneDeliveries.get(i_da_drone);
+		int i_a_truck = -1;
+		if(truckOnlyNodes.size() != 0 && truckOnlyNodes != null){
+			i_a_truck = R.nextInt(truckOnlyNodes.size());
+		}
+		int i_da_drone = -1;
+		DroneDelivery da = null;
+		if(droneDeliveries.size() != 0 && droneDeliveries != null){
+			i_da_drone = R.nextInt(droneDeliveries.size());
+			da = droneDeliveries.get(i_da_drone);
+		}
 		
 		int i_chose = R.nextInt(2);
 		
 		int i_a = -1;
 		Point a;
-		if(i_chose == 0){
+		if((i_da_drone == -1 || i_chose == 0) && i_a_truck != -1){
 			a = truckOnlyNodes.get(i_a_truck);
 			i_a = truckTour.indexOf(a);
 		}else{
@@ -464,13 +487,13 @@ public class GRASPkDrone {
 		}
 		
 		if(it >= truckTour.size()){
-			LOGGER.LOGGER.log(Level.INFO,"Fail to chose point i and point k");
-			return null;
+			//LOGGER.LOGGER.log(Level.INFO,"Fail to chose point i and point k");
+			return;
 		}
 		
 		Point i = truckTour.get(i_i);
 		Point k = truckTour.get(i_k);
-		LOGGER.LOGGER.log(Level.INFO,"i = "+i.toString()+" k = "+k.toString()+" a = "+a.toString());
+		//LOGGER.LOGGER.log(Level.INFO,"i = "+i.toString()+" k = "+k.toString()+" a = "+a.toString());
 		
 		//check how many drone launch from point i and how many drone rendezvous at point k
 		//if amount of drone launch from point i high k drone return null
@@ -486,35 +509,32 @@ public class GRASPkDrone {
 			}
 		}
 		if(nDroneLauchFrompi >= nDrone || nDroneRendezvousAtk >= nDrone) {
-			LOGGER.LOGGER.log(Level.INFO,"amount of drone in node higher than k => return null");
-			return null;
+			//LOGGER.LOGGER.log(Level.INFO,"amount of drone in node higher than k ");
+			return;
 		}
 		
 		//if a is truck-only node
 		if(i_a != -1){
-			truckTour.remove(a);
-			if(tspd.checkDroneConstraint(i, a, k, truckTour)){
-				Point prev_a = truckTour.get(i_a-1);
-				Point next_a = truckTour.get(i_a+1);
-				
-				double prev_cost = tspd.cost(prev_a,a) + tspd.cost(a,next_a);
-				double new_cost = tspd.cost(prev_a,next_a)+ tspd.cost(i,a,k);
-				
-				if(new_cost < prev_cost){
+			Point prev_a = truckTour.get(i_a-1);
+			Point next_a = truckTour.get(i_a+1);
+			
+			double prev_cost = tspd.cost(prev_a,a) + tspd.cost(a,next_a);
+			double new_cost = tspd.cost(prev_a,next_a)+ tspd.cost(i,a,k);
+			
+			if(new_cost < prev_cost){
+				truckTour.remove(a);
+				if(tspd.checkDroneConstraint(i, a, k, truckTour)){
 					DroneDelivery dd = new DroneDelivery(i, a, k);
 					droneDeliveries.add(dd);
-					
-					LOGGER.LOGGER.log(Level.INFO,"a = "+a.toString()+" is truck-only node which relocate to drone node \nNEW_TOUR = "+tspd_tour.toString());
-					return tspd_tour;
-				}else{
-					truckTour.add(i_a,a);
-					LOGGER.LOGGER.log(Level.INFO,"relocate a (truck only node) not imporve, tspd input="+tspd_tour.toString());
-					return null;
+					//LOGGER.LOGGER.log(Level.INFO,"NEW_TOUR improve cost = "+(new_cost-prev_cost));
+					return;
 				}
+				truckTour.add(i_a,a);
+				//LOGGER.LOGGER.log(Level.INFO,"(i,a,k) is not satisfy drone constraint");
+				return;
 			}
-			truckTour.add(i_a,a);
-			LOGGER.LOGGER.log(Level.INFO,"(i,a,k) is not satisfy drone constraint, tspd-input="+tspd_tour.toString());
-			return null;
+			//LOGGER.LOGGER.log(Level.INFO,"relocate a (truck only node) not imporve");
+			return;
 		}
 		//a is drone node
 		else{
@@ -524,23 +544,28 @@ public class GRASPkDrone {
 				if(new_cost < prev_cost){
 					da.setLauch_node(i);
 					da.setRendezvous_node(k);
-					LOGGER.LOGGER.log(Level.INFO,"a = "+a.toString()+" is drone node which relocate new drone node NEW_TOUR="+tspd_tour.toString());
-					return tspd_tour;
+					//LOGGER.LOGGER.log(Level.INFO,"NEW_TOUR improve cost = "+(new_cost-prev_cost));
+					return;
 				}
-				LOGGER.LOGGER.log(Level.INFO,"relocate a (drone node) not imporve, tspd input="+tspd_tour.toString());
-				return null;
+				//LOGGER.LOGGER.log(Level.INFO,"relocate a (drone node) not imporve");
+				return;
 			}
-			LOGGER.LOGGER.log(Level.INFO,"(i,a,k) is not satisfy drone constraint, tspd-input="+tspd_tour.toString());
-			return null;
+			//LOGGER.LOGGER.log(Level.INFO,"(i,a,k) is not satisfy drone constraint");
+			return;
 		}
 	}
 	
-	public Tour remove(Tour tspd_tour){
-		LOGGER.LOGGER.log(Level.INFO,"tspd input = "+tspd_tour.toString());
+	public void remove(Tour tspd_tour){
+		//LOGGER.LOGGER.log(Level.INFO,"chose remove");
 		
 		ArrayList<Point> truckTour = tspd_tour.getTD().getTruck_tour();
 		ArrayList<DroneDelivery> droneDeliveries = tspd_tour.getDD();
 		
+		if(droneDeliveries.size() == 0 || droneDeliveries == null){
+			//LOGGER.LOGGER.log(Level.INFO,"droneDeliveries size = 0");
+			return;
+		}
+			
 		Random R = new Random();
 		int i_dj = R.nextInt(droneDeliveries.size());
 		DroneDelivery dj = droneDeliveries.get(i_dj);
@@ -554,25 +579,133 @@ public class GRASPkDrone {
 		double prev_cost = tspd.cost(dj) + tspd.cost(prev_k,k);
 		double new_cost = tspd.cost(prev_k,j) + tspd.cost(j,k);
 		
-		LOGGER.LOGGER.log(Level.INFO,"remove drone node "+j.toString()+" insert before point"+k.toString());
+		//LOGGER.LOGGER.log(Level.INFO,"remove drone node "+j.toString()+" insert before point"+k.toString());
 		
 		if(new_cost < prev_cost){
 			truckTour.add(i_k, j);
 			droneDeliveries.remove(dj);
 			if(tspd.checkConstraint(tspd_tour)){
-				LOGGER.LOGGER.log(Level.INFO,"NEW_TOUR = "+tspd_tour.toString());
-				return tspd_tour;
+				//LOGGER.LOGGER.log(Level.INFO,"NEW_TOUR improve cost = "+(new_cost-prev_cost));
+				return;
 			}
 			truckTour.remove(j);
 			droneDeliveries.add(dj);
-			LOGGER.LOGGER.log(Level.INFO,"remove don't satisfy drone constraint, tspd-inpu="+tspd_tour.toString());
-			return null;
+			//LOGGER.LOGGER.log(Level.INFO,"remove don't satisfy drone constraint");
+			return;
 		}
 		
-		LOGGER.LOGGER.log(Level.INFO,"this operator not improve solution");
-		return null;
+		//LOGGER.LOGGER.log(Level.INFO,"this operator not improve solution");
+		return;
 	}
 	
+	public void two_exchange(Tour tspd_tour){
+		//LOGGER.LOGGER.log(Level.INFO,"chose two_exchange, tspd input = "+tspd_tour.toString());
+		
+		ArrayList<Point> truckTour = tspd_tour.getTD().getTruck_tour();
+		ArrayList<DroneDelivery> droneDeliveries = tspd_tour.getDD();
+		
+		ArrayList<Point> allPoints = new ArrayList<Point>();
+		
+		ArrayList<Point> truckTour_copy = new ArrayList<Point>();
+		ArrayList<DroneDelivery> droneDeliveries_copy = new ArrayList<DroneDelivery>();
+		
+		for(int i=0; i<truckTour.size(); i++){
+			truckTour_copy.add(truckTour.get(i));
+			if(i == 0 || i == truckTour.size()-1)
+				continue;
+			
+			allPoints.add(truckTour.get(i));
+			
+		}
+		
+		for(int i=0; i<droneDeliveries.size(); i++){
+			DroneDelivery dd = droneDeliveries.get(i);
+			Point lauch_node = dd.getLauch_node();
+			Point drone_node = dd.getDrone_node();
+			Point rendezvous_node = dd.getRendezvous_node();
+			
+			allPoints.add(drone_node);
+			
+			DroneDelivery dd_copy = new DroneDelivery(lauch_node, drone_node, rendezvous_node);
+			droneDeliveries_copy.add(dd_copy);
+		}
+		
+		Tour tspd_tour_copy = new Tour(new TruckTour(truckTour_copy), droneDeliveries_copy);
+		//LOGGER.LOGGER.log(Level.INFO,"size allPoints = "+allPoints.size());
+		
+		Random R = new Random();
+		
+		int i_a = R.nextInt(allPoints.size());
+		int i_b = R.nextInt(allPoints.size());
+		
+		while(i_a == i_b){
+			i_a = R.nextInt(allPoints.size());
+			i_b = R.nextInt(allPoints.size());
+		}
+		
+		Point a = allPoints.get(i_a);
+		Point b = allPoints.get(i_b);
+		
+		//LOGGER.LOGGER.log(Level.INFO,"a = "+a.toString()+" b = "+b.toString());
+		
+		double prev_cost = tspd.cost(tspd_tour);
+		
+		for(int i=0; i<truckTour_copy.size(); i++){
+			Point pi = truckTour_copy.get(i);
+			if(pi.equals(a)){
+				truckTour_copy.remove(i);
+				truckTour_copy.add(i, b);
+			}else if(pi.equals(b)){
+				truckTour_copy.remove(i);
+				truckTour_copy.add(i,a);
+			}
+		}
+		
+		for(int i=0; i<droneDeliveries_copy.size(); i++){
+			DroneDelivery dd = droneDeliveries_copy.get(i);
+			
+			Point launch_node = dd.getLauch_node();
+			Point drone_node = dd.getDrone_node();
+			Point rendezvous_node = dd.getRendezvous_node();
+			
+			if(launch_node.equals(a)){
+				dd.setLauch_node(b);
+			}else if(launch_node.equals(b)){
+				dd.setLauch_node(a);
+			}
+			
+			if(drone_node.equals(a)){
+				dd.setDrone_node(b);
+			}else if(drone_node.equals(b)){
+				dd.setDrone_node(a);
+			}
+			
+			if(rendezvous_node.equals(a)){
+				dd.setRendezvous_node(b);
+			}else if(rendezvous_node.equals(b)){
+				dd.setRendezvous_node(a);
+			}
+		}
+		
+		//LOGGER.LOGGER.log(Level.INFO,"tspd_tour_copy = "+tspd_tour_copy.toString());
+		
+		if(tspd.checkConstraint(tspd_tour_copy)){
+			double new_cost = tspd.cost(tspd_tour_copy);
+			if(new_cost < prev_cost){
+				tspd_tour.setTD(tspd_tour_copy.getTD());
+				tspd_tour.setDD(tspd_tour_copy.getDD());
+				//LOGGER.LOGGER.log(Level.INFO,"tspd_tour = "+tspd_tour.toString());
+				//LOGGER.LOGGER.log(Level.INFO,"NEW_TOUR improve cost = "+(new_cost-prev_cost));
+				return;
+			}
+			//LOGGER.LOGGER.log(Level.INFO,"don't improve cost");
+			return;
+		}
+		//LOGGER.LOGGER.log(Level.INFO,"don't satisfy drone constraint");
+		return;
+	}
+	
+	/*
 	public Tour two_exchange_launch2drone(Tour tspd_tour){
 		LOGGER.LOGGER.log(Level.INFO,"tpsd input = "+ tspd_tour.toString());
 		
@@ -1098,4 +1231,5 @@ public class GRASPkDrone {
 		LOGGER.LOGGER.log(Level.INFO,"don't improve solution, tspd-input"+tspd_tour.toString());
 		return null;
 	}
+	*/
 }
