@@ -55,43 +55,19 @@ public class GRASPkDrone {
 			//ArrayList<Point> tour = tsp.randomGenerator();
 			ArrayList<Point> tour = tsp.lsInitTSP();
 			LOGGER.LOGGER.log(Level.INFO,"it "+iteration+" init tsp tour cost = "+tspd.cost(0,tour.size()-1,tour));
+			
 			Tour tspdSolution = split_algorithm(tour);
 			LOGGER.LOGGER.log(Level.INFO,"tspd after using split cost = "+tspd.cost(tspdSolution));
 			
-			/*
-			 * record solution 
-			 * need make new object to record solution
-			 */
-			if(tspd.cost(tspdSolution) < bestObjectiveValue){
-				//solution_tour = tspdSolution;
-				ArrayList<Point> trucktour = tspdSolution.getTD().getTruck_tour();
-				ArrayList<Point> solution_truckTour = new ArrayList<Point>();
-				for(int i=0; i<trucktour.size(); i++){
-					Point tmp_solutionPoint = new Point(trucktour.get(i).getID(),trucktour.get(i).getLat(),trucktour.get(i).getLng());
-					solution_truckTour.add(tmp_solutionPoint);
-				}
-				ArrayList<DroneDelivery> droneDeliveries = tspdSolution.getDD();
-				ArrayList<DroneDelivery> solution_droneDeliveries = new ArrayList<DroneDelivery>();
-				for(int i=0; i<droneDeliveries.size(); i++){
-					DroneDelivery dd = droneDeliveries.get(i);
-					Point solution_launchNode = new Point(dd.getLauch_node().getID(),dd.getLauch_node().getLat(),dd.getLauch_node().getLng());
-					Point solution_droneNode = new Point(dd.getDrone_node().getID(),dd.getDrone_node().getLat(),dd.getDrone_node().getLng());
-					Point solution_rendezvousNode = new Point(dd.getRendezvous_node().getID(),dd.getRendezvous_node().getLat(),dd.getRendezvous_node().getLng());
-					solution_droneDeliveries.add(new DroneDelivery(solution_launchNode, solution_droneNode, solution_rendezvousNode));
-				}
-				
-				solution_tour = new Tour(new TruckTour(solution_truckTour), solution_droneDeliveries);
-				bestObjectiveValue = tspd.cost(tspdSolution);
-			}
-//			LOGGER.LOGGER.log(Level.INFO,"bestObjectiveValue = "+bestObjectiveValue+" bestTour cost = "+tspd.cost(solution_tour));
 			local_search(tspdSolution);
 			LOGGER.LOGGER.log(Level.INFO,"tspd after local_search cost = "+tspd.cost(tspdSolution));
+			
 			if(tspd.cost(tspdSolution) < bestObjectiveValue){
 				solution_tour = tspdSolution;
 				bestObjectiveValue = tspd.cost(tspdSolution);
 				iteration = 0;
+				LOGGER.LOGGER.log(Level.INFO,"find bestTour cost = "+tspd.cost(solution_tour)+"    bestObjectiveValue "+bestObjectiveValue);
 			}
-			LOGGER.LOGGER.log(Level.INFO,"bestTour cost = "+tspd.cost(solution_tour)+"    bestObjectiveValue "+bestObjectiveValue);
 		}
 		LOGGER.LOGGER.log(Level.INFO,"bestTour cost = "+tspd.cost(solution_tour)+"    bestObjectiveValue "+bestObjectiveValue);
 		solution_tour.setTotalCost(tspd.cost(solution_tour));
@@ -615,7 +591,6 @@ public class GRASPkDrone {
 				continue;
 			
 			allPoints.add(truckTour.get(i));
-			
 		}
 		
 		for(int i=0; i<droneDeliveries.size(); i++){
@@ -646,6 +621,7 @@ public class GRASPkDrone {
 		Point a = allPoints.get(i_a);
 		Point b = allPoints.get(i_b);
 		
+		//System.out.println("i_a = "+i_a+" i_b = "+i_b+" Point a = "+a.toString()+" Point b = "+b.toString());
 		//LOGGER.LOGGER.log(Level.INFO,"a = "+a.toString()+" b = "+b.toString());
 		
 		double prev_cost = tspd.cost(tspd_tour);
