@@ -5,6 +5,7 @@ public class Point2 {
 	private double lat;
 	private double lng;
 	private boolean allowdrone;
+	
 	public int getID() {
 		return ID;
 	}
@@ -31,7 +32,7 @@ public class Point2 {
 	}
 	public Point2(int iD, double lat, double lng, boolean allowdrone) {
 		super();
-		ID = iD;
+		this.ID = iD;
 		this.lat = lat;
 		this.lng = lng;
 		this.allowdrone = allowdrone;

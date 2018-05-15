@@ -34,8 +34,8 @@ public class Point {
 	}
 	@Override
 	public String toString() {
-		//return "Point [ID=" + ID + ", lat=" + lat + ", lng=" + lng + "]";
-		return ""+ID;
+		return "Point [ID=" + ID + ", lat=" + lat + ", lng=" + lng + "]";
+		//return ""+ID;
 	}
 	public Point() {
 		super();

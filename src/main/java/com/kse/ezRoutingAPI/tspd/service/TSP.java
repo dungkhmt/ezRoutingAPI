@@ -1,6 +1,7 @@
 package com.kse.ezRoutingAPI.tspd.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -22,7 +23,6 @@ import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.Gre
 import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.GreedyThreeOptMove8Explorer;
 import localsearch.domainspecific.vehiclerouting.vrp.neighborhoodexploration.INeighborhoodExplorer;
 import localsearch.domainspecific.vehiclerouting.vrp.search.GenericLocalSearch;
-
 
 import com.kse.ezRoutingAPI.tspd.model.Point;
 
@@ -77,36 +77,173 @@ public class TSP {
 		tour.add(startPoint);
 		
 		int nClientPoint = clientPoints.size();
-		
-//		for(int i=0; i<nClientPoint; i++){
-//			tour.add(clientPoints.get(i));
-//		}
-//		
-//		Random rand = new Random();
-//		for(int i=1; i <= nClientPoint; i++){
-//			int j = rand.nextInt(nClientPoint+1-i)+i;
-//			Point tmp = new Point(tour.get(i).getID(),tour.get(i).getLat(),tour.get(i).getLng());
-//			tour.set(i, tour.get(j));
-//			tour.set(j, tmp);
-//		}
-		
-		boolean visted[] = new boolean[nClientPoint];
-		for(int i=0; i<nClientPoint; i++){
-			visted[i] = false;
-		}
- 		Random rand = new Random();
+				
+		Collections.shuffle(clientPoints);
 		
 		for(int i=0; i<nClientPoint; i++){
-			int iPoint = rand.nextInt(nClientPoint);
-			while(visted[iPoint]){
-				iPoint = rand.nextInt(nClientPoint);
-			}
-			tour.add(clientPoints.get(iPoint));
-			visted[iPoint] = true;
+			tour.add(clientPoints.get(i));
 		}
 		
 		tour.add(endPoint);
 		
+		return tour;
+	}
+	
+	public ArrayList<Point> kNearest(){
+		ArrayList<Point> tour = new ArrayList<Point>();
+		
+		Random R = new Random();
+		int k = R.nextInt(2)+2;
+		
+		tour.add(startPoint);
+		
+		boolean[] visited  = new boolean[clientPoints.size()];
+		for(int i=0; i<clientPoints.size(); i++){
+			visited[i] = false;
+		}
+		
+			
+		int nClientPoint = 0;
+		
+		while(nClientPoint != clientPoints.size()){
+			Point last = tour.get(tour.size()-1);
+			//System.out.println("last = "+last.toString());
+			double[] minCost = new double[k];
+			int[] minIndex = new int[k];
+			
+			for(int i=0; i<k; i++){
+				minCost[i] = Double.MAX_VALUE;
+				minIndex[i] = -1;
+			}
+			
+			for(int i=0; i<clientPoints.size(); i++){
+				if(!visited[i]){
+					Point pi = clientPoints.get(i);
+					for(int ik = 0; ik < k; ik ++){
+						if(distances_matrix[last.getID()][pi.getID()] < minCost[ik]){
+							for(int jk = k-1; jk > ik; jk--){
+								minCost[jk] = minCost[jk-1];
+								minIndex[jk] = minIndex[jk-1];
+							}
+							minCost[ik] = distances_matrix[last.getID()][pi.getID()];
+							minIndex[ik] = i;
+							break;
+						}
+					}
+				}
+			}
+			ArrayList<Integer> iNearests = new ArrayList<Integer>();
+			for(int i=0; i<k; i++){
+				if(minIndex[i] != -1){
+					iNearests.add(minIndex[i]);
+				}
+			}
+			//System.out.println("nearests = "+iNearests.toString());
+			int in = R.nextInt(iNearests.size());
+			int iNearest = iNearests.get(in);
+			Point nearest = clientPoints.get(iNearest);
+			
+			//System.out.println("nearest = "+nearest.toString());
+			
+			tour.add(nearest);
+			nClientPoint++;
+			visited[iNearest] = true;
+		}
+		
+		tour.add(endPoint);
+		return tour;
+	}
+
+	public ArrayList<Point> kCheapest(){
+		ArrayList<Point> tour = new ArrayList<Point>();
+		Random R = new Random();
+		
+		int k = R.nextInt(2)+2;
+		
+		tour.add(startPoint);
+		tour.add(endPoint);
+			
+		
+		Collections.shuffle(clientPoints);
+		
+		for(int i=0; i<clientPoints.size(); i++){
+			Point pi = clientPoints.get(i);
+			//System.out.println("pi = "+pi.toString());
+			
+			double[] minCost = new double[k];
+			int[] minIndex = new int[k];
+			for(int ik = 0; ik < k; ik++){
+				minCost[ik] = Double.MAX_VALUE;
+				minIndex[ik] = -1;
+			}
+			
+			for(int ir = 1; ir < tour.size() ; ir++){
+				Point pj = tour.get(ir);
+				Point pk = tour.get(ir-1);
+				double cost = distances_matrix[pj.getID()][pi.getID()] + distances_matrix[pi.getID()][pk.getID()]
+						- distances_matrix[pj.getID()][pk.getID()];
+					
+				for(int ik = 0; ik < k; ik ++){
+					if(cost < minCost[ik]){
+						for(int jk = k-1; jk > ik; jk--){
+							minCost[jk] = minCost[jk-1];
+							minIndex[jk] = minIndex[jk-1];
+						}
+						minCost[ik] = cost;
+						minIndex[ik] = ir;
+						break;
+					}
+				}	
+			}
+			
+			ArrayList<Integer> iInserts = new ArrayList<Integer>();
+			for(int ik = 0; ik < k ; ik++){
+				if(minIndex[ik] != -1){
+					iInserts.add(minIndex[ik]);
+				}
+			}
+			//System.out.println("iInserts = "+iInserts.toString());
+			int iInsert = R.nextInt(iInserts.size());
+			//System.out.println("iInsert = "+iInserts.get(iInsert));
+			tour.add(iInserts.get(iInsert),pi);
+		}
+		
+		return tour;
+	}
+	
+	public ArrayList<Point> greedyInit(){
+		ArrayList<Point> tour = new ArrayList<Point>();
+		
+		tour.add(startPoint);
+		
+		boolean[] visited  = new boolean[clientPoints.size()];
+		for(int i=0; i<clientPoints.size(); i++){
+			visited[i] = false;
+		}
+		
+			
+		int nClientPoint = 0;			
+		while(nClientPoint != clientPoints.size()){
+			Point last = tour.get(tour.size()-1);
+			
+			double minCost = Double.MAX_VALUE;
+			int minIndex = -1;
+			for(int i=0; i<clientPoints.size(); i++){
+				if(!visited[i]){
+					Point pi = clientPoints.get(i);
+					if(distances_matrix[last.getID()][pi.getID()] < minCost){
+						minCost = distances_matrix[last.getID()][pi.getID()];
+						minIndex = i;
+					}
+				}
+			}
+			Point nearest = clientPoints.get(minIndex);
+			tour.add(nearest);
+			nClientPoint++;
+			visited[minIndex] = true;
+		}
+		
+		tour.add(endPoint);
 		return tour;
 	}
 	

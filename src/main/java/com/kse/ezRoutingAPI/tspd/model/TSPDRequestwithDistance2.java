@@ -11,8 +11,8 @@ public class TSPDRequestwithDistance2 {
 	private int droneCost; //cost per unit of drone
 	private double delta;
 	private double endurance;
-	Point2[] listPoints;
-	Map<String,Double> map;
+	private Point2[] listPoints;
+	private Map<String,Double> map;
 	
 	public Map<String, Double> getMap() {
 		return map;
